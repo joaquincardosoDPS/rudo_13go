@@ -118,7 +118,7 @@ Sub GetApiEndPoints(appConfig as object) as Dynamic
         ' Catálogo: feed tipo WordPress en 13.cl
         GetConfig: feedBaseUrl + "configuracion",
         GetHomeConfig: feedBaseUrl + "configuracion-portada",
-        GetAllCategories: feedBaseUrl + "categorias",
+        GetCategoryPrograms: feedBaseUrl + "categorias/",
         GetPrograms: feedBaseUrl + "programas",
         GetVideos: feedBaseUrl + "video",
 

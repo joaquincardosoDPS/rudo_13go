@@ -21,8 +21,8 @@ function ContentAPI__New()
     this.GetConfig = ContentAPI__GetConfig
     this.GetHomeConfig = ContentAPI__GetHomeConfig
 
-    this.GetAllCategories = ContentAPI__GetAllCategories
-    this.GetFeaturedSliderPrograms = ContentAPI__GetFeaturedSliderPrograms
+    this.GetCategoryPrograms = ContentAPI__GetCategoryPrograms
+    this.GetJsonByUrl = ContentAPI__GetJsonByUrl
     this.GetSearchPrograms = ContentAPI__GetSearchPrograms
     this.GetMyListPrograms = ContentAPI__GetMyListPrograms
     this.GetPrograms = ContentAPI__GetPrograms
@@ -141,15 +141,15 @@ function ContentAPI__GetConfig()
     return handleApiResponse(response)
 end function
 
-function ContentAPI__GetAllCategories(requestParams as object)
-    path = GlobalGet("apiEndPoints").GetAllCategories
-    headers = GetHeaders()
-    data = requestParams
-    response = postRequest(path, data, headers)
+function ContentAPI__GetCategoryPrograms(categoryId as string)
+    path = GlobalGet("apiEndPoints").GetCategoryPrograms + categoryId
+    headers = { "Content-Type": "application/json" }
+    data = { }
+    response = getRequest(path, data, headers)
     return handleApiResponse(response)
 end function
 
-function ContentAPI__GetFeaturedSliderPrograms(requestParams as object)
+function ContentAPI__GetJsonByUrl(requestParams as object)
     path = requestParams.url
     headers = { "Content-Type": "application/json" }
     data = {}

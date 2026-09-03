@@ -1,13 +1,13 @@
 sub Init()
 end sub
 
-function GetAllCategories() as void
-    response = ContentAPI().GetAllCategories(m.top.params)
+function GetCategoryPrograms() as void
+    response = ContentAPI().GetCategoryPrograms(m.top.params.categoryId)
     m.top.result = response
 end function
 
-function GetFeaturedSliderPrograms() as void
-    response = ContentAPI().GetFeaturedSliderPrograms(m.top.params)
+function GetJsonByUrl() as void
+    response = ContentAPI().GetJsonByUrl(m.top.params)
     m.top.result = response
 end function
 

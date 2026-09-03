@@ -208,37 +208,222 @@ end sub
 sub OnGetHomeSectionsAPIResponse(event as dynamic)
     apiResponse = event.getData()
     print "OnGetHomeSectionsAPIResponse : response : " 'FormatJson(apiResponse)
-    sections = getValueFromProps(apiResponse, "data", [])
-    homeConfig = GlobalGet("homeConfig")
-    destacadosUrl = ""
-    if isValid(homeConfig) then destacadosUrl = homeConfig.destacados_principales
-    hasDestacados = false
-    if isValid(sections) AND sections.count() > 0
-        for each section in sections
-            if isValid(section) AND section.status = "1" AND section.despliegue = "destacados"
-                hasDestacados = true
-                exit for
-            end if
-        end for
-    end if
-    m.apiInProgress--
+    m.homeSections = getValueFromProps(apiResponse, "data", [])
+    m.homeSectionIndex = 0
     m.getHomeSectionsTask = invalid
-    ' Nota: por ahora solo se implementa "destacados" (sub-paso 4d.3-A). El resto de
-    ' los tipos de seccion (categoria_carrusel, categoria_destacada, top10, senales,
-    ' radios) quedan para el 4d.3-B.
-    if hasDestacados AND isNonEmptyString(destacadosUrl)
-        GetFeaturedSliderPrograms(destacadosUrl)
-    else
-        createDynamicRowList()
-    end if
-
+    ProcessNextHomeSection()
 
 end sub
 
+sub ProcessNextHomeSection()
+    if m.homeSections = invalid OR m.homeSectionIndex >= m.homeSections.count()
+        m.apiInProgress--
+        createDynamicRowList()
+        return
+    end if
+    section = m.homeSections[m.homeSectionIndex]
+    m.homeSectionIndex++
+    if isInvalid(section) OR section.status <> "1"
+        ProcessNextHomeSection()
+        return
+    end if
+
+    homeConfig = GlobalGet("homeConfig")
+    despliegue = section.despliegue
+
+    if despliegue = "destacados"
+        url = ""
+        if isValid(homeConfig) then url = homeConfig.destacados_principales
+        if isNonEmptyString(url)
+            GetFeaturedSliderPrograms(url)
+        else
+            ProcessNextHomeSection()
+        end if
+    else if despliegue = "categoria_carrusel" OR despliegue = "categoria_destacada"
+        if isNonEmptyString(section.categoria)
+            GetHomeCategoryPrograms(section.titulo, section.categoria)
+        else
+            ProcessNextHomeSection()
+        end if
+    else if despliegue = "top10"
+        url = ""
+        if isValid(homeConfig) then url = homeConfig.masvistos
+        if isNonEmptyString(url)
+            GetHomeTop10(section.titulo, url)
+        else
+            ProcessNextHomeSection()
+        end if
+    else if despliegue = "senales"
+        url = ""
+        if isValid(homeConfig) then url = homeConfig.senales
+        if isNonEmptyString(url)
+            GetHomeSenales(section.titulo, url)
+        else
+            ProcessNextHomeSection()
+        end if
+    else if despliegue = "radios"
+        url = ""
+        if isValid(homeConfig) then url = homeConfig.radios
+        if isNonEmptyString(url)
+            GetHomeRadios(section.titulo, url)
+        else
+            ProcessNextHomeSection()
+        end if
+    else
+        ' seguirviendo / favoritos / bannerpromo / preguntasfrecuentes: sin fetch propio por ahora
+        ProcessNextHomeSection()
+    end if
+end sub
+
+
+
+sub PushHomeRow(title as string, items as object)
+    if isValid(items) AND items.count() > 0
+        catData = {}
+        catData.title = title
+        catData.format = "default"
+        catData.image_orientation = "portrait"
+        catData.liveCategory = false
+        catData.image_background_category = {}
+        catData.image_logo_category = {}
+        catData.key = title
+        catData.total_display_records = items.count()
+        catData.total_records = items.count()
+        catData.programs = items
+
+        sliderView = createObject("roSGNode", "SliderView")
+        sliderView.ObserveField("itemSelected", "onRowItemSelected")
+        sliderView.ObserveField("itemFocused", "onRowItemFocused")
+        sliderView.id = title
+        sliderView.componentHeight = 576 + 50
+        catNode = rowListDataParser(catData)
+        if isValid(catNode)
+            sliderView.category = catData
+            sliderView.content = catNode
+        end if
+        m.categoriesNode.push(sliderView)
+    end if
+end sub
+
+sub GetHomeCategoryPrograms(rowTitle as string, categoryId as string)
+    m.pendingRowTitle = rowTitle
+    m.getHomeCategoryTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.getHomeCategoryTask.functionName = "GetCategoryPrograms"
+    m.getHomeCategoryTask.params = { "categoryId": categoryId }
+    m.getHomeCategoryTask.ObserveField("result", "OnGetHomeCategoryProgramsAPIResponse")
+    m.getHomeCategoryTask.control = "RUN"
+end sub
+
+sub OnGetHomeCategoryProgramsAPIResponse(event as dynamic)
+    apiResponse = event.getData()
+    rawPrograms = getValueFromProps(apiResponse, "data.programs", [])
+    items = []
+    for each raw in rawPrograms
+        imageUrl = raw.image
+        items.push({
+            title: raw.title
+            description: raw.bajada
+            description_short: raw.bajada
+            key: raw.id
+            image_orientation: "portrait"
+            format: "default"
+            image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
+        })
+    end for
+    PushHomeRow(m.pendingRowTitle, items)
+    m.getHomeCategoryTask = invalid
+    ProcessNextHomeSection()
+end sub
+
+sub GetHomeTop10(rowTitle as string, url as string)
+    m.pendingRowTitle = rowTitle
+    m.getHomeTop10Task = CreateObject("roSGNode", "ContentAPIAction")
+    m.getHomeTop10Task.functionName = "GetJsonByUrl"
+    m.getHomeTop10Task.params = { "url": url }
+    m.getHomeTop10Task.ObserveField("result", "OnGetHomeTop10APIResponse")
+    m.getHomeTop10Task.control = "RUN"
+end sub
+
+sub OnGetHomeTop10APIResponse(event as dynamic)
+    apiResponse = event.getData()
+    rawItems = getValueFromProps(apiResponse, "data", [])
+    items = []
+    for each raw in rawItems
+        imageUrl = raw.image
+        items.push({
+            title: raw.title
+            key: raw.id
+            image_orientation: "portrait"
+            format: "default"
+            image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
+        })
+    end for
+    PushHomeRow(m.pendingRowTitle, items)
+    m.getHomeTop10Task = invalid
+    ProcessNextHomeSection()
+end sub
+
+sub GetHomeSenales(rowTitle as string, url as string)
+    m.pendingRowTitle = rowTitle
+    m.getHomeSenalesTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.getHomeSenalesTask.functionName = "GetJsonByUrl"
+    m.getHomeSenalesTask.params = { "url": url }
+    m.getHomeSenalesTask.ObserveField("result", "OnGetHomeSenalesAPIResponse")
+    m.getHomeSenalesTask.control = "RUN"
+end sub
+
+sub OnGetHomeSenalesAPIResponse(event as dynamic)
+    apiResponse = event.getData()
+    rawItems = getValueFromProps(apiResponse, "data", [])
+    items = []
+    for each raw in rawItems
+        imageUrl = raw.imagen
+        items.push({
+            title: raw.titulo
+            description: raw.bajada
+            description_short: raw.bajada
+            key: raw.nid
+            image_orientation: "portrait"
+            format: "default"
+            image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
+        })
+    end for
+    PushHomeRow(m.pendingRowTitle, items)
+    m.getHomeSenalesTask = invalid
+    ProcessNextHomeSection()
+end sub
+
+sub GetHomeRadios(rowTitle as string, url as string)
+    m.pendingRowTitle = rowTitle
+    m.getHomeRadiosTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.getHomeRadiosTask.functionName = "GetJsonByUrl"
+    m.getHomeRadiosTask.params = { "url": url }
+    m.getHomeRadiosTask.ObserveField("result", "OnGetHomeRadiosAPIResponse")
+    m.getHomeRadiosTask.control = "RUN"
+end sub
+
+sub OnGetHomeRadiosAPIResponse(event as dynamic)
+    apiResponse = event.getData()
+    rawItems = getValueFromProps(apiResponse, "data", [])
+    items = []
+    for each raw in rawItems
+        imageUrl = raw.image
+        items.push({
+            title: raw.name
+            key: raw.name
+            image_orientation: "portrait"
+            format: "default"
+            image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
+        })
+    end for
+    PushHomeRow(m.pendingRowTitle, items)
+    m.getHomeRadiosTask = invalid
+    ProcessNextHomeSection()
+end sub
+
 sub GetFeaturedSliderPrograms(url as string)
-    m.apiInProgress++
     m.getFeaturedSliderProgramsTask = CreateObject("roSGNode", "ContentAPIAction")
-    m.getFeaturedSliderProgramsTask.functionName = "GetFeaturedSliderPrograms"
+    m.getFeaturedSliderProgramsTask.functionName = "GetJsonByUrl"
     m.getFeaturedSliderProgramsTask.params = {"url": url}
     m.getFeaturedSliderProgramsTask.ObserveField("result", "OnGetFeaturedSliderProgramsAPIResponse")
     m.getFeaturedSliderProgramsTask.control = "RUN"
@@ -310,8 +495,7 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
         m.gDetails.translation = [0,150]
     end if
     m.getFeaturedSliderProgramsTask = invalid
-    m.apiInProgress--
-    createDynamicRowList()
+    ProcessNextHomeSection()
 end sub
 
 sub createDynamicRowList()
