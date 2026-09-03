@@ -3,7 +3,6 @@
     <script type="text/brightscript" uri="MarkupGridPlayerItem.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs"/>
     <script type="text/brightscript" uri="pkg:/source/managers/FontManager.brs"/>
-    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs"/>
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs"/>
     <interface>
         <field id="itemContent" type="node" onChange="ItemContent_Changed"/>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="CustomButton" extends="Group">
     <script type="text/brightscript" uri="CustomButton.brs" />
-    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
 
     <interface>

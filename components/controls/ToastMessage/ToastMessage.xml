@@ -3,7 +3,6 @@
     <script type="text/brightscript" uri="pkg:/components/controls/ToastMessage/ToastMessage.brs" />
 	<script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs"/>
 	<script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs"/>
-    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs"/>
 	<script type="text/brightscript" uri="pkg:/source/managers/FontManager.brs"/>
 	<script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs"/>
 

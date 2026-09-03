@@ -6,7 +6,6 @@
     <script type="text/brightscript" uri="pkg:/source/managers/FontManager.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
-    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs" />
 
     <interface>
     </interface>

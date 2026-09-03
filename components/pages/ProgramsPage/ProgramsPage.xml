@@ -3,7 +3,6 @@
     <script type="text/brightscript" uri="ProgramsPage.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
-    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <interface>
         <field id="isDestroy" type="boolean" alwaysnotify="true" onChange="onPageDestroy"/>

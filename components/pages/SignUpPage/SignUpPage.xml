@@ -2,7 +2,6 @@
 <component name="SignUpPage" extends="Group">
     <script type="text/brightscript" uri="SignUpPage.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
-    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
