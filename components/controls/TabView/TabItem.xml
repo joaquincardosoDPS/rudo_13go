@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="TabItem" extends="Group">
+    <script type="text/brightscript" uri="TabItem.brs" />
+
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+
+    <interface>
+        <field id="itemContent" type="node" onChange="onContentChange" />
+        <field id="focusPercent" type="float" onChange="FocusPercent_Changed" alwaysNotify="true" />
+        <field id="itemHasFocus" type="boolean" onChange="ItemHasFocus_Changed" alwaysNotify="false" />
+        <field id="rowListHasFocus" type="boolean" onChange="ParentHasFocus_Changed" alwaysNotify="false" />
+        <field id="rowHasFocus" type="boolean" onChange="RowHasFocus_Changed" />
+        <field id="gridHasFocus" type="boolean" onChange="ParentHasFocus_Changed" alwaysNotify="false" />
+    </interface>
+
+    <children>
+        <Label id="lTitle" vertAlign="center" horizAlign="left" />
+        <Rectangle id="focusLine" translation="[0,44]" />
+    </children>
+</component>

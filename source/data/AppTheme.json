@@ -1,0 +1,30 @@
+{
+  "black": "#000000",
+  "white": "#FFFFFF",
+  "inputTextColor": "#6F8692",
+  "selectedFieldColor": "#78174D",
+  
+  "color": "#001a28",
+  "clrIcon": "#ffffff",
+  "clrPrimary": "#001a28",
+  "clrPrimaryButton": "#416b84",
+  "clrPrimarySubtitle": "#ffffff",
+  "clrPrimaryText": "#b9b9b9",
+  "clrPrimaryTitle": "#ffffff",
+  "clrSecondary": "#054668",
+  "clrSecondaryButton": "#ff1376",
+  "clrSecondarySubtitle": "#000000",
+  "clrSecondaryText": "#b9b9b9",
+  "clrSecondaryTitle": "#000000",
+  "clrTertiaryButton": "#000000",
+  "clrTextPrimaryButton": "#ffffff",
+  "clrTextTertiaryButton": "#ffffff",
+  "focPrimary": "#ff1376",
+  "focSecondary": "#ffffff",
+  "focTertiary": "#fae24b",
+  "gradSidebar": "#054668",
+
+  "background_image": "https://cdn.rudo.video/assets/chv/ott/2026/05/25eb1136549a900b09f53ad31e597ee60.png",
+  "filledBackGroundImage": "pkg:/images/focus/filled_r6.9.png",
+  "filledRoundedBackGroundImage": "pkg:/images/focus/white_fill_corner_radius_$$RES$$_10.9.png"
+}

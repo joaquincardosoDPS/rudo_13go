@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="LivePage" extends="Group">
+    <script type="text/brightscript" uri="LivePage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <interface>
+        <field id="clearView" type="boolean" alwaysNotify="true" onChange="clearView" />
+        <field id="isDestroy" type="boolean" alwaysnotify="true" onChange="onPageDestroy"/>
+    </interface>
+
+    <children>
+        <Group id="gMain" translation="[0, 0]">
+            <Group id="epgSection" visible="false">
+                <LayoutGroup id="lgDetailSection" addItemSpacingAfterChild="false" layoutDirection="vert" horizAlignment="Left" itemSpacings="[20,70]" translation="[1176, 160]" />
+                <Group id="gridColTitle" translation="[56, 745]">
+                    <Label id="lDay" width="112" horizAlign="center" translation="[0,0]" />
+                    <Label id="lNow" width="780" horizAlign="center" text="On Now" translation="[112, 0]" />
+                    <Label id="lComing" width="780" horizAlign="center" text="Coming Up Next" translation="[968, 0]" />
+                </Group>
+            </Group>
+            <CustomMarkupGrid id="epgGrid" translation="[ 56, 800 ]" itemComponentName="EPGGridItem" vertFocusAnimationStyle="FixedFocus" numColumns="3" numRows="3" itemSize="[ 112, 112 ]" itemSpacing="[ 8, 8 ]" columnWidths="[112, 780, 780]" columnSpacings="[8, 8]" drawFocusFeedback="false" />
+            <Timer id="refreshSchedule" repeat="true" duration="60" />
+        </Group>
+        <Group id="gLivePlayer" translation="[56, 150]" scale="[0.532292,0.532292]">
+            <Video id="vLivePlayer" width="1920" height="1080" visible="false" />
+        </Group>
+        <ParallelAnimation id="bigLivePlayer">
+            <Animation id="bigLivePlayerAnimation" duration="0.5" control="none" easeFunction="linear">
+                <Vector2DFieldInterpolator id=" bigLivePlayerTranslation" key="[0,1]" keyValue="[[56, 150], [0,0]]" fieldToInterp="gLivePlayer.translation" />
+                <Vector2DFieldInterpolator id=" bigLivePlayerScale" key="[0,1]" keyValue="[[0.532292,0.532292], [1,1]]" fieldToInterp="gLivePlayer.scale" />
+            </Animation>
+        </ParallelAnimation>
+        <ParallelAnimation id="smallLivePlayer">
+            <Animation id="smallLivePlayerAnimation" duration="0.5" control="none" easeFunction="linear">
+                <Vector2DFieldInterpolator id=" smallLivePlayerTranslation" key=" [0,1]" keyValue=" [[0,0], [56, 150]]" fieldToInterp="gLivePlayer.translation" />
+                <Vector2DFieldInterpolator id=" smallLivePlayerScale" key=" [0,1]" keyValue=" [[1,1], [0.532292,0.532292]]" fieldToInterp="gLivePlayer.scale" />
+            </Animation>
+        </ParallelAnimation>
+        <Label id="noData" text="DiscoverPage" vertAlign="center" horizAlign="center" width="1920" height="1080" visible="false" />
+        <BusySpinner id="bsLoader" translation="[910,490]" clockwise="true" spinInterval="0.8" />
+    </children>
+</component>

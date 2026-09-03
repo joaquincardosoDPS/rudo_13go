@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="ShortDetailsView" extends="Group">
+    <script type="text/brightscript" uri="ShortDetailsView.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/ImageUtils.brs" />
+    <interface>
+        <field id="contentNode" type="node" alwaysNotify="true" onChange="onContentInfoChanged" />
+        <field id="backGroundvideoStop" type="boolean" alwaysNotify="true" />
+        <field id="item" type="node" alwaysNotify="true" />
+        <field id="showPlayButton" type="boolean" value="true" alwaysNotify="true" />
+        <field id="dTranslation" type="array" value="[100, 150]" alwaysNotify="true" alias="lgDetails.translation" />
+    </interface>
+    <children>
+        <Group id="gDetails">
+            <Group id="gTopContent" translation="[0,0]">
+                <Poster id="pVideo" width="1920" height="1080" loadWidth="1920" loadHeight="1080" loadDisplayMode="scaleTozoom" translation="[0,0]" visible="true" />
+                <Poster id="pMetaOverlay" width="1920" height="1080" loadWidth="1920" loadHeight="1080" uri="pkg:/images/overlay/detailpage_overlay.png" loadDisplayMode="scaleTozoom" translation="[0,0]" visible="true" />
+            </Group>
+            <LayoutGroup id="lgDetails" layoutDirection="vert" itemSpacings="[10,20]" />
+        </Group>
+    </children>
+</component>

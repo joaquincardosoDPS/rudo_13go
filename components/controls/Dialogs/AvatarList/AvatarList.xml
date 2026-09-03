@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="AvatarList" extends="Group">
+  <script type="text/brightscript" uri="AvatarList.brs" />
+  <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+  <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+  <interface>
+    <field id="avatarItems" type="array" alwaysNotify="true" onChange="OnAvatarItemsChanged" />
+    <field id="selectedAvatarId" type="string" alwaysNotify="true" onChange="SetSelectedAvatarJumpIndex" />
+    <field id="selectedAvatar" type="assocarray" alwaysNotify="true" />
+    <field id="selectionConfirmed" type="boolean" alwaysNotify="true" value="false" />
+    <field id="closeRequested" type="boolean" alwaysNotify="true" value="false" />
+  </interface>
+  <children>
+    <Poster id="backgroundPoster" uri="pkg:/images/focus/filled_r6.9.png" width="1920" height="1080" />
+    <Label id="titleLabel" width="640" horizAlign="left" height="48" text="Elige un avatar" translation="[688,246]" />
+    <MarkupGrid id="avatarGrid" itemComponentName="AvatarListItem" itemClippingRect="[0,0,1820,400]" numColumns="3" numRows="2" itemSize="[160,160]" itemSpacing="[34,34]" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="floatingFocus" drawFocusFeedback="false" translation="[688,351]" />
+    <CustomButton id="backButton" margin="20" posterImage="pkg:/images/focus/back_button_image.png" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonText="Volver" buttonWidth="194" buttonHeight="70" isFilledBgOnFocus="true" visible="true" translation="[1626,72]" />
+  </children>
+</component>

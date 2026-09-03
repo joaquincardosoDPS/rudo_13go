@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="LoginPage" extends="Group">
+    <script type="text/brightscript" uri="LoginPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+
+    <interface>
+        <field id="enteredEmail" type="String" alwaysNotify="true" />
+        <field id="enteredPassword" type="String" alwaysNotify="true" />
+    </interface>
+
+    <children>
+        <Rectangle id="rBackground" width="1920" height="1080" />
+        <Poster id="logo" height="150" loadDisplayMode="scaleToFit" translation="[910,120]" />
+        <LayoutGroup id="lgloginEmail" layoutDirection="vert" horizAlignment="center" itemSpacings="[45,20,20]" translation="[959,335]" visible="true">
+            <Label id="loginEmailTitleText" text="Ingresa con tu correo electronico" width="504" horizAlign="left" lineSpacing="-2" wrap="true" />
+            <CustomButton id="bEmailField" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonWidth="504" buttonHeight="72" isFilledBgOnFocus="true" visible="true">
+                <Label id="emailPlaceholderText" text="Correo electronico" width="486" height="72" vertAlign="center" translation="[18,0]" />
+            </CustomButton>
+            <CustomButton id="continueButton" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" buttonWidth="504" buttonHeight="72" buttonText="CONTINUAR" isFilledBgOnFocus="true" visible="true" />
+        </LayoutGroup>
+
+        <LayoutGroup id="lgloginPassword" layoutDirection="vert" horizAlignment="center" itemSpacings="[45,20,30,20]" translation="[959,335]" visible="false">
+            <Label id="loginPasswordTitleText" text="Ingresa tu contrasena" width="504" horizAlign="left" lineSpacing="-2" wrap="true" />
+            <CustomButton id="bPasswordField" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonWidth="504" buttonHeight="72" isFilledBgOnFocus="true">
+                <Label id="passwordPlaceholderText" text="Pasword" width="486" height="72" vertAlign="center" translation="[18,0]" />
+            </CustomButton>
+            <CustomButton id="loginButton" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" buttonWidth="504" buttonHeight="72" buttonText="INGRESAR" isFilledBgOnFocus="true" visible="true">
+                <BusySpinner id="loginPreloader" control="start" clockwise="true" spinInterval="0.8" visible="false" />
+            </CustomButton>
+            <Label id="forgotPasswordPromptText" text="¿Olvidaste tu clave?" width="504" horizAlign="left" lineSpacing="-2" wrap="true" />
+        </LayoutGroup>
+        <Group id="registerLinkGroup" translation="[708,608]">
+            <MultiStyleLabel id="registerText" width="503" horizAlign="left" lineSpacing="-2" wrap="false" focusable="true" />
+            <Poster id="registerFocusline" uri="pkg:/images/focus/underline.png" width="120" height="3" translation="[231,30]" visible="false" />
+        </Group>
+    </children>
+</component>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MenuContentItem" extends="Group">
+  <script type="text/brightscript" uri="MenuContentItem.brs" />
+  <interface>
+    <field id="itemContent" type="node" onChange="ShowContent" />
+    <field id="width" type="float" />
+    <field id="index" type="integer" />
+    <field id="gridHasFocus" type="boolean" onChange="GridHasFocusChanged" />
+    <field id="focusPercent" type="float" onChange="FocusPercentChanged" />
+    <field id="itemHasFocus" type="Boolean" onChange="ItemHasFocusChanged" />
+  </interface>
+  <children>
+    <Label id="itemTitle" width="160" height="36" vertAlign="center" horizAlign="center" />
+    <Poster id="itemSelect" uri="pkg:/images/focus/underline.png" height="6" visible="false" />
+    <Poster id="itemFocus" uri="pkg:/images/focus/underline.png" height="6" opacity="0.0" />
+  </children>
+</component>

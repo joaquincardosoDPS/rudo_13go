@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="TabView" extends="Group">
+    <script type="text/brightscript" uri="TabView.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+
+
+    <interface>
+        <field id="tabData" type="array" onChange="onContentChanged" />
+        <field id="updateContent" type="assocArray" alwaysNotify="true" />
+        <field id="isSeasonTab" type="bool" value="false" alwaysNotify="true" />
+        <field id="initSelect" type="bool" onChange="OnInitSelectTab" />
+        <field id="ItemSelected" type="integer" value="0" />
+
+        <function name="clearTabView" />
+    </interface>
+
+    <children>
+        <Label id="lHiddenTitle" visible="false" />
+    </children>
+</component>

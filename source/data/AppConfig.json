@@ -1,0 +1,6 @@
+{
+    "baseUrl": "https://consumers.rudo.video/",
+    "client": "chv",
+    "qrLink": "https://api.qrserver.com/v1/create-qr-code/?size=156x156&data=",
+    "pageSize": "15"
+}

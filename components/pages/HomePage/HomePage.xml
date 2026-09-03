@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="HomePage" extends="Group">
+    <script type="text/brightscript" uri="HomePage.brs" />
+    <script type="text/brightscript" uri="HomePageParser.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/ImageUtils.brs" />
+    <interface>
+        <field id="isDestroy" type="boolean" alwaysnotify="true" onChange="onPageDestroy"/>
+    </interface>
+
+    <children>
+        <Poster id="pBackground" width="1920" height="1080" uri="pkg:/images/other/bg_home.png" visible="false" />
+        <HeroSlider id="heroSlider" width="1920" height="1080" translation="[0,0]" visible="true" />
+        <Group id="gDetails" translation="[0, 0]">
+            <FocusableGroup id="focusableGroup" translation="[0,0]" />
+        </Group>
+        <Label id="noData" vertAlign="center" horizAlign="center" height="1080" width="1920" visible="false" />
+        <PageLoader id="pageLoader" isCenter="true" isBackground="false" visible="false" />
+    </children>
+
+</component>

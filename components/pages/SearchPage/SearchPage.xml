@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="SearchPage" extends="Group">
+    <script type="text/brightscript" uri="SearchPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <interface>
+    </interface>
+    <children>
+        <Label id="searchScene" height="50" width="900" translation="[1000,540]" text="El resultado de la búsqueda se mostrará aquí" visible="true" />
+        <Label id="minChar" height="50" width="900" translation="[1045,540]" text="Introduzca un mínimo de 3 caracteres" visible="false" />
+        <Label id="resFail" height="50" width="900" translation="[1075,540]" text="No se encontró ningún resultado" visible="false" />
+        <CustomButton id="bSearchField" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonWidth="1670" buttonHeight="84" isFilledBgOnFocus="true" visible="true" translation="[125,173]">
+            <Label id="searchPlaceholderHintText" text="Ingresa tu búsqueda" width="434" height="84" vertAlign="center" translation="[18,0]" opacity="0.3" />
+            <Label id="searchPlaceholderText" text="|" width="434" height="84" vertAlign="center" translation="[18,0]" />
+        </CustomButton>
+        <Markupgrid id="searchGrid" translation="[765,315]" itemComponentName="CommonItemComponent" numColumns="3" numRows="3" itemSize="[320,180]" itemSpacing="[30,30]" itemClippingRect="[0,0,1200,765]" drawFocusFeedback="true" vertFocusAnimationStyle="floatingFocus" />
+        <MiniKeyboard id="miniKeyboard" translation="[100, 220]" />
+        <Timer id="cursorBlinkTimer" repeat="true" duration="0.5" control="start" />
+    </children>
+</component>

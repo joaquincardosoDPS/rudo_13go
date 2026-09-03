@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="HeroSlider" extends="Group">
+    <script type="text/brightscript" uri="HeroSlider.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/ImageUtils.brs" />
+    <interface>
+        <field id="items" type="array" />
+        <field id="width" type="float" />
+        <field id="componentHeight" type="integer" value="0" />
+        <field id="height" type="float" />
+        <function name="setScrollStateImageVisibility" />
+    </interface>
+    <children>
+        <!-- Posters -->
+        <Group id="pImageGroup" visible="false">
+            <Poster id="pImage" loadDisplayMode="scaleToZoom" opacity="1.0" />
+            <Poster id="overlayImage" uri="pkg:/images/overlay/detailpage_overlay.png" />
+        </Group>
+        <LayoutGroup id="lgDetails" addItemSpacingAfterChild="false" layoutDirection="vert" itemSpacings="[10,20,20,20]" translation="[100, 163]">
+            <Poster id="pLogo" height="184" loadHeight="184" loadDisplayMode="scaleToZoom" />
+            <Label id="titleLabel" width="900" wrap="true" lineSpacing="-3" maxLines="2" />
+            <CustomButton id="bWatchNow" visible="false" />
+            <Label id="descLabel" width="900" wrap="true" lineSpacing="-3" maxLines="3" />
+        </LayoutGroup>
+    </children>
+</component>

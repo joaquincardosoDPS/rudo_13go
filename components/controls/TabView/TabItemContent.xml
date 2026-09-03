@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="TabItemContent" extends="ContentNode">
+    <interface>
+        <field id="width" type="integer" />
+        <field id="underlineHeight" type="integer" />
+        <field id="titleHeight" type="integer" />
+        <field id="isSelected" type="boolean" />
+        <field id="contentType" type="string" />
+        <field id="key" type="string" />
+        <field id="max_temp" type="string" />
+        <field id="all_temp" type="array" />
+    </interface>
+</component>

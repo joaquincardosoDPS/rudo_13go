@@ -1,0 +1,430 @@
+sub Init()
+    print "HomePage Init "
+    SetLocals()
+    SetControls()
+    SetupFonts()
+    SetupColor()
+    SetObservers()
+    Initialize()
+end sub
+
+sub SetLocals()
+    m.scene = m.top.GetScene()
+    m.fonts = m.global.fonts
+    m.theme = m.global.appTheme
+
+    initVar()
+end sub
+
+sub SetControls()
+    m.gDetails = m.top.findNode("gDetails")
+    m.heroSlider = m.top.findNode("heroSlider")
+    m.focusableGroup = m.top.findNode("focusableGroup")
+    m.noData = m.top.findNode("noData")
+    m.pageLoader = m.top.findNode("pageLoader")
+end sub 
+
+sub SetupFonts()
+    m.noData.font = m.fonts.poppinsBold32
+end sub
+
+sub SetupColor()
+    m.noData.color = m.theme.white
+end sub 
+
+sub SetObservers()
+    m.top.observeField("focusedChild", "onFocusedChild")
+    m.top.observeField("visible", "onVisibleChange")
+    m.scene.observeField("isWatchHistoryFetched", "refreshRowlistContent")
+    m.scene.observeField("updatedContinueWatchData", "onAddUpdateContinueWatchingRow")
+end sub
+
+sub initVar()
+    m.categoriesData = invalid
+    m.apiInProgress = 0
+    m.heroSlider = invalid
+    m.continueWatchingData = invalid
+
+    m.cwSectionIndex = 0
+    m.cwDisplayTitle = ""
+    m.categoriesNode = []
+    m.continteWatchingSliderView = invalid
+    m.isReRenderUI = false
+    m.isFirstTime = false
+end sub
+
+sub onVisibleChange()
+    if m.top.visible
+        refreshRowlistContent()
+    end if
+end sub
+
+sub OnFocusedChild()
+    if m.top.hasFocus()
+        focusRestored = RestoreFocus()
+        if focusRestored = false
+            if (isValid(m.focusableGroup) AND m.focusableGroup.callFunc("getContainerChildCount") > 0)
+                setFocus(m.focusableGroup)
+            end if
+        end if
+    end if
+end sub
+
+sub showHidePageLoader(visible as boolean)
+    m.pageLoader.visible = visible
+end sub
+
+sub onPageDestroy()
+    if m.top.isDestroy
+        initVar()
+        m.scene.isWatchHistoryFetched = false
+        m.scene.updatedContinueWatchData = {}
+        if isValid(m.focusableGroup) then m.focusableGroup.callFunc("clearNodes")
+        if isValid(m.watchHistoryTask)
+            m.watchHistoryTask.control = "stop"
+            m.watchHistoryTask = invalid
+        end if
+        if isValid(m.getFeaturedSliderProgramsTask)
+            m.getFeaturedSliderProgramsTask.control = "stop"
+            m.getFeaturedSliderProgramsTask = invalid
+        end if
+        if isValid(m.getAllCategoriesTask)
+            m.getAllCategoriesTask.control = "stop"
+            m.getAllCategoriesTask = invalid
+        end if
+    end if
+end sub
+
+sub Initialize()
+    m.rowSpacing = 62
+    m.focusableGroup.rowSpacing = m.rowSpacing
+    GetFeaturedSliderPrograms()
+    fetchAndStoreWatchHistory()
+    GetAllCategories()
+end sub
+
+' Continue Watching
+sub refreshRowlistContent()
+    if m.scene.isWatchHistoryFetched AND m.top.visible
+        m.scene.isWatchHistoryFetched = false
+        fetchAndStoreWatchHistory()
+    end if
+end sub
+
+sub fetchAndStoreWatchHistory()
+    if m.scene.isUserLoggedIn
+        m.apiInProgress++
+        if isValid(m.watchHistoryTask)
+            m.watchHistoryTask.control = "STOP"
+            m.watchHistoryTask = invalid
+        end if
+        params = {}
+        params["client"] = GlobalGet("appConfig").client
+        params["token"] = GlobalGet("token")
+        params["profile"] = GlobalGet("selectedProfileID")
+        params["end"] = 0
+        ' params["page"] = 1
+        ' params["limit"] = GlobalGet("appConfig").pageSize
+        m.watchHistoryTask = CreateObject("roSGNode", "ContentAPIAction")
+        m.watchHistoryTask.functionName = "GetAllWatchHistory"
+        m.watchHistoryTask.params = params
+        m.watchHistoryTask.observeField("result", "onGetAllWatchHistoryResponse")
+        m.watchHistoryTask.control = "RUN"
+    end if
+end sub
+
+sub onGetAllWatchHistoryResponse(event as dynamic)
+    response = event.getData()
+    print "onGetAllWatchHistoryResponse >>>> response : " 'formatjson(response)
+    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND isValid(response.data.data.count() > 0)
+        data = response.data.data
+        catData = {}
+        catData.title = "Seguir Viendo"
+        catData.format = "default"
+        catData.image_orientation = "landscape"
+        catData.liveCategory = false
+        catData.image_background_category = {} 
+        catData.image_logo_category = {} 
+        catData.key = "Seguir Viendo"
+        catData.total_display_records = 10
+        catData.total_records = 10
+        catData.last_page = 1
+        catData.programs = data
+        if m.continueWatchingData = invalid
+            m.continueWatchingData = catData
+        else
+            m.scene.updatedContinueWatchData = catData
+        end if
+    end if
+    m.apiInProgress--
+    if m.isFirstTime = false then createDynamicRowList()
+    m.watchHistoryTask = invalid
+end sub
+
+sub CreateSilderViewForContinueWatching()
+    if isValid(m.continueWatchingData) AND m.continueWatchingData.count() > 0
+        catNode = rowListDataParser(m.continueWatchingData)
+        if isValid(catNode) AND isValid(m.continteWatchingSliderView)
+            m.continteWatchingSliderView.category = m.continueWatchingData
+            m.continteWatchingSliderView.content = catNode
+        end if
+    end if
+end sub
+
+sub onAddUpdateContinueWatchingRow()
+    continueWatchingData = m.scene.updatedContinueWatchData
+    catNode = invalid
+    if isValid(continueWatchingData) AND continueWatchingData.count() > 0
+        catNode = rowListDataParser(continueWatchingData)
+        if isValid(catNode) AND isValid(m.continteWatchingSliderView)
+            m.continteWatchingSliderView.category = continueWatchingData
+        end if
+    end if
+    if isValid(m.continteWatchingSliderView) then checkRefreshNodes(m.continteWatchingSliderView, catNode)
+end sub
+
+sub createLastWatchedSlider()
+    sliderView = createObject("roSGNode", "SliderView")
+    sliderView.ObserveField("itemSelected", "onRowItemSelected")
+    sliderView.ObserveField("itemFocused", "onRowItemFocused")
+    sliderView.id = "seguirviendo"
+    sliderView.componentHeight = 180 + 50
+    m.continteWatchingSliderView = sliderView
+    m.categoriesNode.push(sliderView)
+    CreateSilderViewForContinueWatching()
+end sub
+' End Continue Watching
+
+sub GetAllCategories(page = 1)
+    m.apiInProgress++
+    showHidePageLoader(true)
+    params = {}
+    params["show_event"] = true
+    params["show_ranking"] = true
+    params["client"] = GlobalGet("appConfig").client
+    params["page"] = page
+    params["limit"] = GlobalGet("appConfig").pageSize
+    m.getAllCategoriesTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.getAllCategoriesTask.functionName = "GetAllCategories"
+    m.getAllCategoriesTask.params = params
+    m.getAllCategoriesTask.ObserveField("result", "OnGetAllCategoriesAPIResponse")
+    m.getAllCategoriesTask.control = "RUN"
+end sub
+
+sub OnGetAllCategoriesAPIResponse(event as dynamic)
+    response = event.getData()
+    print "OnGetAllCategoriesAPIResponse : response : " 'formatjson(response)
+    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND response.data.data.count() > 0
+        m.categoriesData = response.data.data
+    end if
+    m.apiInProgress--
+    m.getAllCategoriesTask = invalid
+    createDynamicRowList()
+end sub
+
+sub GetFeaturedSliderPrograms(page = 1)
+    m.apiInProgress++
+    params = {}
+    params["page"] = page
+    m.getFeaturedSliderProgramsTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.getFeaturedSliderProgramsTask.functionName = "GetFeaturedSliderPrograms"
+    m.getFeaturedSliderProgramsTask.params = params
+    m.getFeaturedSliderProgramsTask.ObserveField("result", "OnGetFeaturedSliderProgramsAPIResponse")
+    m.getFeaturedSliderProgramsTask.control = "RUN"
+end sub
+
+sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
+    response = event.getData()
+    print "OnGetFeaturedSliderProgramsAPIResponse : response : " 'formatjson(response)
+    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND response.data.data.count() > 0
+        featuredSliderProgramsData = response.data
+        singleFeatureSlider = featuredSliderProgramsData.data[0]
+        if isValid(singleFeatureSlider) AND singleFeatureSlider.count() > 0 AND isValid(m.heroSlider)
+            m.heroSlider.items = [singleFeatureSlider]
+            m.heroSlider.componentHeight = 583
+            m.heroSlider.visible = true
+            m.gDetails.translation = [0, 0]
+            m.categoriesNode.push(m.heroSlider)
+        end if
+        if featuredSliderProgramsData.count() > 1
+            catData = {}
+            catData.title = "Destacados"
+            catData.format = "default"
+            catData.image_orientation = "landscape"
+            catData.liveCategory = false
+            catData.image_background_category = {} 
+            catData.image_logo_category = {} 
+            catData.key = "Destacados"
+            catData.total_display_records = featuredSliderProgramsData.total_display_records
+            catData.total_records = featuredSliderProgramsData.total_records
+            catData.last_page = featuredSliderProgramsData.last_page
+            featuredSliderProgramsData.data.Delete(0)
+            program = featuredSliderProgramsData.data
+            catData.programs = program
+
+            sliderView = createObject("roSGNode", "SliderView")
+            sliderView.ObserveField("itemSelected", "onRowItemSelected")
+            sliderView.ObserveField("itemFocused", "onRowItemFocused")
+            sliderView.id = "destacados"
+            sliderView.componentHeight = 180 + 50
+            catNode = rowListDataParser(catData)
+            if isValid(catNode)
+                sliderView.category = catData
+                sliderView.content = catNode
+            end if
+            m.categoriesNode.push(sliderView)
+        end if
+    else
+        m.gDetails.translation = [0, 150]
+    end if
+    m.getFeaturedSliderProgramsTask = invalid
+    m.apiInProgress--
+    createDynamicRowList()
+end sub
+
+sub createDynamicRowList()
+    print "apiInProgress : " m.apiInProgress
+    if m.apiInProgress > 0
+        return
+    end if
+    m.isFirstTime = true
+    ' catData = MergedCategoriesData()
+    if isValid(m.categoriesData) AND m.categoriesData.count() > 0
+        bufferSize = 50
+        createLastWatchedSlider()
+        for each catData in m.categoriesData
+            componentHeight = 180
+            if catData.image_orientation = "landscape"
+                componentHeight = 180
+            else if catData.image_orientation = "portrait"
+                componentHeight = 576
+            end if
+            isLiveCategory = false
+            if catData.format = "event" AND catData.image_orientation = "portrait" AND isValid(catData.programs) AND isValid(catData.programs[0]) AND isValid(catData.programs[0].type) AND catData.programs[0].type = "live"
+                isLiveCategory = true
+                componentHeight = 706
+            end if
+            catData.liveCategory = isLiveCategory
+            mainContentNode = rowListDataParser(catData)
+            if isValid(mainContentNode) AND mainContentNode.getChildCount() > 0
+                sliderView = createObject("roSGNode", "SliderView")
+                sliderView.id = catData.title
+                sliderView.ObserveField("itemSelected", "onRowItemSelected")
+                sliderView.ObserveField("itemFocused", "onRowItemFocused")
+                sliderView.category = catData
+                sliderView.componentHeight = componentHeight + bufferSize
+                sliderView.content = mainContentNode
+                m.categoriesNode.push(sliderView)
+            end if
+        end for
+    end if
+    for each node in m.categoriesNode
+        if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR (node.id = "heroSlider")))
+            m.focusableGroup.callFunc("setTranslation", node)
+        end if
+    end for
+    manageFocus()
+    if (isNonEmptyString(m.scene.deepLinkingContentId) AND isValid(m.scene.deeplinkingData) AND isValid(m.scene.deeplinkingData.programid) AND isNonEmptyString(m.scene.DeeplinkingMediaType))
+        m.scene.isDeeplinking = true
+        item = {}
+        item.key = m.scene.deeplinkingData.programid
+        item.category_key = m.scene.deeplinkingData.programid
+        item.format = "default"
+        item.image_orientation = "landscape"
+        itemContent = CreateObject("roSGNode", "ProgramItemNode")
+        itemContent.setFields(item)
+        itemSelected = {
+            "itemData": itemContent
+            "sliderId": "deeplinking"
+        }
+        print "itemSelected : " itemSelected
+        m.scene.callFunc("showDetailPage", itemSelected, false)
+    else
+        m.scene.DeeplinkMsg = "No result found"
+        m.scene.deepLinkingContentId = ""
+    end if
+    showHidePageLoader(false)
+end sub
+
+sub checkRefreshNodes(compNode as dynamic, mainContent as dynamic)
+    if isValid(compNode)
+        if (isValid(compNode) AND mainContent = invalid)
+            m.isReRenderUI = true
+            deleteFromArray(m.categoriesNode, compNode)
+            m.focusableGroup.callFunc("removeNode", compNode)
+            m.focusableGroup.callFunc("clearNodes")
+        else if (isInvalid(compNode.content) OR compNode.content.getChildCount() = 0)
+            compNode.content = mainContent
+            m.isReRenderUI = true
+            m.focusableGroup.callFunc("clearNodes")
+        else
+            compNode.updateContent = mainContent
+        end if
+    end if
+    if m.isReRenderUI
+        for each node in m.categoriesNode
+            if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR (node.id = "heroSlider")))
+                m.focusableGroup.callFunc("setTranslation", node)
+            end if
+        end for
+    end if
+    manageFocus()
+end sub
+
+sub manageFocus()
+    m.noData.visible = false
+    if (m.focusableGroup.callFunc("getContainerChildCount") > 0)
+        setFocus(m.focusableGroup)
+    else
+        m.noData.text = "No hay datos disponibles"
+        m.noData.visible = true
+        setFocus(m.noData)
+    end if
+end sub
+
+sub onRowItemFocused(event as dynamic)
+    focusedItem = event.getData()
+    if isValid(focusedItem) AND isValid(focusedItem.itemData)
+    end if
+end sub
+
+sub onRowItemSelected(event as dynamic)
+    selectedItem = event.getData()
+    print "onRowItemSelected : selectedItem : " selectedItem.itemData
+    if isValid(selectedItem) AND isValid(selectedItem.itemData)
+        if isValid(selectedItem.itemData.isViewMoreCard) AND selectedItem.itemData.isViewMoreCard
+            m.scene.callFunc("showCategoryDetailPage", selectedItem, false)
+        else if isValid(selectedItem.itemData.format) AND selectedItem.itemData.format = "event"
+            m.scene.callFunc("showEventDetailPage", selectedItem, false)
+        else
+            m.scene.callFunc("showDetailPage", selectedItem, false)
+        end if
+    end if
+end sub
+
+function hasFocusOnFocusableGroup() as boolean
+    return isValid(m.focusableGroup) AND m.focusableGroup.visible = true AND (m.focusableGroup.hasFocus() OR m.focusableGroup.isInFocusChain())
+end function
+
+function validFocusableGroup() as boolean
+    return isValid(m.focusableGroup) AND m.focusableGroup.visible = true AND (m.focusableGroup.callFunc("getContainerChildCount") > 0)
+end function
+
+Function onKeyEvent(key as String, press as Boolean) as Boolean
+    handled = false
+    if press
+        print " Page : HomePage : onKeyEvent : key = " key " press = " press
+        if key = "back"
+            if hasFocusOnFocusableGroup() AND validFocusableGroup()
+                focusIndex = m.focusableGroup.callFunc("getFocusComponentIndex")
+                firstContentIndex = m.focusableGroup.callFunc("getFirstContentIndex")
+                if focusIndex > firstContentIndex
+                    handled = m.focusableGroup.callFunc("focusToFirstRow")
+                else if focusIndex = firstContentIndex AND firstContentIndex > 0
+                    handled = m.focusableGroup.callFunc("focusToHeroSlider")
+                end if
+            end if
+        end if
+    end if
+    return handled
+End Function

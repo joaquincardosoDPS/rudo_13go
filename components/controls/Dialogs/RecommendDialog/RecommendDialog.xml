@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="RecommendDialog" extends="Group">
+    <script type="text/brightscript" uri="RecommendDialog.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+    <interface>
+    </interface>
+    <children>
+        <Rectangle id="backgroundPanel" width="1920" height="1080" />
+        <LayoutGroup layoutDirection="vert" horizAlignment="center" itemSpacings="[25]" translation="[960,266]">
+            <Label id="titleLabel" translation="[0, 188]" width="850" wrap="true" maxlines="2" text="Cuenta" horizAlign="center" lineSpacing="-5" vertAlign="center" />
+            <Label id="descLabel" translation="[0, 188]" width="850" wrap="true" maxlines="2" text="Cuenta" horizAlign="center" lineSpacing="0" vertAlign="center" />
+            <CustomButton id="returnHomeButton" margin="20" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonText="VOLVER AL HOME" buttonWidth="496" buttonHeight="70" isFilledBgOnFocus="true" />
+        </LayoutGroup>
+        <RowList id="rlProgramList" itemComponentName="CommonItemComponent" rowTitleComponentName="RowTitleItem" rowItemSize="[[320, 180]]" itemSize="[1920, 250]" rowHeights="[250]" rowSpacings="[60]" itemSpacing="[0, 60]" rowItemSpacing="[[30, 0]]" rowLabelOffset="[[0, 10]]" vertFocusAnimationStyle="fixedFocus" rowFocusAnimationStyle="floatingFocus" showRowLabel="[true]" numRows="1"
+            numColumns="1" drawFocusFeedback="true" drawFocusFeedbackOnTop="true" fixedLayout="false" translation="[100, 785]" />
+    </children>
+</component>

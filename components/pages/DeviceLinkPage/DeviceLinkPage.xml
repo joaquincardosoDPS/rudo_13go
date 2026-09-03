@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="DeviceLinkPage" extends="Group">
+    <script type="text/brightscript" uri="DeviceLinkPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/FontManager.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs" />
+
+    <interface>
+    </interface>
+
+    <children>
+        <Rectangle id="rBackground" width="1920" height="1080" />
+        <Poster id="pBackground" width="1056" height="1080" loadWidth="1056" loadHeight="1080" uri="" loadDisplayMode="scaleToFit" translation="[864,0]" />
+        <Poster id="topGradient" width="1060" height="1080" uri="pkg:/images/overlay/topGradient.png" />
+        <Poster id="logo" height="96" translation="[120,30]" loadDisplayMode="scaleToFit" />
+
+        <Group id="contentGroup" translation="[120,216]">
+            <Label id="DeviceLinkTitleText" text="Para iniciar sesion, debes vincular su televisor" width="1100" lineSpacing="-2" wrap="true" />
+            <Poster id="stepOneBadge" uri="pkg:/images/focus/circleDot.png" width="56" height="56" translation="[0,100]" loadDisplayMode="scaleToFit" />
+            <Label id="stepOneNumber" width="56" height="56" horizAlign="center" vertAlign="center" translation="[0,100]" />
+            <Label id="stepOneText" text="Visita www.michilevision.cl/tv o Escanee el siguiente codigo QR usando su movil." width="550" lineSpacing="4" wrap="true" translation="[84,94]" />
+            <Group id="qrCard" translation="[84,256]">
+                <Poster id="qrCardBackground" uri="pkg:/images/other/qrCard.png" width="220" height="220" loadDisplayMode="scaleToFit" />
+                <Poster id="qrCode" width="156" height="156" translation="[32,32]" loadDisplayMode="scaleToFit" />
+            </Group>
+            <Poster id="stepTwoBadge" uri="pkg:/images/focus/circleDot.png" width="56" height="56" translation="[0,520]" loadDisplayMode="scaleToFit" />
+            <Label id="stepTwoNumber" width="56" height="56" horizAlign="center" vertAlign="center" translation="[0,520]" />
+            <Label id="stepTwoText" width="550" lineSpacing="2" text="Ingresa el siguiente código" wrap="true" translation="[84,528]" />
+            <Group id="codeGroup" translation="[84,596]">
+                <Poster id="codeBackground" uri="pkg:/images/focus/filled_r6.9.png" width="345" height="72" loadDisplayMode="scaleToFit" />
+                <Label id="codeValueText" width="345" height="72" horizAlign="center" vertAlign="center" />
+                <BusySpinner id="deviceLinkPreloader" control="start" clockwise="true" spinInterval="0.8" visible="false" />
+            </Group>
+            <Label id="emailText" text="O ingresa con tu correo electronico" width="700" wrap="true" translation="[0,742]" />
+        </Group>
+        <Timer id="deviceLinkTimer" repeat="true" duration="10" control="start" />
+        <Timer id="codeExpiryTimer" repeat="true"/>
+    </children>
+
+</component>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="CategoryDetailPage" extends="Group">
+    <script type="text/brightscript" uri="CategoryDetailPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <interface>
+        <field id="contentNode" type="assocArray" alwaysNotify="true" onChange="onContentInfoChanged" />
+    </interface>
+    <children>
+        <Group id="gCategoryDetail" translation="[100, 100]">
+            <Label id="lCategoryTitle" horizAlign="right" text="" translation="[0, 0]" />
+            <Label id="lTotalCount" horizAlign="right" text="" translation="[0, 70]" />
+            <MarkupGrid id="mgPrograms" itemClippingRect="[0,0,1820,690]" translation="[0,130]" itemComponentName="CommonItemComponent" numColumns="5" numRows="3" itemSize="[320,180]" itemSpacing="[30,40]" drawFocusFeedback="true" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="floatingFocus" visible="true" />
+        </Group>
+        <CustomButton id="cmViewMore" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" buttonWidth="200" buttonHeight="60" buttonText="Cargar más" isFilledBgOnFocus="true" visible="false" />
+        <PageLoader id="pageLoader" visible="false" />
+    </children>
+</component>

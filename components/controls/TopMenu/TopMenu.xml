@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="TopMenu" extends="Group">
+    <script type="text/brightscript" uri="TopMenu.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/ProfileAvatarUtils.brs" />
+    <interface>
+        <field id="selectedItem" type="node" />
+        <function name="UpdateSelectedTopMenu" />
+    </interface>
+    <children>
+        <Poster id="bgProfilePopup" uri="pkg:/images/overlay/preference_gradient.png" height="1080" width="1920" visible="false" translation="[0,0]"/>
+        <Poster id="pLogoImage" height="77" loadHeight="77" loadDisplayMode="scaleToFit" translation="[100,30]" />
+        <Group id="gMyProfile" visible="false">
+            <Label id="lMyProfile" text="" width="300" height="75" horizAlign="right" vertAlign="center" translation="[1450,33]" />
+            <MaskGroup id="mgMyProfile" maskUri="pkg:/images/other/profile_mask.png" maskSize="[64,64]" translation="[1770,38.5]">
+                <Poster id="pMyProfile" uri="pkg:/images/focus/add_profile_img_unfocus.png" width="64" height="64" loadWidth="64" loadHeight="64" loadDisplayMode="scaleToFit => Fill  => or Zoom" />
+            </MaskGroup>
+            <Poster id="pMyProfileBorder" uri="pkg:/images/focus/MyProfile_focus_border.png" width="64" height="64" translation="[1770,38.5]" visible="true" />
+        </Group>
+        <CustomButton id="loginButton" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" buttonWidth="200" buttonHeight="55" buttonText="Iniciar Sesión" isFilledBgOnFocus="true" translation="[1670,45]" visible="false" />
+        <MarkupGrid id="topMenuGrid" itemComponentName="MenuContentItem" numColumns="7" numRows="1" itemSize="[160,60]" itemSpacing="[50,0]" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="floatingFocus" drawFocusFeedback="false" rowHeights="[50]" translation="[55,50]" focusBitmapUri="pkg:/images/focus/underline.png" />
+        <Label id="lHidden" visible="false" />
+        <Group id="gProfilePopup" visible="false" translation="[1505,108]">
+            <Poster id="pProfilePopup" uri="pkg:/images/focus/R5Filled_30px.9.png" width="340" height="385"/>
+            <MarkupGrid id="profilePopupGrid" itemComponentName="TopProfilePopupItem" numColumns="1" numRows="3" itemSize="[290,70]" itemSpacing="[0,8]" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="floatingFocus" drawFocusFeedback="false" translation="[30,17]" />
+            <LayoutGroup id="lgProfileActions" translation="[30,250]" layoutDirection="vert" itemSpacings="[0,0]">
+                <Group id="gEditProfileAction">
+                    <Label id="lEditProfileAction" width="304" height="40" vertAlign="center" text="Editar perfiles" />
+                </Group>
+                <Group id="gAccountAction">
+                    <Label id="lAccountAction" width="304" height="40" vertAlign="center" text="Cuenta" />
+                </Group>
+                <Group id="gLogoutAction">
+                    <Label id="lLogoutAction" width="304" height="40" vertAlign="center" text="Cerrar sesión" />
+                </Group>
+            </LayoutGroup>
+        </Group>
+        <AddEditProfilePopup id="addEditProfilePopup" visible="false" />
+    </children>
+</component>

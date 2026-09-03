@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="PageLoader" extends="Group">
+    <script type="text/brightscript" uri="PageLoader.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+
+    <interface>
+        <field id="isCenter" type="boolean" value="true" />
+        <field id="loaderWidth" type="string" value="150" alwaysNotify="true" />
+        <field id="showSpinnerText" type="string" value="" alwaysNotify="true" onChange="OnShowSpinnerTextChange" />
+        <field id="isBackground" type="boolean" value="true" alias="rLoaderBackground.visible" />
+        <field id="pageTranslation" type="array" alwaysNotify="true" alias="gLoader.translation" />
+        <field id="pageSpinnerTextTranslation" type="array" value="[-25,200]" alwaysNotify="true" alias="lSpinnerText.translation" />
+        <field id="textFont" type="string" alwaysNotify="true" alias="lSpinnerText.font" />
+    </interface>
+
+    <children>
+        <Rectangle id="rLoaderBackground" width="1920" height="1080" color="#000000" translation="[0,0]" />
+        <Group id="gLoader">
+            <BusySpinner id="bsLoader" translation="[0,0]" clockwise="true" spinInterval="0.8" />
+            <Label id="lSpinnerText" width="200" horizAlign="center" translation="[-50,250]" />
+        </Group>
+    </children>
+</component>

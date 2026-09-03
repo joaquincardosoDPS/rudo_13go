@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="RowTitleItem" extends="Group" >
+  <script type="text/brightscript" uri="RowTitleItem.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs"/>
+  <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs"/>
+
+  <interface>
+    <field id="content" type="node" onChange="itemContentChanged" />
+  </interface>
+
+  <children>
+    <Label id="lRowLabelBadgeText" vertAlign="center" height="46" horizAlign="left" translation="[10,0]"/>
+    <Poster id="pCounter" width="160" Height="30" loadDisplayMode="scaleToFit" uri="pkg:/images/focus/filled_r6.9.png"/>
+    <Label id="lCounter" vertAlign="center" height="30" horizAlign="center" translation="[5,8]"/>
+  </children>
+</component>

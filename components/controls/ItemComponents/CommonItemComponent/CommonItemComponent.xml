@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="CommonItemComponent" extends="Group">
+    <script type="text/brightscript" uri="CommonItemComponent.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/ImageUtils.brs" />
+    <interface>
+        <field id="itemContent" type="node" onChange="ItemContent_Changed" />
+        <field id="focusPercent" type="float" onChange="FocusPercent_Changed" alwaysNotify="true" />
+        <field id="itemHasFocus" type="boolean" onChange="ItemHasFocus_Changed" alwaysNotify="false" />
+        <field id="rowListHasFocus" type="boolean" alwaysNotify="false" />
+        <field id="rowHasFocus" type="boolean" onChange="RowHasFocus_Changed" />
+        <field id="gridHasFocus" type="boolean" alwaysNotify="false" />
+    </interface>
+    <children>
+        <Group id="gHorizCard" translation="[0, 0]" visible="false">
+            <MaskGroup id="mgHBorderMask" maskUri="pkg:/images/card/card_mask_320_180.png" translation="[0,0]">
+                <Poster id="pHCard" width="320" height="180" loadWidth="320" loadHeight="180" loadingBitmapUri="pkg:/images/card/card_320_180.png" failedBitmapUri="pkg:/images/card/card_320_180.png" loadDisplayMode="scaleToFit" visible="true" />
+                <Rectangle id="rHRightTop" width="100" height="22" translation="[0,0]" visible="false">
+                    <Label id="lHRightTop" width="100" height="22" horizAlign="left" vertAlign="center" translation="[0,0]" />
+                </Rectangle>
+                <Rectangle id="pUnfillProgressRect" width="320" height="10" opacity="0.8" visible="false" />
+                <Rectangle id="pFillProgressRect" width="320" height="10" visible="false" />
+            </MaskGroup>
+            <Label id="lHRightTop" width="100" height="22" horizAlign="left" vertAlign="center" translation="[0,0]" />
+        </Group>
+        <Group id="gViewMoreCard" translation="[0, 0]" visible="false">
+            <MaskGroup id="mgViewMoreBorderMask" maskUri="pkg:/images/card/card_mask_320_180.png" translation="[0,0]">
+                <Poster id="pViewMoreCard" width="320" height="180" loadWidth="320" loadHeight="180" uri="pkg:/images/card/card_320_180.png" loadingBitmapUri="pkg:/images/card/card_320_180.png" failedBitmapUri="pkg:/images/card/card_320_180.png" loadDisplayMode="scaleToFit" />
+                <Label id="lViewMoreTitle" text="Ver Más" width="320" height="180" horizAlign="center" vertAlign="center" translation="[0,0]" />
+            </MaskGroup>
+        </Group>
+        <Group id="gEpisodeCard" translation="[0, 0]" visible="false">
+            <MaskGroup id="mgEBorderMask" maskUri="pkg:/images/card/card_mask_320_180.png" translation="[0,0]">
+                <Poster id="pECard" width="320" height="180" loadWidth="320" loadHeight="180" loadingBitmapUri="pkg:/images/card/card_320_180.png" failedBitmapUri="pkg:/images/card/card_320_180.png" loadDisplayMode="scaleToFit" visible="true" />
+            </MaskGroup>
+            <Label id="lETime" width="320" height="30" horizAlign="left" vertAlign="center" visible="false" translation="[0,193]" />
+            <Label id="lEDescription" width="320" horizAlign="left" vertAlign="center" wrap="true" maxLines="3" lineSpacing="-3" translation="[0,193]" />
+        </Group>
+        <Group id="gVerticalCard" translation="[0, 0]" visible="false">
+            <MaskGroup id="mgVBorderMask" maskUri="pkg:/images/card/card_mask_324_576.png" translation="[0,0]">
+                <Poster id="pVCard" width="324" height="576" loadWidth="324" loadHeight="576" loadingBitmapUri="pkg:/images/card/card_324_576.png" failedBitmapUri="pkg:/images/card/card_324_576.png" loadDisplayMode="scaleToFit" visible="true" />
+                <Rectangle id="rVRightTop" height="28" translation="[0,0]" visible="false">
+                    <Label id="lVRightTop" height="28" horizAlign="center" vertAlign="center" translation="[10,0]" />
+                </Rectangle>
+                <Rectangle id="rVBottomTime" width="324" height="34" translation="[0,542]" visible="false">
+                    <Label id="lVBottomTime" width="324" height="34" horizAlign="center" vertAlign="center" translation="[0,0]" />
+                </Rectangle>
+            </MaskGroup>
+        </Group>
+        <Group id="gNumber" translation="[0, 0]" visible="false">
+            <MaskGroup id="mgNumberBorderMask" maskUri="pkg:/images/card/card_mask_324_576.png" translation="[0,0]">
+                <Poster id="pNCard" width="324" height="576" loadWidth="324" loadHeight="576" loadingBitmapUri="pkg:/images/card/card_324_576.png" failedBitmapUri="pkg:/images/card/card_324_576.png" loadDisplayMode="scaleToFit" visible="true" />
+                <Poster id="pNumber" width="70" height="107" loadWidth="70" loadHeight="107" translation="[14,12]" uri="pkg:/images/card/number_back.png" loadingBitmapUri="pkg:/images/card/number_back.png" failedBitmapUri="pkg:/images/card/number_back.png" loadDisplayMode="scaleToZoom" visible="true">
+                    <Label id="lNumberRightTop" width="25" height="90" horizAlign="center" vertAlign="center" translation="[22.5,0]" />
+                </Poster>
+            </MaskGroup>
+        </Group>
+    </children>
+</component>

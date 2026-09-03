@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="AuthAPIAction" extends="Task">
+        <script type="text/brightscript" uri="AuthAPIAction.brs" />
+        <script type="text/brightscript" uri="pkg:/source/apis/ContentAPI.brs" />
+        <script type="text/brightscript" uri="pkg:/source/apis/BaseRequests.brs" />
+        <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+        <interface>
+                <!-- Input -->
+                <field id="params" type="assocarray" />
+                <field id="token" type="string" />
+                <field id="result" type="assocarray" />
+                <field id="resultData" type="array" />
+                <field id="action" type="string" />
+        </interface>
+</component>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="OnboardingPage" extends="Group">
+    <script type="text/brightscript" uri="OnboardingPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+
+    <interface>
+    </interface>
+
+    <children>
+        <Rectangle id="rBackground" width="1920" height="1080" />
+        <Poster id="pBackground" width="1056" height="1080" loadWidth="1056" loadHeight="1080" uri="" loadDisplayMode="scaleToFit" translation="[864,0]" />
+        <Poster id="topGradient" width="1060" height="1080" uri="pkg:/images/overlay/topGradient.png" />
+        <Group id="gOnboarding">
+            <Poster id="logo" loadDisplayMode="scaleToFit" height="257" translation="[120,210]" />
+            <LayoutGroup id="lgOnboarding" layoutDirection="vert" itemSpacings="[30,85,10,30]" translation="[350, 200]">
+                <Label id="WelcomeTitleText" width="560" lineSpacing="-2" text="Accede ahora a nuestra app y disfruta de nuestro contenido 24/7" wrap="true" />
+                <CustomButton id="LoginButton" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" buttonWidth="256" buttonHeight="70" buttonText="Iniciar sesiòn" isFilledBgOnFocus="true" visible="true" />
+                <MultiStyleLabel id="DonthaveAccountText" width="560" lineSpacing="-2" wrap="true" />
+                <Label id="RegisterText" width="560" lineSpacing="-2" wrap="true" />
+                <Group id="qrCard" translation="[570,146]" visible="false">
+                    <Poster id="qrCardBackground" uri="pkg:/images/other/qrCard.png" width="248" height="248" loadDisplayMode="scaleToFit" />
+                    <Poster id="qrCode" width="184" height="184" translation="[32,32]" loadDisplayMode="scaleToFit" />
+                </Group>
+            </LayoutGroup>
+        </Group>
+    </children>
+
+</component>

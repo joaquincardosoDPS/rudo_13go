@@ -1,0 +1,20 @@
+<?xml version = "1.0" encoding = "utf-8" ?>
+<component name = "MarkupGridPlayerItem" extends = "Group" >
+    <script type="text/brightscript" uri="MarkupGridPlayerItem.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs"/>
+    <script type="text/brightscript" uri="pkg:/source/managers/FontManager.brs"/>
+    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs"/>
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs"/>
+    <interface>
+        <field id="itemContent" type="node" onChange="ItemContent_Changed"/>
+        <field id="focusPercent" type="float" onChange="focusPercent_Changed" alwaysNotify="true"/>
+        <field id="itemHasFocus" type="boolean" onChange="itemHasFocus_Changed" alwaysNotify="false"/>
+        <field id="gridHasFocus" type="boolean" onChange="parentHasFocus_Changed" alwaysNotify="true"/>
+        <field id="rowListHasFocus" type="boolean" onChange="parentHasFocus_Changed" alwaysNotify="true"/>
+        <field id="rowHasFocus" type="boolean" onChange="rowHasFocus_Changed"/>
+    </interface>
+    <children>
+        <Poster id="pBackGround" width="50" height="50" loadwidth="50" loadheight="50" uri="pkg:/images/focus/circleDot.png" opacity="0"/>
+        <Poster id="pIcon" width="28" height="28" loadwidth="28" loadheight="28" uri="pkg:/images/PlayerOverlayIcon/rewind.png" translation="[11,11]" loadDisplayMode="scaleToFit"/>
+    </children>
+</component>

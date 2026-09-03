@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="EPGItemData" extends="ContentNode">
+    <interface>
+        <field id="name" type="string" />
+        <field id="isLive" type="boolean" value="false" />
+        <field id="key" type="string" />
+        <field id="key_live" type="string" />
+        <field id="name_live" type="string" />
+        <field id="background_image" type="string" />
+        <field id="logo" type="string" />
+        <field id="color" type="string" />
+        <field id="order" type="integer" />
+        <field id="is_playlist" type="boolean" />
+        <field id="timezone" type="string" />
+        <field id="active" type="boolean" />
+        <field id="active_external" type="boolean" />
+        <field id="live" type="string" />
+        <field id="is_schedule" type="boolean" />
+        <field id="active_item_data" type="assocArray" />
+        <field id="folder" type="string" />
+        <field id="m3u8" type="string" />
+        <field id="vast" type="string" />
+        <field id="type" type="string" />
+        <field id="preview_m3u8" type="string" />
+        <field id="in_review" type="boolean" />
+        <field id="restriction" type="string" />
+        <field id="geo_blocking" type="boolean" />
+        <field id="timezone_live" type="string" />
+        <field id="DPSDAIAssetKey" type="string" />
+        <field id="assetKey" type="string" />
+        <field id="ads" type="string" />
+    </interface>
+</component>

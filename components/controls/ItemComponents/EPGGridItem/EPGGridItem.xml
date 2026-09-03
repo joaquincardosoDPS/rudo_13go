@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--********** Copyright 2016 Roku Corp.  All Rights Reserved. **********-->
+
+<component name="EPGGridItem" extends="Group">
+    <script type="text/brightscript" uri="EPGGridItem.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+    <interface>
+        <field id="width" type="float" />
+        <field id="height" type="float" />
+        <field id="itemContent" type="node" onChange="itemContentChanged" />
+        <field id="focusPercent" type="float" onChange="focusPercentChanged" alwaysNotify="true" />
+        <field id="itemHasFocus" type="boolean" onChange="itemHasFocusChanged" alwaysNotify="false" />
+        <field id="gridHasFocus" type="boolean" onChange="parentHasFocusChanged" alwaysNotify="false" />
+    </interface>
+    <children>
+        <Group id="gridItem">
+            <Poster id="rBox" uri="pkg:/images/focus/epgGrid.9.png" />
+            <Poster id="channelLogo" visible="false" />
+            <LayoutGroup id="programDetail" layoutDirection="vert" itemSpacings="[5]">
+                <Label id="programTitle" vertAlign="center" />
+                <Label id="lLiveTime" text="" vertAlign="center" visible="false" />
+            </LayoutGroup>
+            <Poster id="playIcon" width="20" height="20" uri="pkg:/images/focus/btnplay.png" />
+        </Group>
+    </children>
+</component>

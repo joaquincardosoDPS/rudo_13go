@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="EventDetailPage" extends="Group">
+    <script type="text/brightscript" uri="EventDetailPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/ImageUtils.brs" />
+    <interface>
+        <field id="contentNode" type="assocArray" alwaysNotify="true" onChange="onContentInfoChanged" />
+    </interface>
+    <children>
+        <Group id="gDetails" opacity="0.0">
+            <Group id="gTopContent" translation="[0,0]">
+                <Poster id="pVideo" width="1920" height="1080" loadWidth="1920" loadHeight="1080" loadDisplayMode="scaleToFill" translation="[0,0]" visible="true" />
+                <Poster id="pMetaOverlay" width="1920" height="1080" loadWidth="1920" loadHeight="1080" uri="pkg:/images/overlay/detailpage_overlay.png" loadDisplayMode="scaleTozoom" translation="[0,0]" visible="true" opacity="1.0" />
+                <Rectangle id="rBottomMetaOverlay" height="1080" width="1920" translation="[0,0]" opacity="0.0" />
+            </Group>
+            <Group id="gDetailsContent">
+                <LayoutGroup id="lgDetails" layoutDirection="vert" translation="[100,100]" />
+                <Group id="gProgressBar" visible="false">
+                    <Poster id="pUnfillProgressRect" width="270" height="8" loadWidth="270" loadHeight="8" opacity="0.8" uri="pkg:/images/focus/filled_r6.9.png" />
+                    <Poster id="pFillProgressRect" width="0" height="8" loadWidth="270" loadHeight="8" uri="pkg:/images/focus/filled_r6.9.png" />
+                    <Label id="lRemainingTime" width="260" height="40" translation="[290,-16]" />
+                </Group>
+                <Group id="gSegmentGrid" translation="[100,40]" visible="false">
+                    <TabView id="tabView" isSeasonTab="false" translation="[0,733]" visible="true" />
+                    <Rectangle id="horizLine" height="2" width="1740" translation="[0, 780]" opacity="0.4" visible="false" />
+                    <MarkupGrid id="mgEpisode" translation="[0,807]" itemComponentName="CommonItemComponent" numColumns="5" numRows="3" itemSize="[320,180]" itemSpacing="[30,110]" imageWellBitmapUri="pkg:/images/card/card_320_180.png" itemClippingRect="[0,0,1920,865]" drawFocusFeedback="true" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="fixedFocus" visible="false" />
+                </Group>
+                <Group id="gDetailsSection" translation="[100,847]" visible="false" />
+            </Group>
+        </Group>
+        <PageLoader id="pageLoader" isCenter="true" isBackground="false" visible="false" />
+        <Animation id="transAnimation" duration="2" repeat="false" easeFunction="linear">
+            <FloatFieldInterpolator key="[0.0, 0.5, 1.0]" keyValue="[0.0, 0.5, 1.0]" fieldToInterp="gDetails.opacity" />
+        </Animation>
+        <Animation id="gDetailsUpAnimation" duration="0.4" repeat="false" easeFunction="linear">
+            <Vector2DFieldInterpolator key="[0, 1]" keyValue="[ [0, -580], [0, 0] ]" fieldToInterp="gDetailsContent.translation" />
+            <FloatFieldInterpolator key="[0.0, 0.5, 1.0]" keyValue="[0.0, 0.5, 1.0]" fieldToInterp="pMetaOverlay.opacity" />
+            <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.9, 0.0]" fieldToInterp="rBottomMetaOverlay.opacity" />
+        </Animation>
+        <Animation id="gDetailsDownAnimation" duration="0.4" repeat="false" easeFunction="linear">
+            <Vector2DFieldInterpolator key="[0, 1]" keyValue="[ [0, 0], [0, -580] ]" fieldToInterp="gDetailsContent.translation" />
+            <FloatFieldInterpolator key="[0.0, 0.5, 1.0]" keyValue="[1.0, 0.5, 0.0]" fieldToInterp="pMetaOverlay.opacity" />
+            <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, 0.9]" fieldToInterp="rBottomMetaOverlay.opacity" />
+        </Animation>
+    </children>
+</component>

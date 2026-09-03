@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="VideoPlayer" extends="Group">
+    <script type="text/brightscript" uri="VideoPlayer.brs"/>
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs"/>
+    <script type="text/brightscript" uri="pkg:/source/managers/FontManager.brs"/>
+    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs"/>
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs"/>
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs"/>
+    <script type="text/brightscript" uri="pkg:/source/helpers/ImageUtils.brs" />
+    <interface>
+        <field id="content" type="assocArray" alwaysNotify="true" onChange="OnContentChange"/>
+        <field id="isVideoPlayerStopped" type="boolean" alwaysNotify="true"/>
+        <function name="closePlayer" />
+    </interface>
+    <children>
+        <NextEpisodeComponent id="nextEpisodePopup" visible="false"/>
+        <Group id="gLivePlayer" scale="[1, 1]">
+            <Poster id="pVideo" width="1920" height="1080" loadWidth="1920" loadHeight="1080" loadDisplayMode="scaleTozoom"/>
+            <Video id="VideoPlayer" width="1920" height="1080" notificationInterval="1"/>
+            <PlayerOverlay id="PlayerOverlay" visible="false"/>
+            <Group id="loaderSection" translation="[910,485]" visible="false">
+                <BusySpinner id="loadingStatus" spinInterval="0.8" translation="[0,0]"/>
+            </Group>
+        </Group>
+        <Animation id="fadeOutControls" duration="1.5" repeat="false" easeFunction="linear">
+            <FloatFieldInterpolator id="opacityInterpo" key="[0.0, 0.5, 1.0]" keyValue="[ 1.0, 0.5, 0.0 ]" fieldToInterp="PlayerOverlay.opacity"/>
+        </Animation>
+        <Timer id="hideControlsTimer" repeat="false" duration="5"/>
+        <Animation id="bigPlayerAnimation" duration="0.5" control="none" easeFunction="linear">
+            <Vector2DFieldInterpolator id="bigPlayerOverlayTranslation" key="[0,1]" keyValue="[[1470, 755], [0,0]]" fieldToInterp="gLivePlayer.translation" />
+            <Vector2DFieldInterpolator id="bigPlayerOverlayScale" key="[0,1]" keyValue="[[0.208333,0.208333], [1,1]]" fieldToInterp="gLivePlayer.scale" />
+        </Animation>
+        <Animation id="smallPlayerAnimation" duration="0.5" control="none" easeFunction="linear">
+            <Vector2DFieldInterpolator id="smallPlayerOverlayTranslation" key=" [0,1]" keyValue=" [[0,0], [1470, 755]]" fieldToInterp="gLivePlayer.translation" />
+            <Vector2DFieldInterpolator id="smallPlayerOverlayScale" key=" [0,1]" keyValue=" [[1,1], [0.208333,0.208333]]" fieldToInterp="gLivePlayer.scale" />
+        </Animation>
+    </children>
+</component>

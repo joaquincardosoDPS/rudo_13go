@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MainScene" extends="Scene">
+    <script type="text/brightscript" uri="MainScene.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/FontManager.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/ViewStackManager.brs" />
+
+    <interface>
+        <field id="outRequest" type="AssocArray" alwaysNotify="true" />
+        <field id="sentLaunchCompleteEvent" type="boolean" alwaysNotify="true" onChange="sendAppLaunchCompleteBeacon" />
+        <field id="sentAppDialogInitiateEvent" type="boolean" alwaysNotify="true" onChange="sendAppDialogInitiateBeacon" />
+        <field id="sentAppDialogCompleteEvent" type="boolean" alwaysNotify="true" onChange="sendAppDialogCompleteBeacon" />
+
+        <field id="deepLinkingContentId" type="string" />
+        <field id="deepLinkingMediaType" type="string" />
+        <field id="deeplinkMsg" type="string" alwaysNotify="true" onChange="ChangeDeeplinkDialogMessage" />
+        <field id="deepLinkingLand" type="boolean" alwaysNotify="true" onChange="onDeepLinkingLand" />
+        <field id="isDeeplinking" type="boolean" value="false" alwaysNotify="true" />
+        <field id="deeplinkingData" type="assocArray" alwaysNotify="true" />
+        <function name="HandleInputEvent" />
+        <function name="CloseDeeplinkDialog" />
+
+        <field id="isUserLoggedIn" type="boolean" value="false" alwaysNotify="true" onChange="OnUserLoggedIn" />
+        <field id="hasTopMenuBackground" type="boolean" value="false" alwaysNotify="true" alias="pTopMenuBackground.visible" />
+        <field id="ProfileData" type="assocArray" alwaysNotify="true" />
+        <field id="updatedContinueWatchData" type="AssocArray" alwaysNotify="true" />
+        <field id="isWatchHistoryFetched" type="boolean" value="false" alwaysNotify="true" />
+        <field id="refreshMylistPage" type="boolean" value="false" alwaysNotify="true" />
+        <field id="isItemAddRemoveFav" type="assocArray" alwaysNotify="true" />
+        <function name="ShowHideLoader" />
+        <function name="ShowOnboardingPage" />
+        <function name="ShowSignUpPage" />
+        <function name="ShowLoginPage" />
+        <function name="ShowDeviceLinkPage" />
+        <function name="ShowEditorProfilesPage" />
+        <function name="ShowHomePage" />
+        <function name="ShowAccountPage" />
+        <function name="HandleBackKey" />
+        <function name="OnLogout" />
+        <function name="StartApp" />
+        <function name="showDetailPage" />
+        <function name="showEventDetailPage" />
+        <function name="showCategoryDetailPage" />
+        <function name="ShowHideMenu" />
+        <function name="StartVideo" />
+        <function name="UpdateSelectedTopMenu" />
+    </interface>
+
+    <children>
+        <Rectangle id="rBackground" width="1920" height="1080" visible="false">
+            <Poster id="pBackgound" width="1920" height="1080" loadwidth="1920" loadDisplayMode="scaleToZoom" loadheight="1080" />
+        </Rectangle>
+        <Group id="gPageContainer" />
+        <Poster id="pTopMenuBackground" width="1920" height="200" loadwidth="1920" loadheight="200" uri="pkg:/images/overlay/preference_gradient.png" loadDisplayMode="scaleToZoom" />
+        <Group id="gTopMenu" visible="true" />
+        <PageLoader id="pageLoader" isCenter="true" loaderWidth="100" pageSpinnerTextTranslation="[-50,130]" showSpinnerText="Please wait..." />
+        <Group id="ToastMsgBox" visible="false">
+            <Label id="ToastMsgText" />
+        </Group>
+        <Timer id="toastMessageTimer" repeat="true" duration="5" />
+    </children>
+</component>

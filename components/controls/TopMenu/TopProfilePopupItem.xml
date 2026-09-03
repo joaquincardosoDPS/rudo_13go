@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="TopProfilePopupItem" extends="Group">
+    <script type="text/brightscript" uri="TopProfilePopupItem.brs" />
+    <interface>
+        <field id="itemContent" type="node" onChange="ShowContent" />
+        <field id="gridHasFocus" type="boolean" onChange="GridHasFocusChanged" />
+        <field id="focusPercent" type="float" onChange="FocusPercentChanged" />
+        <field id="itemHasFocus" type="Boolean" onChange="ItemHasFocusChanged" />
+    </interface>
+    <children>
+        <MaskGroup id="mgAvatar" maskUri="pkg:/images/other/profile_mask.png" maskSize="[64,64]" translation="[0,10]" visible="false">
+            <Poster id="pAvatar" width="64" height="64" uri="pkg:/images/other/default_user.png" />
+        </MaskGroup>
+        <Label id="lTitle" translation="[79,17]" width="230" height="64" vertAlign="center" />
+    </children>
+</component>

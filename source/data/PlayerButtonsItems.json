@@ -1,0 +1,17 @@
+ [
+    {
+        "itemId": "rewind",
+        "title": "Rewind",
+        "icon_url": "pkg:/images/PlayerOverlayIcon/rewind.png"
+    },
+    {
+        "itemId": "playPause",
+        "title": "PlayPause",
+        "icon_url": "pkg:/images/PlayerOverlayIcon/play.png"
+    },
+    {
+        "itemId": "forward",
+        "title": "Forward",
+        "icon_url": "pkg:/images/PlayerOverlayIcon/fast-forward.png"
+    }
+]

@@ -1,0 +1,30 @@
+params:   
+    rasp_version: 1
+    default_keypress_wait: 2
+    channels:   
+        MiCHV: dev
+steps:  
+    - launch: MiCHV
+    - pause: 15
+    - press: ok
+    - pause: 8
+    - press: up
+    - press: up
+    - press: right
+    - press: right
+    - press: right
+    - press: right
+    - press: right
+    - press: right
+    - press: ok
+    - press: down
+    - press: down
+    - press: down
+    - press: down
+    - press: down
+    - press: down
+    - press: down
+    - press: down
+    - press: ok
+    - press: right
+    - press: ok

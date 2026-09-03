@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="ToastMessage" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/controls/ToastMessage/ToastMessage.brs" />
+	<script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs"/>
+	<script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs"/>
+    <script type="text/brightscript" uri="pkg:/source/helpers/Global.brs"/>
+	<script type="text/brightscript" uri="pkg:/source/managers/FontManager.brs"/>
+	<script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs"/>
+
+    <interface>
+        <field id="msgData" type="AssocArray" alwaysNotify="true" onChange="onMessageChanged"/>
+        <field id="quickHide" type="boolean" alwaysNotify="true" onChange="onQuickHideChanged"/>
+        <field id="toastClosed" type="boolean" alwaysNotify="true"/>
+        <field id="OKPressed" type="boolean" alwaysNotify="true"/>
+    </interface>
+
+    <children>
+      <Rectangle id="tostMessageBackground" width="1920" height="1080" opacity="0.8" visible="false"/>
+      <Poster id="messageBackground" uri="pkg:/images/focus/R5Filled_30px.9.png">
+            <label id="lText" horizAlign="center" vertAlign="center"/>
+            <Group id="gDetails">
+                <Poster id="messageIcon" loadDisplayMode="scaleToFit"/>
+                <label id="message" wrap="false" maxLines="1" lineSpacing="0" horizAlign="left" vertAlign="center"/>
+            </Group>
+      </Poster>
+      <Animation id="messageShowAnimation">
+        <FloatFieldInterpolator
+            key="[0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 1]"
+            keyValue="[0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0]"
+            fieldToInterp="messageBackground.opacity"/>
+        <FloatFieldInterpolator
+            key="[0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 1]"
+            keyValue="[0.0, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.0]"
+            fieldToInterp="tostMessageBackground.opacity"/>
+      </Animation>
+    </children>
+</component>

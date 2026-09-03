@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="ProgramItemNode" extends="ContentNode">
+    <interface>
+        <field id="key" type="string" />
+        <field id="category_key" type="string" />
+        <field id="name_category" value="" type="string" />
+        <field id="description_short" type="string" />
+        <field id="description" type="string" />
+        <field id="image_orientation" type="string" />
+        <field id="status_ads" type="boolean" />
+        <field id="classification" type="assocarray" />
+        <field id="image_background" type="assocarray" />
+        <field id="image_port" type="assocarray" />
+        <field id="image_land" type="assocarray" />
+        <field id="image_slider" type="assocarray" />
+        <field id="image_logo" type="assocarray" />
+        <field id="live_associated" type="assocarray" />
+        <field id="program_associated" type="assocarray" />
+        <field id="format" value="default" type="string" />
+        <field id="gmt0_unlocked" type="string" />
+        <field id="is_unlocked" value="false" type="boolean" />
+        <field id="skip_view" type="boolean" />
+        <field id="isViewMoreCard" type="boolean" value="false" />
+        <field id="type" type="string" />
+    </interface>
+</component>

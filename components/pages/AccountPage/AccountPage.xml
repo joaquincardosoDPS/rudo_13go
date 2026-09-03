@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="AccountPage" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/pages/AccountPage/AccountPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+    <interface>
+    </interface>
+    <children>
+        <Rectangle id="backgroundPanel" width="1920" height="1080" />
+        <Poster id="brandLogo" translation="[86, 38]"  height="88" loadDisplayMode="scaleToFit" />
+        <CustomButton id="backButton" margin="20" posterImage="pkg:/images/focus/back_button_image.png" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonText="Volver" buttonWidth="194" buttonHeight="70" isFilledBgOnFocus="true" translation="[1532,72]" />
+        <Label id="titleLabel" translation="[0, 188]" width="1920" height="44" text="Cuenta" horizAlign="center" vertAlign="center" />
+        <Poster id="bgPoster" uri="pkg:/images/other/profile_mask.png" loadWidth="188" loadHeight="188" loadDisplayMode="scaleToFit => Fill  => or Zoom" width="188" height="188" translation="[866, 290]"/>
+        <MaskGroup id="borderMask" maskUri="pkg:/images/other/profile_mask.png" translation="[866, 290]">
+            <Poster id="poster" uri="pkg:/images/Group 872.png" loadWidth="188" loadHeight="188" loadDisplayMode="scaleToFit => Fill  => or Zoom" width="188" height="188" />
+        </MaskGroup>
+        <LayoutGroup id="accountLayout" horizAlignment="center" layoutDirection="vert" itemSpacings="[15]" translation="[960,530]">
+            <Label id="lProfileName" text="" horizAlign="center"/>
+            <Label id="lEmail" text="" horizAlign="center"/>
+            <Label id="lName" text="" horizAlign="center"/>
+            <Label id="lGender" text="" horizAlign="center"/>
+            <Label id="lBirthdate" text="" horizAlign="center"/>
+        </LayoutGroup>
+        <CustomButton id="logoutButton" margin="20" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonText="CERRAR SESIÓN" buttonWidth="270" buttonHeight="70" isFilledBgOnFocus="true"/>
+    </children>
+</component>

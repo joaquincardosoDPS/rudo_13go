@@ -1,0 +1,12 @@
+{
+  "keywordCaseOverride": {
+    "and": "upper",
+    "or": "upper"
+  },
+  "indentStyle": "spaces",
+  "indentSpaceCount": 4,
+  "endOfLine": "lf",
+  "keywordCase": "original",
+  "removeTrailingWhiteSpace": false,
+  "formatMultiLineObjectsAndArrays": false
+}

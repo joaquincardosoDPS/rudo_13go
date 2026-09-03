@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="ContentAPIAction" extends="Task">
+    <script type="text/brightscript" uri="ContentAPIAction.brs" />
+    <script type="text/brightscript" uri="pkg:/source/apis/ContentAPI.brs" />
+    <script type="text/brightscript" uri="pkg:/source/apis/BaseRequests.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <!-- Input -->
+        <field id="params" type="assocarray" />
+        <field id="childNode" type="node" />
+        <field id="categoryData" type="array" />
+        <field id="perPage" type="integer" />
+        <field id="page" type="integer" />
+        <field id="action" type="String" />
+        <field id="contentId" type="String" />
+        <field id="categoryId" type="String" />
+        <field id="term" type="String" />
+        <field id="SearchString" type="string" />
+        <field id="videoInfo" type="assocarray" />
+        <field id="result" type="assocarray" />
+        <field id="resultData" type="array" />
+    </interface>
+</component>

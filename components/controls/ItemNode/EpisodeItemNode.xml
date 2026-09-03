@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="EpisodeItemNode" extends="ContentNode">
+    <interface>
+        <field id="image_orientation" value="landscape" type="string" />
+        <field id="format" value="default" type="string" />
+        <field id="chapter" type="integer" />
+        <field id="date_create" type="string" />
+        <field id="date_update" type="string" />
+        <field id="gmt0_unlocked" type="string" />
+        <field id="description" type="string" />
+        <field id="duration" type="string" />
+        <field id="duration_seg" type="integer" />
+        <field id="time" type="integer" />
+        <field id="end" type="integer" />
+        <field id="image" type="string" />
+        <field id="image_land" type="assocarray" />
+        <field id="image_background" type="assocarray" />
+        <field id="key" type="string" />
+        <field id="key_segment" type="string" />
+        <field id="m3u8" type="string" />
+        <field id="key_program" type="string" />
+        <field id="name_program" type="string" />
+        <field id="name_segment" type="string" />
+        <field id="restriction" type="integer" />
+        <field id="season" type="integer" />
+        <field id="single_episode" type="boolean" />
+        <field id="status_ads" type="boolean" />
+        <field id="slug" type="string" />
+        <field id="category_key" type="string" />
+        <field id="title_complete" type="string" />
+    </interface>
+</component>

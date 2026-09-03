@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="FocusableGroup" extends="Group">
+    <script type="text/brightscript" uri="FocusableGroup.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+
+    <interface>
+        <!-- <field id="actionKey" type="string" onChange="onKeyPress"/> -->
+        <field id="rowSpacing" type="integer" value="0" />
+
+        <function name="setTranslation" />
+        <function name="removeNode" />
+        <function name="clearNodes" />
+        <function name="getContainerChildCount" />
+        <function name="getFirstContentIndex" />
+        <function name="getFocusComponentIndex" />
+        <function name="focusToFirstRow" />
+        <function name="focusToHeroSlider" />
+    </interface>
+
+    <children>
+        <Group id="gContainer" translation="[0,0]" />
+
+        <Animation id="slideAnimation" easeFunction="linear">
+            <Vector2DFieldInterpolator id="slideVector2D" key="[0.0, 1.0]" />
+        </Animation>
+    </children>
+</component>

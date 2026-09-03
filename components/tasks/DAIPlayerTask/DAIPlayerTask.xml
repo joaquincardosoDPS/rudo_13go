@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="DAIPlayerTask" extends="Task">
+    <script type="text/brightscript" uri="pkg:/components/tasks/DAIPlayerTask/DAIPlayerTask.brs"/>
+    <script type="text/brightscript" uri="pkg:/components/tasks/DAIPlayerTask/convertCompanionToRAF.brs" />
+
+    <interface>
+        <field id="sdkLoaded" type="Boolean" />
+        <field id="streamManagerReady" type="Boolean" />
+        <field id="errors" type="stringarray" />
+        <field id="streamData" type="assocarray" />
+        <field id="deviceRida" type="string" />
+        <field id="urlData" type="assocarray" />
+        <field id="adPlaying" type="Boolean" />
+        <field id="contentTime" type="Integer" />
+        <field id="snapbackTime" type="Integer" />
+        <field id="bookmarkStreamTime" type="Integer" />
+        <field id="inSnapback" type="Boolean" />
+        <field id="video" type="Node" />
+        <field id="setAdsDebugOutput" type="Boolean" />
+        <field id="enableNielsenDAR" type="Boolean" />
+        <field id="setJITPods" type="Boolean" />
+        <field id="setAdMeasurements" type="Boolean" />
+        <field id="mediaInfo" type="assocarray" />
+        <field id="nielsenAppId" type="string" />
+        <field id="nielsenProgramId" type="string" />
+        <field id="contentGenres" type="string" />
+    </interface>
+</component>

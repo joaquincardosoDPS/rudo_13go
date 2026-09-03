@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="AddEditProfilePopup" extends="Group">
+  <script type="text/brightscript" uri="AddEditProfilePopup.brs" />
+  <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+  <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+
+  <interface>
+    <field id="enteredProfileName" type="String" alwaysNotify="true" />
+    <field id="enteredProfileUri" type="String" alwaysNotify="true" />
+    <field id="closeRequested" type="boolean" alwaysNotify="true" value="false" />
+    <field id="popupMode" type="string" alwaysNotify="true" value="create" />
+    <field id="profileId" type="string" alwaysNotify="true" value="" />
+    <field id="profileName" type="string" alwaysNotify="true" value="" />
+    <field id="profileUri" type="string" alwaysNotify="true" value="" />
+    <field id="avatarItems" type="array" alwaysNotify="true" />
+    <field id="selectedAvatarId" type="string" alwaysNotify="true" value="" />
+    <field id="profileIndex" type="integer" alwaysNotify="true" value="-1" />
+    <field id="profileAction" type="string" alwaysNotify="true" value="" />
+    <field id="actionSucceeded" type="boolean" alwaysNotify="true" value="false" />
+    <field id="resultProfileData" type="assocarray" alwaysNotify="true" />
+  </interface>
+
+  <children>
+    <Group id="popupRoot" visible="false">
+      <Rectangle id="bgPopup" width="1920" height="1080">
+        <Poster id="pLogoImage" height="77" loadHeight="77" loadDisplayMode="scaleToFit" translation="[100,30]" />
+        <Group id="gContent" translation="[610,330]">
+          <LayoutGroup id="lgForm" layoutDirection="vert" itemSpacings="[20,22,18,18]">
+            <Label id="pageTitle" text="Agregar perfil" width="360" horizAlign="left" />
+            <CustomButton id="profileNameButton" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonWidth="380" buttonHeight="64" isFilledBgOnFocus="true" visible="true">
+              <Label id="profileNameText" text="Nombre del perfil" width="344" height="64" vertAlign="center" translation="[18,0]" />
+            </CustomButton>
+            <CustomButton id="createProfileButton" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" buttonWidth="380" buttonHeight="64" buttonText="CREAR PERFIL" isFilledBgOnFocus="true" visible="true">
+              <BusySpinner id="createProfilePreloader" control="start" clockwise="true" spinInterval="0.8" visible="false" />
+            </CustomButton>
+            <Group id="gDeleteProfile" visible="false">
+              <Label id="deleteProfileText" text="Eliminar perfil" width="220" height="36" vertAlign="center" />
+            </Group>
+          </LayoutGroup>
+          <Group id="gAvatarPicker" translation="[454, 30]">
+            <Poster id="avatarBorder" uri="pkg:/images/other/borderImage.png" width="162" height="162" translation="[-6,-6]" visible="false" />
+            <MaskGroup id="mgAvatar" maskUri="pkg:/images/other/profile_mask.png" maskSize="[150,150]" translation="[0,0]">
+              <Poster id="avatarIcon" uri="pkg:/images/focus/add_profile_img_unfocus.png" width="150" height="150" translation="[0,0]" />
+            </MaskGroup>
+            <Group id="gEditBadge" translation="[110,103]">
+              <Poster id="editBadgeIcon" uri="pkg:/images/focus/edit_icon.png" width="44" height="44" />
+            </Group>
+          </Group>
+        </Group>
+      </Rectangle>
+    </Group>
+    <AvatarList id="avatarList" visible="false" />
+    <Group id="gDeleteProfilePopup" visible="false">
+      <Rectangle id="rdeleteDialogBg" width="1920" height="1080" opacity="0.7" />
+      <Group id="gDeleteConfirmation" translation="[685,421]">
+        <Poster id="deleteDialogBg" uri="pkg:/images/focus/filled_r6.9.png" width="550" height="238" />
+        <Label id="deleteDialogText" translation="[75,30]" width="400" height="60" horizAlign="center" vertAlign="center" wrap="true" text="" />
+        <Label id="deleteDialogMeasureText" translation="[0,-1000]" opacity="0" text="" />
+        <LayoutGroup id="lgDeleteButtons" translation="[70,118]" layoutDirection="horiz" itemSpacings="[20,0]">
+          <CustomButton id="cancelDeleteButton" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" buttonWidth="195" buttonHeight="70" buttonText="CANCELAR" isFilledBgOnFocus="true" visible="true" />
+          <CustomButton id="confirmDeleteButton" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" buttonWidth="195" buttonHeight="70" buttonText="BORRAR" isFilledBgOnFocus="true" visible="true" />
+        </LayoutGroup>
+      </Group>
+      <BusySpinner id="bsPreloader" translation="[880,460]" control="start" clockwise="true" spinInterval="0.8" visible="false" />
+    </Group>
+  </children>
+</component>

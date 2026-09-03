@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="ExitDialog" extends="Group">
+    <script type="text/brightscript" uri="ExitDialog.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+
+    <interface>
+        <field id="selectedButton" type="Integer" alwaysNotify="true" />
+        <field id="message" type="String" alwaysNotify="true" onChange="OnMessageChangedEvent" />
+        <field id="positiveButtonText" type="String" alwaysNotify="true" value="Exit" onChange="OnPositiveButtonTextChanged" />
+        <field id="positiveButtonWidth" type="Integer" alwaysNotify="true" value="200" onChange="OnPositiveButtonWidthChanged" />
+        <field id="showLogoutButton" type="boolean" alwaysNotify="true" value="false" />
+    </interface>
+
+    <children>
+        <Group id="gConfirmation">
+            <Rectangle id="rBackground" width="1920" height="1080" />
+            <Poster id="pBackgroundImage" width="1056" height="1080" loadWidth="1056" loadHeight="1080" uri="" loadDisplayMode="scaleToFit" translation="[864,0]" />
+            <Poster id="topGradient" width="1060" height="1080" uri="pkg:/images/overlay/topGradient.png" visible="false"/>
+            <Poster id="pLogo" height="150" loadHeight="150" loadDisplayMode="scaleToFit" translation="[80,300]" />
+            <Group id="exitGrp">
+                <Label id="message" width="1820" maxLines="1" lineSpacing="0" horizAlign="left" />
+                <LayoutGroup id="lgButtons" layoutDirection="horiz" itemSpacings="25">
+                    <CustomButton backGroundImage="pkg:/images/focus/filled_r6.9.png" id="bNo" buttonWidth="200" buttonHeight="80" buttonText="Cancel" />
+                    <CustomButton backGroundImage="pkg:/images/focus/filled_r6.9.png" id="bPositive" buttonWidth="200" buttonHeight="80" buttonText="Exit" />
+                </LayoutGroup>
+            </Group>
+        </Group>
+    </children>
+</component>

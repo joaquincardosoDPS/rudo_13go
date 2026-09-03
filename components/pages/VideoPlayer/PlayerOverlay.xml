@@ -1,0 +1,49 @@
+<component name="PlayerOverlay" extends="Group" initialFocus="hiddenLabel">
+    <script type="text/brightscript" uri="PlayerOverlay.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/FontManager.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+    <interface>
+        <field id="key" type="assocArray" alwaysNotify="true" onChange="OnCustomPlayerKeyPress" />
+        <field id="videoParams" type="assocArray" alwaysNotify="true" onchange="OnVideoParamsChanged" />
+        <field id="action" type="assocArray" alwaysNotify="true" onchange="OnUserAction" />
+        <field id="seekingStatus" type="string" value="None" alwaysNotify="true" />
+        <field id="videoPlayerState" type="string" alwaysNotify="true" onChange="UpdateIconState" />
+        <field id="videoPosition" type="integer" value="0" alwaysNotify="true" onChange="OnVideoPositionChanged" />
+        <field id="duration" type="integer" value="0" alwaysNotify="true" onChange="OnVideoDurationChanged" />
+        <field id="seekPosition" type="integer" value="0" alwaysNotify="true" />
+        <field id="pauseVideo" type="boolean" alwaysNotify="true" />
+        <field id="videoContent" type="assocArray" alwaysNotify="true" />
+        <field id="endDuration" type="float" value="0" alwaysNotify="true" />
+        <field id="resethidecontrolstimer" type="boolean" alwaysNotify="true" />
+    </interface>
+    <children>
+        <poster id="pVideoOverlayBackground" visible="true" width="1920" height="1080" loadWidth="1920" loadHeight="1080" loadDisplayMode="scaleToFit" uri="pkg:/images/focus/video_overlay.png" />
+        <Group id="gOverlayDetails" translation="[0,0]" visible="false">
+            <Poster id="pBackGroundOverlay" translation="[0,0]" Width="1920" Height="1080" LoadWidth="1920" LoadHeight="1080" loadDisplayMode="scaleToZoom" uri="pkg:/images/overlay/PlayerGradient.png" loadingBitmapUri="pkg:/images/overlay/PlayerGradient.png" failedBitmapUri="pkg:/images/overlay/PlayerGradient.png" opacity="0.8" />
+            <LayoutGroup id="lgTitleBack" layoutDirection="horiz" vertAlignment="center" itemSpacings="[5]" translation="[40,40]">
+                <Poster id="backArrow" width="50" height="50" uri="pkg:/images/PlayerOverlayIcon/backArrow.png" loadDisplayMode="ScaleToZoom" />
+                <Label id="lVideoTitle" width="1200" height="50" horizAlign="left" vertAlign="center" />
+            </LayoutGroup>
+            <Group id="gDetails" translation="[0,0]" visible="true">
+                <Group id="gPauseVideoOverlay" translation="[40,0]">
+                    <Group id="progress" translation="[0,1034]">
+                        <Poster id="outlineRect" width="1820" height="5" uri="pkg:/images/focus/R5Filled_30px.9.png" translation="[10, 0]"/>
+                        <Poster id="progressRect" width="0" height="5" uri="pkg:/images/focus/R5Filled_30px.9.png" translation="[10, 0]" />
+                        <Poster id="pSeekingDotFocused" height="25" width="25" translation="[10, -10]" uri="pkg:/images/PlayerOverlayIcon/focused_knob.png" visible="false" />
+                        <Poster id="pSeekingDotUnfocused" height="20" width="20" translation="[10, -8]" uri="pkg:/images/focus/circleDot.png" />
+                    </Group>
+                    <MarkupGrid id="playerButtonsMarkupGrid" itemComponentName="MarkupGridPlayerItem" itemSize="[50, 50]" itemSpacing="[0, 0]" numColumns="5" numRows="1" focusBitmapUri="" translation="[840,965]" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="fixedFocus" />
+                    <LayoutGroup id="lgPlayerDetails" translation="[10,1000]" vertAlignment="center" layoutDirection="horiz" itemSpacings="[0]">
+                        <Label id="leftProgressLabel" text="00:00" horizAlign="right" />
+                        <Label id="crossArrow" text="/" horizAlign="center" />
+                        <Label id="rightProgressLabel" text="00:00" horizAlign="left" />
+                    </LayoutGroup>
+                </Group>
+            </Group>
+        </Group>
+        <BusySpinner id="btnSubscribeSpinner" clockwise="true" spinInterval="0.8" translation="[127,801]" />
+    </children>
+</component>

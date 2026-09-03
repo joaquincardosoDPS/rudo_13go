@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="ProfileListItem" extends="Group">
+    <script type="text/brightscript" uri="ProfileListItem.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="itemContent" type="node" onChange="itemContentChanged" />
+        <field id="width" type="float" />
+        <field id="height" type="float" />
+        <field id="focusPercent" type="float" onChange="focusPercentChanged" />
+        <field id="index" type="integer" />
+        <field id="gridHasFocus" type="bool" onChange="focusPercentChanged" />
+    </interface>
+    <children>
+        <MaskGroup id="borderMask" maskUri="pkg:/images/other/profile_mask.png" translation="[6.5, 51.5]">
+            <Poster id="poster" opacity="0.6" visible="true" uri="pkg:/images/Group 872.png" loadWidth="188" loadHeight="188" loadDisplayMode="scaleToFit => Fill  => or Zoom" width="188" height="188" />
+        </MaskGroup>
+        <Poster id="roundedTransparent_Poster" uri="pkg:/images/other/borderImage.png" translation="[6.5,51.5]" height="188" width="188" visible="true" />
+        <Group id="editBadge" translation="[141.5,187]" visible="false">
+            <Poster id="editBadgeIcon" uri="pkg:/images/focus/edit_icon.png" width="44" height="44" />
+        </Group>
+        <Label id="title" horizAlign="center" vertAlign="center" width="201" height="40" translation="[0,260]" visible="true" />
+    </children>
+</component>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="NextEpisodeComponent" extends="Group">
+    <script type="text/brightscript" uri="NextEpisodeComponent.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <interface>
+        <field id="contentNode" type="assocArray" alwaysNotify="true" onChange="onContentInfoChanged" />
+        <field id="showNextEpisode" type="boolean" value="false" alwaysNotify="true"/>
+        <field id="showEpisodeList" type="boolean" value="false" alwaysNotify="true"/>
+        <field id="leftPosition" type="integer" value="0" alwaysNotify="true" onChange="OnVideoPositionChanged" />
+    </interface>
+    <children>
+        <Poster id="pVideo" width="1920" height="1080" loadWidth="1920" loadHeight="1080" loadDisplayMode="scaleTozoom"/>
+        <Rectangle id="overlay" width="1920" height="1080" opacity="0.7"/>
+        <LayoutGroup id="lgDetails" layoutDirection="vert" itemSpacings="[20]" translation="[140,150]">
+            <Label id="lTitle" width="820" lineSpacing="-3" wrap="true" maxLines="2"/>
+            <Poster id ="pLogo" width="360" loadWidth="360" height="170" loadHeight="170" loadDisplayMode="scaleToFit" />
+            <Label id="lEpisodeTitle" width="900" lineSpacing="-3" wrap="true" maxLines="2"/>
+            <Label id="lDescription" width="980" lineSpacing="-3" wrap="true" maxLines="3"/>
+            <LayoutGroup id="lgButtons" layoutDirection="horiz" itemSpacings="[10]">
+                <CustomButton id="nextEpisodeButton" posterImage="pkg:/images/focus/btnplay.png" posterImageSize="24" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" 
+                    buttonWidth="380" buttonHeight="65" padding="40" buttonText="Siguiente episodio en" isFilledBgOnFocus="true"/>
+                <CustomButton id="episodeListButton" posterImage="pkg:/images/focus/list_icon.png" posterImageSize="24" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" 
+                    buttonWidth="370" buttonHeight="65" padding="40" buttonText="Listado de episodios" isFilledBgOnFocus="true"/>
+            </LayoutGroup>
+        </LayoutGroup>
+    </children>
+</component>
