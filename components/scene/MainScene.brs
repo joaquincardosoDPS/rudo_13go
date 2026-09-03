@@ -256,6 +256,7 @@ sub OnGetConfigAPIResponse(event as dynamic)
     apiResponse = event.getData()
     print "Mainscene : OnGetConfigAPIResponse : " 'FormatJson(apiResponse)
     response = getValueFromProps(apiResponse, "data.0", {})
+    GlobalSet("homeConfig", response)
     logo = "pkg:/images/brand/logo.png"
     background_image = invalid
     urlTVVincular = ""

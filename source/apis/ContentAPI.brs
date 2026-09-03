@@ -19,6 +19,7 @@ function ContentAPI__New()
     this.VerifyDevice = ContentAPI__VerifyDevice
 
     this.GetConfig = ContentAPI__GetConfig
+    this.GetHomeConfig = ContentAPI__GetHomeConfig
 
     this.GetAllCategories = ContentAPI__GetAllCategories
     this.GetFeaturedSliderPrograms = ContentAPI__GetFeaturedSliderPrograms
@@ -149,14 +150,10 @@ function ContentAPI__GetAllCategories(requestParams as object)
 end function
 
 function ContentAPI__GetFeaturedSliderPrograms(requestParams as object)
-    path = GlobalGet("apiEndPoints").GetFeaturedSliderPrograms
-    headers = GetHeaders()
-    data = {
-        "client": GlobalGet("appConfig").client
-        "page": requestParams.page
-        "pageSize": GlobalGet("appConfig").pageSize
-    }
-    response = postRequest(path, data, headers)
+    path = requestParams.url
+    headers = { "Content-Type": "application/json" }
+    data = {}
+    response = getRequest(path, data, headers)
     return handleApiResponse(response)
 end function
 
@@ -334,4 +331,13 @@ function handleApiResponse(response as object) as object
     else
         return Error(GetErrorReason(response))
     end if
+end function
+
+function ContentAPI__GetHomeConfig()
+    ' Lista de secciones del home'
+    path = GlobalGet("apiEndPoints").GetHomeConfig
+    headers = { "Content-Type": "application/json" }
+    data = {}
+    response = getRequest(path, data, headers)
+    return handleApiResponse(response)
 end function

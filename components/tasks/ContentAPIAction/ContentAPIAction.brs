@@ -106,6 +106,11 @@ function GetConfig() as void
     end if
 end function
 
+function GetHomeConfig() as void
+    response = ContentAPI().GetHomeConfig()
+    m.top.result = response
+end function
+
 function GetRecommendedPrograms() as void
     print "ContentAPIAction : GetRecommendedPrograms"
     response = ContentAPI().GetRecommendedPrograms()

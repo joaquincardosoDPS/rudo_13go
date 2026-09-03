@@ -98,9 +98,9 @@ end sub
 sub Initialize()
     m.rowSpacing = 62
     m.focusableGroup.rowSpacing = m.rowSpacing
-    GetFeaturedSliderPrograms()
+    GetHomeSections()
     fetchAndStoreWatchHistory()
-    GetAllCategories()
+
 end sub
 
 ' Continue Watching
@@ -195,72 +195,104 @@ sub createLastWatchedSlider()
 end sub
 ' End Continue Watching
 
-sub GetAllCategories(page = 1)
+sub GetHomeSections()
     m.apiInProgress++
     showHidePageLoader(true)
-    params = {}
-    params["show_event"] = true
-    params["show_ranking"] = true
-    params["client"] = GlobalGet("appConfig").client
-    params["page"] = page
-    params["limit"] = GlobalGet("appConfig").pageSize
-    m.getAllCategoriesTask = CreateObject("roSGNode", "ContentAPIAction")
-    m.getAllCategoriesTask.functionName = "GetAllCategories"
-    m.getAllCategoriesTask.params = params
-    m.getAllCategoriesTask.ObserveField("result", "OnGetAllCategoriesAPIResponse")
-    m.getAllCategoriesTask.control = "RUN"
+    m.getHomeSectionsTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.getHomeSectionsTask.functionName = "GetHomeConfig"
+    m.getHomeSectionsTask.params = {}
+    m.getHomeSectionsTask.ObserveField("result", "OnGetHomeSectionsAPIResponse")
+    m.getHomeSectionsTask.control = "RUN"
 end sub
 
-sub OnGetAllCategoriesAPIResponse(event as dynamic)
-    response = event.getData()
-    print "OnGetAllCategoriesAPIResponse : response : " 'formatjson(response)
-    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND response.data.data.count() > 0
-        m.categoriesData = response.data.data
+sub OnGetHomeSectionsAPIResponse(event as dynamic)
+    apiResponse = event.getData()
+    print "OnGetHomeSectionsAPIResponse : response : " 'FormatJson(apiResponse)
+    sections = getValueFromProps(apiResponse, "data", [])
+    homeConfig = GlobalGet("homeConfig")
+    destacadosUrl = ""
+    if isValid(homeConfig) then destacadosUrl = homeConfig.destacados_principales
+    hasDestacados = false
+    if isValid(sections) AND sections.count() > 0
+        for each section in sections
+            if isValid(section) AND section.status = "1" AND section.despliegue = "destacados"
+                hasDestacados = true
+                exit for
+            end if
+        end for
     end if
     m.apiInProgress--
-    m.getAllCategoriesTask = invalid
-    createDynamicRowList()
+    m.getHomeSectionsTask = invalid
+    ' Nota: por ahora solo se implementa "destacados" (sub-paso 4d.3-A). El resto de
+    ' los tipos de seccion (categoria_carrusel, categoria_destacada, top10, senales,
+    ' radios) quedan para el 4d.3-B.
+    if hasDestacados AND isNonEmptyString(destacadosUrl)
+        GetFeaturedSliderPrograms(destacadosUrl)
+    else
+        createDynamicRowList()
+    end if
+
+
 end sub
 
-sub GetFeaturedSliderPrograms(page = 1)
+sub GetFeaturedSliderPrograms(url as string)
     m.apiInProgress++
-    params = {}
-    params["page"] = page
     m.getFeaturedSliderProgramsTask = CreateObject("roSGNode", "ContentAPIAction")
     m.getFeaturedSliderProgramsTask.functionName = "GetFeaturedSliderPrograms"
-    m.getFeaturedSliderProgramsTask.params = params
+    m.getFeaturedSliderProgramsTask.params = {"url": url}
     m.getFeaturedSliderProgramsTask.ObserveField("result", "OnGetFeaturedSliderProgramsAPIResponse")
     m.getFeaturedSliderProgramsTask.control = "RUN"
 end sub
 
 sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
-    response = event.getData()
-    print "OnGetFeaturedSliderProgramsAPIResponse : response : " 'formatjson(response)
-    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND response.data.data.count() > 0
-        featuredSliderProgramsData = response.data
-        singleFeatureSlider = featuredSliderProgramsData.data[0]
-        if isValid(singleFeatureSlider) AND singleFeatureSlider.count() > 0 AND isValid(m.heroSlider)
-            m.heroSlider.items = [singleFeatureSlider]
+    apiResponse = event.getData()
+    print "OnGetFeaturedSliderProgramsAPIResponse : response : " 'FormatJson(apiResponse)
+    rawItems = getValueFromProps(apiResponse, "data", [])
+    if isValid(rawItems) AND rawItems.count() > 0
+        items = []
+        for each raw in rawItems
+            imageUrl = raw.image
+            items.push({
+                title: raw.title
+                description: raw.bajada
+                description_short: raw.bajada
+                key: raw.nid
+                image_land: {
+                    small: imageUrl,
+                    medium: imageUrl,
+                    normal: imageUrl,
+                    big: imageUrl,
+                    default: imageUrl
+                }
+                image_background: {
+                    small: imageUrl,
+                    medium: imageUrl,
+                    normal: imageUrl,
+                    big: imageUrl,
+                    default: imageUrl
+                }
+            })
+        end for
+        if isValid(m.heroSlider)
+            m.heroSlider.items = [items[0]]
             m.heroSlider.componentHeight = 583
             m.heroSlider.visible = true
-            m.gDetails.translation = [0, 0]
+            m.gDetails.translation = [0,0]
             m.categoriesNode.push(m.heroSlider)
         end if
-        if featuredSliderProgramsData.count() > 1
+        if items.count() > 1
             catData = {}
             catData.title = "Destacados"
             catData.format = "default"
             catData.image_orientation = "landscape"
             catData.liveCategory = false
-            catData.image_background_category = {} 
-            catData.image_logo_category = {} 
+            catData.image_background_category = {}
+            catData.image_logo_category = {}
             catData.key = "Destacados"
-            catData.total_display_records = featuredSliderProgramsData.total_display_records
-            catData.total_records = featuredSliderProgramsData.total_records
-            catData.last_page = featuredSliderProgramsData.last_page
-            featuredSliderProgramsData.data.Delete(0)
-            program = featuredSliderProgramsData.data
-            catData.programs = program
+            items.Delete(0)
+            catData.total_display_records = items.count()
+            catData.total_records = items.count()
+            catData.programs = items
 
             sliderView = createObject("roSGNode", "SliderView")
             sliderView.ObserveField("itemSelected", "onRowItemSelected")
@@ -275,7 +307,7 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
             m.categoriesNode.push(sliderView)
         end if
     else
-        m.gDetails.translation = [0, 150]
+        m.gDetails.translation = [0,150]
     end if
     m.getFeaturedSliderProgramsTask = invalid
     m.apiInProgress--
