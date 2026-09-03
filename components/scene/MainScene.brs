@@ -255,30 +255,27 @@ end sub
 sub OnGetConfigAPIResponse(event as dynamic)
     apiResponse = event.getData()
     print "Mainscene : OnGetConfigAPIResponse : " 'FormatJson(apiResponse)
-    response = getValueFromProps(apiResponse, "data.data", {})
+    response = getValueFromProps(apiResponse, "data.0", {})
     logo = "pkg:/images/brand/logo.png"
-    urlTVVincular = "https://michv.cl/tv"
+    background_image = invalid
+    urlTVVincular = ""
+    vastURL = ""
     if isValid(m.theme) AND isValid(m.theme.background_image) then background_image = m.theme.background_image
     If isValid(response) AND response.count() > 0
-        if isNonEmptyString(response.logo)
-            logo = response.logo
+        if isNonEmptyString(response.logo_blanco)
+            logo = response.logo_blanco
         end if
-        if isNonEmptyString(response.background_image)
-            background_image = response.background_image
+        if isNonEmptyString(response.fondo_bienvenida)
+            background_image = response.fondo_bienvenida
         end if
-        vastURL = ""
-        if isNonEmptyString(response.base_ads)
-            vastURL = response.base_ads
-        end if
-        GlobalSet("vastURL", vastURL)
-        if isValid(response["url-tv-vincular"]) AND isNonEmptyString(response["url-tv-vincular"])
-            urlTVVincular = response["url-tv-vincular"]
-        end if
+        ' TODO (Paso 4 - auth/ads): /configuracion de 13go no trae "base_ads" ni "url-tv-vincular".
+        ' vastURL sale de deviceAdService (VAST/VMAP por request) y el link de vinculacion TV
+        ' se resuelve con el flujo action=deviceCode/deviceToken del gateway. Quedan en "" por ahora.
         newTheme = MergeMissingConfigColorsIntoTheme(m.theme, response)
         m.global.setFields({ "appTheme": newTheme })
-        ' print "m.global.appTheme :: " m.global.appTheme
         m.theme = m.global.appTheme
     end if
+    GlobalSet("vastURL", vastURL)
     GlobalSet("urlTVVincular", urlTVVincular)
     GlobalSet("logo", logo)
     GlobalSet("backgroundImage", background_image)

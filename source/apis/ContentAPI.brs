@@ -1,50 +1,50 @@
 function ContentAPI()
     gThis = GetGlobalAA()
     if gThis.ContentAPI = invalid
-        gThis.ContentAPI = TVCHVContentAPI__New()
+        gThis.ContentAPI = ContentAPI__New()
     end if
     return gThis.ContentAPI
 end function
 
-function TVCHVContentAPI__New()
+function ContentAPI__New()
     this = {}
-    this.Login = TVCHVContentAPI__Login
-    this.SignUp = TVCHVContentAPI__SignUp
-    this.CheckValidToken = TVCHVContentAPI__CheckValidToken
-    this.ProfileManagement = TVCHVContentAPI__ProfileManagement
-    this.GetDeviceCodeAPI = TVCHVContentAPI__GetDeviceCodeAPI
+    this.Login = ContentAPI__Login
+    this.SignUp = ContentAPI__SignUp
+    this.CheckValidToken = ContentAPI__CheckValidToken
+    this.ProfileManagement = ContentAPI__ProfileManagement
+    this.GetDeviceCodeAPI = ContentAPI__GetDeviceCodeAPI
 
-    this.GetAllAvatar = TVCHVContentAPI__GetAllAvatar
-    this.GetProfilesData = TVCHVContentAPI__GetProfilesData
-    this.VerifyDevice = TVCHVContentAPI__VerifyDevice
+    this.GetAllAvatar = ContentAPI__GetAllAvatar
+    this.GetProfilesData = ContentAPI__GetProfilesData
+    this.VerifyDevice = ContentAPI__VerifyDevice
 
-    this.GetConfig = TVCHVContentAPI__GetConfig
+    this.GetConfig = ContentAPI__GetConfig
 
-    this.GetAllCategories = TVCHVContentAPI__GetAllCategories
-    this.GetFeaturedSliderPrograms = TVCHVContentAPI__GetFeaturedSliderPrograms
-    this.GetSearchPrograms = TVCHVContentAPI__GetSearchPrograms
-    this.GetMyListPrograms = TVCHVContentAPI__GetMyListPrograms
-    this.GetPrograms = TVCHVContentAPI__GetPrograms
-    this.GetProgramDetails = TVCHVContentAPI__GetProgramDetails
-    this.GetSeasonEpisodeDetails = TVCHVContentAPI__GetSeasonEpisodeDetails
-    this.GetEpisodeDetails = TVCHVContentAPI__GetEpisodeDetails
-    this.GetProgramEventsDetails = TVCHVContentAPI__GetProgramEventsDetails
-    this.GetEventSeasonEpisodeDetails = TVCHVContentAPI__GetEventSeasonEpisodeDetails
-    this.GetEPGData = TVCHVContentAPI__GetEPGData
-    this.GetEPGPrograms = TVCHVContentAPI__GetEPGPrograms
-    this.GetRecommendedPrograms = TVCHVContentAPI__GetRecommendedPrograms
-    this.CheckItemInFavourite = TVCHVContentAPI__CheckItemInFavourite
-    this.AddRemoveFavourite = TVCHVContentAPI__AddRemoveFavourite
-    this.GetAllPrograms = TVCHVContentAPI__GetAllPrograms
+    this.GetAllCategories = ContentAPI__GetAllCategories
+    this.GetFeaturedSliderPrograms = ContentAPI__GetFeaturedSliderPrograms
+    this.GetSearchPrograms = ContentAPI__GetSearchPrograms
+    this.GetMyListPrograms = ContentAPI__GetMyListPrograms
+    this.GetPrograms = ContentAPI__GetPrograms
+    this.GetProgramDetails = ContentAPI__GetProgramDetails
+    this.GetSeasonEpisodeDetails = ContentAPI__GetSeasonEpisodeDetails
+    this.GetEpisodeDetails = ContentAPI__GetEpisodeDetails
+    this.GetProgramEventsDetails = ContentAPI__GetProgramEventsDetails
+    this.GetEventSeasonEpisodeDetails = ContentAPI__GetEventSeasonEpisodeDetails
+    this.GetEPGData = ContentAPI__GetEPGData
+    this.GetEPGPrograms = ContentAPI__GetEPGPrograms
+    this.GetRecommendedPrograms = ContentAPI__GetRecommendedPrograms
+    this.CheckItemInFavourite = ContentAPI__CheckItemInFavourite
+    this.AddRemoveFavourite = ContentAPI__AddRemoveFavourite
+    this.GetAllPrograms = ContentAPI__GetAllPrograms
 
-    this.GetWatchHistory = TVCHVContentAPI__GetWatchHistory
-    this.GetAllWatchHistory = TVCHVContentAPI__GetAllWatchHistory
-    this.AddWatchHistory = TVCHVContentAPI__AddWatchHistory
+    this.GetWatchHistory = ContentAPI__GetWatchHistory
+    this.GetAllWatchHistory = ContentAPI__GetAllWatchHistory
+    this.AddWatchHistory = ContentAPI__AddWatchHistory
 
     return this
 end function
 
-function TVCHVContentAPI__Login(params as dynamic)
+function ContentAPI__Login(params as dynamic)
     path = GlobalGet("apiEndPoints").Login
     headers = GetHeaders()
     data = {
@@ -57,7 +57,7 @@ function TVCHVContentAPI__Login(params as dynamic)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__SignUp(params as dynamic)
+function ContentAPI__SignUp(params as dynamic)
     path = GlobalGet("apiEndPoints").SignUp
     headers = GetHeaders()
     data = {
@@ -71,7 +71,7 @@ function TVCHVContentAPI__SignUp(params as dynamic)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__CheckValidToken(params as object)
+function ContentAPI__CheckValidToken(params as object)
     path = GlobalGet("apiEndPoints").AutoLogin
     headers = GetHeaders()
     data = params
@@ -80,7 +80,7 @@ function TVCHVContentAPI__CheckValidToken(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetProfilesData()
+function ContentAPI__GetProfilesData()
     path = GlobalGet("apiEndPoints").GetProfilesData
     headers = GetHeaders()
     data = {
@@ -91,7 +91,7 @@ function TVCHVContentAPI__GetProfilesData()
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetAllAvatar()
+function ContentAPI__GetAllAvatar()
     path = GlobalGet("apiEndPoints").GetAllAvatar
     headers = GetHeaders()
     data = {
@@ -102,7 +102,7 @@ function TVCHVContentAPI__GetAllAvatar()
 end function
 
 
-function TVCHVContentAPI__ProfileManagement(action as dynamic, params as dynamic)
+function ContentAPI__ProfileManagement(action as dynamic, params as dynamic)
     path = GlobalGet("apiEndPoints").ProfileManagement + action
     headers = GetHeaders()
     data = params
@@ -113,7 +113,7 @@ function TVCHVContentAPI__ProfileManagement(action as dynamic, params as dynamic
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetDeviceCodeAPI()
+function ContentAPI__GetDeviceCodeAPI()
     path = GlobalGet("apiEndPoints").GetDeviceCode
     headers = GetHeaders()
     data = {
@@ -123,7 +123,7 @@ function TVCHVContentAPI__GetDeviceCodeAPI()
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__VerifyDevice(params as dynamic)
+function ContentAPI__VerifyDevice(params as dynamic)
     path = GlobalGet("apiEndPoints").VerifyDevice
     headers = GetHeaders()
     data = params
@@ -132,16 +132,15 @@ function TVCHVContentAPI__VerifyDevice(params as dynamic)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetConfig()
+function ContentAPI__GetConfig()
     path = GlobalGet("apiEndPoints").GetConfig
-    headers = GetHeaders()
+    headers = { "Content-Type": "application/json" }
     data = {}
-    data["client"] = GlobalGet("appConfig").client
-    response = postRequest(path, data, headers)
+    response = getRequest(path, data, headers)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetAllCategories(requestParams as object)
+function ContentAPI__GetAllCategories(requestParams as object)
     path = GlobalGet("apiEndPoints").GetAllCategories
     headers = GetHeaders()
     data = requestParams
@@ -149,7 +148,7 @@ function TVCHVContentAPI__GetAllCategories(requestParams as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetFeaturedSliderPrograms(requestParams as object)
+function ContentAPI__GetFeaturedSliderPrograms(requestParams as object)
     path = GlobalGet("apiEndPoints").GetFeaturedSliderPrograms
     headers = GetHeaders()
     data = {
@@ -161,7 +160,7 @@ function TVCHVContentAPI__GetFeaturedSliderPrograms(requestParams as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetSearchPrograms(params as object)
+function ContentAPI__GetSearchPrograms(params as object)
     path = GlobalGet("apiEndPoints").GetSearchPrograms
     headers = GetHeaders()
     data = params
@@ -169,7 +168,7 @@ function TVCHVContentAPI__GetSearchPrograms(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetMyListPrograms(requestParams = invalid as dynamic)
+function ContentAPI__GetMyListPrograms(requestParams = invalid as dynamic)
     path = GlobalGet("apiEndPoints").GetMyListPrograms
     headers = GetHeaders()
     data = {
@@ -186,7 +185,7 @@ function TVCHVContentAPI__GetMyListPrograms(requestParams = invalid as dynamic)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetPrograms(params as object)
+function ContentAPI__GetPrograms(params as object)
     path = GlobalGet("apiEndPoints").GetPrograms
     headers = GetHeaders()
     data = params
@@ -197,7 +196,7 @@ function TVCHVContentAPI__GetPrograms(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetAllPrograms(params as object)
+function ContentAPI__GetAllPrograms(params as object)
     path = GlobalGet("apiEndPoints").GetAllPrograms
     headers = GetHeaders()
     data = params
@@ -205,7 +204,7 @@ function TVCHVContentAPI__GetAllPrograms(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetProgramDetails(params as object)
+function ContentAPI__GetProgramDetails(params as object)
     path = GlobalGet("apiEndPoints").GetProgramDetails
     headers = GetHeaders()
     data = params
@@ -213,7 +212,7 @@ function TVCHVContentAPI__GetProgramDetails(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetSeasonEpisodeDetails(params as object)
+function ContentAPI__GetSeasonEpisodeDetails(params as object)
     path = GlobalGet("apiEndPoints").GetSeasonEpisodeDetails
     headers = GetHeaders()
     data = params
@@ -222,7 +221,7 @@ function TVCHVContentAPI__GetSeasonEpisodeDetails(params as object)
 end function
 
 
-function TVCHVContentAPI__GetEpisodeDetails(params as object)
+function ContentAPI__GetEpisodeDetails(params as object)
     path = GlobalGet("apiEndPoints").GetEpisodeDetails
     headers = GetHeaders()
     data = params
@@ -230,7 +229,7 @@ function TVCHVContentAPI__GetEpisodeDetails(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetProgramEventsDetails(params as object)
+function ContentAPI__GetProgramEventsDetails(params as object)
     path = GlobalGet("apiEndPoints").GetProgramEventsDetails
     headers = GetHeaders()
     data = params
@@ -238,7 +237,7 @@ function TVCHVContentAPI__GetProgramEventsDetails(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetEventSeasonEpisodeDetails(params as object)
+function ContentAPI__GetEventSeasonEpisodeDetails(params as object)
     path = GlobalGet("apiEndPoints").GetEventSeasonEpisodeDetails
     headers = GetHeaders()
     data = params
@@ -247,7 +246,7 @@ function TVCHVContentAPI__GetEventSeasonEpisodeDetails(params as object)
 end function
 
 
-function TVCHVContentAPI__GetEPGData()
+function ContentAPI__GetEPGData()
     randomNumber = RND(10)
     path = GlobalGet("apiEndPoints").GetEPGChannels + randomNumber.toStr()
     headers = { "Content-Type": "application/json" }
@@ -256,7 +255,7 @@ function TVCHVContentAPI__GetEPGData()
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetEPGPrograms()
+function ContentAPI__GetEPGPrograms()
     path = GlobalGet("apiEndPoints").GetEPGPrograms
     headers = { "Content-Type": "application/json" }
     data = {}
@@ -264,7 +263,7 @@ function TVCHVContentAPI__GetEPGPrograms()
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetRecommendedPrograms()
+function ContentAPI__GetRecommendedPrograms()
     path = GlobalGet("apiEndPoints").GetRecommendedPrograms
     headers = { "Content-Type": "application/json" }
     data = { "client": GlobalGet("appConfig").client }
@@ -272,7 +271,7 @@ function TVCHVContentAPI__GetRecommendedPrograms()
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__CheckItemInFavourite(params as object)
+function ContentAPI__CheckItemInFavourite(params as object)
     path = GlobalGet("apiEndPoints").CheckItemInFavourite
     headers = GetHeaders()
     data = params
@@ -282,7 +281,7 @@ function TVCHVContentAPI__CheckItemInFavourite(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__AddRemoveFavourite(params as object)
+function ContentAPI__AddRemoveFavourite(params as object)
     path = GlobalGet("apiEndPoints").AddRemoveFavourite + params.action
     headers = { "Content-Type": "application/json" }
     params["token"] = GlobalGet("token")
@@ -291,7 +290,7 @@ function TVCHVContentAPI__AddRemoveFavourite(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetWatchHistory(params as object)
+function ContentAPI__GetWatchHistory(params as object)
     path = GlobalGet("apiEndPoints").GetWatchHistory
     headers = GetHeaders()
     data = params
@@ -302,7 +301,7 @@ function TVCHVContentAPI__GetWatchHistory(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__GetAllWatchHistory(params as object)
+function ContentAPI__GetAllWatchHistory(params as object)
     path = GlobalGet("apiEndPoints").GetAllWatchHistory
     headers = GetHeaders()
     data = params
@@ -310,7 +309,7 @@ function TVCHVContentAPI__GetAllWatchHistory(params as object)
     return handleApiResponse(response)
 end function
 
-function TVCHVContentAPI__AddWatchHistory(params as object)
+function ContentAPI__AddWatchHistory(params as object)
     path = GlobalGet("apiEndPoints").AddWatchHistory
     headers = { "Content-Type": "application/json" }
     data = params
