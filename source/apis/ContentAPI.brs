@@ -187,12 +187,9 @@ end function
 
 function ContentAPI__GetPrograms(params as object)
     path = GlobalGet("apiEndPoints").GetPrograms
-    headers = GetHeaders()
-    data = params
-    data["client"] = GlobalGet("appConfig").client
-    data["show_event"] = true
-    data["show_ranking"] = true
-    response = postRequest(path, data, headers)
+    headers = { "Content-Type": "application/json" }
+    data = { }
+    response = getRequest(path, data, headers)
     return handleApiResponse(response)
 end function
 

@@ -106,51 +106,55 @@ sub callGetProgramsAPI(page = 1 as Integer)
     ShowLoading(true)
     m.GetProgramsTask = CreateObject("roSGNode", "ContentAPIAction")
     m.GetProgramsTask.functionName = "GetPrograms"
-    m.GetProgramsTask.params = {
-        page: page
-        limit: 10
-    }
-    if m.isPagination
-        m.GetProgramsTask.ObserveField("result", "OnProgramsPaginationResult")
-    else
-        m.GetProgramsTask.ObserveField("result", "OnProgramsResult")
-    end if
+    m.GetProgramsTask.params = {}
+    m.GetProgramsTask.observeField("result", "OnProgramsResult")
     m.GetProgramsTask.control = "RUN"
 end sub
 
 sub OnProgramsResult(event as dynamic)
-    programsAPIRes = event.getData()
-    programsRes = getValueFromProps(programsAPIRes, "data.data", [])
-    if isValid(programsAPIRes) AND programsRes.count() > 0
-        UpdatePaginationData(programsAPIRes.data)
+    apiResponse  = event.getData()
+    categoriesByName = getValueFromProps(apiResponse, "data", {})
+    if isValid(categoriesByName) AND categoriesByName.count() > 0
         mainContent = CreateObject("roSGNode", "ContentNode")
-        for each item in programsRes
-            if ((isValid(item.format) AND item.format = "default") OR isInvalid(item.format))
-                if isValid(item) AND isValid(item.key) AND isValid(item.programs) AND item.programs.count() > 0
-                    rowContent = mainContent.CreateChild("ContentNode")
-                    rowContent.title = item.title
-                    for each program in item.programs
-                        program.image_orientation = "landscape"
-                        itemContent = rowContent.CreateChild("ProgramItemNode")
-                        itemContent.setFields(program)
-                        if rowContent.getChildCount() > 10
-                            itemAA = {}
-                            itemAA.image_orientation = "landscape"
-                            itemAA.category_key = rowContent.key
-                            itemAA.format = program.format
-                            itemAA.title = "Ver Más"
-                            itemAA.isViewMoreCard = true
-                            itemContent = CreateObject("roSGNode", "ProgramItemNode")
-                            itemContent.setFields(itemAA)
-                            rowContent.appendChild(itemContent)
-                            exit for
-                        end if
-                    end for
-                end if
+        for each categoryName in categoriesByName
+            rawPrograms = categoriesByName[categoryName]
+            if isValid(rawPrograms) and rawPrograms.count() > 0
+                rowContent = mainContent.CreateChild("ContentNode")
+                rowContent.title = categoryName
+                counter = 0
+                for each raw in rawPrograms
+                    if counter >= 10
+                        itemAA = {}
+                        itemAA.image_orientation = "portrait"
+                        itemAA.format = "default"
+                        itemAA.title = "Ver Más"
+                        itemAA.isViewMoreCard = true
+                        itemContent = CreateObject("roSGNode", "ProgramItemNode")
+                        itemContent.setFields(itemAA)
+                        rowContent.appendChild(itemContent)
+                        exit for
+                    end if
+                    imageUrl = raw.imagen_vertical
+                    itemContent = rowContent.CreateChild("ProgramItemNode")
+                    itemContent.setFields({
+                        title: raw.titulo,
+                        key: raw.id,
+                        image_orientation: "portrait",
+                        format: "default"
+                        image_port: {
+                            small: imageUrl,
+                            medium: imageUrl,
+                            normal: imageUrl,
+                            big: imageUrl,
+                            default: imageUrl
+                        }
+                    })
+                    counter++
+                end for
             end if
         end for
         m.rlProgramList.content = mainContent
-        if isValid(m.rlProgramList.content) AND m.rlProgramList.content.getChild(0).getChildCount() > 0
+        if isValid(m.rlProgramList.content) AND m.rlProgramList.content.getChildCount() > 0 AND m.rlProgramList.content.getChild(0).getChildCount() > 0
             SetFocus(m.rlProgramList)
         else
             m.noData.visible = true
@@ -160,6 +164,7 @@ sub OnProgramsResult(event as dynamic)
         m.noData.visible = true
         SetFocus(m.noData)
     end if
+
     ShowLoading(false)
     clearTask()
 end sub

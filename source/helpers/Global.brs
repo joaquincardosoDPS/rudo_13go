@@ -119,7 +119,7 @@ Sub GetApiEndPoints(appConfig as object) as Dynamic
         GetConfig: feedBaseUrl + "configuracion",
         GetHomeConfig: feedBaseUrl + "configuracion-portada",
         GetAllCategories: feedBaseUrl + "categorias",
-        GetPrograms: feedBaseUrl + "programa",
+        GetPrograms: feedBaseUrl + "programas",
         GetVideos: feedBaseUrl + "video",
 
         ' Streaming / EPG: CDN de rudo.video, bajo el tenant "canal-13"
