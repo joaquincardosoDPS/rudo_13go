@@ -1,18 +1,20 @@
+
 Sub SetGlobalNode()
     appConfig = GetAppConfigFromFile()
     deviceInfo = CreateObject("roDeviceInfo")
     globalFields = {
-        appConfig: appConfig
-        appTheme: GetAppThemeFromFile()
-        apiEndPoints: GetApiEndPoints(appConfig)
-        fonts: CreateFontManager()
-        deviceId: deviceInfo.GetChannelClientId()
+        appConfig: appConfig,
+        appTheme: GetAppThemeFromFile(),
+        apiEndPoints: GetApiEndPoints(appConfig),
+        fonts: CreateFontManager(),
+        deviceId: deviceInfo.GetChannelClientId(),
         deviceVersion: GetAppOsVersion()
         deviceModel: deviceInfo.GetModel()
-        menuList: GetMenuList()
+        menuList: GetMenuList(),
         designResolution: deviceInfo.GetDisplayMode()
     }
     m.global.AddFields(globalFields)
+
 End Sub
 
 Sub GetAppConfigFromFile() as Dynamic
@@ -23,22 +25,24 @@ Sub GetAppConfigFromFile() as Dynamic
         Print "Globals : App config file loaded : " ' config
     Else
         Print "*** Error : Globals : Invalid configuration"
-    End If
+    End if
 
     Return configJson
+
 End Sub
 
 Sub GetAppThemeFromFile() as Dynamic
-    Print "Globals : GetAppConfigFromFile"
+    Print "Globals : GetAppThemeFromFile"
     theme = ReadAsciiFile("pkg:/source/data/AppTheme.json")
     themeJson = ParseJson(theme)
     If themeJson <> invalid
-        Print "Globals : GetAppThemeFromFile : App config file loaded : " ' config
+        Print "Globals : GetAppThemeFromFile : App theme file loaded : " ' theme
     Else
         Print "*** Error : Globals : GetAppThemeFromFile : Invalid theme configuration!"
-    End If
+    End if
 
     Return themeJson
+
 End Sub
 
 function NormalizeThemeColorKeyName(key as String) as String
@@ -51,7 +55,7 @@ function NormalizeThemeColorKeyName(key as String) as String
     normalizedKey = ""
     capitalizeNext = false
     for i = 0 to Len(key) - 1
-        currentChar = Mid(key, i + 1, 1)
+        currentChar = Mid(key, i+1, 1)
         if currentChar = "-"
             capitalizeNext = true
         else if capitalizeNext
@@ -61,7 +65,9 @@ function NormalizeThemeColorKeyName(key as String) as String
             normalizedKey = normalizedKey + currentChar
         end if
     end for
+
     return normalizedKey
+
 end function
 
 function MergeMissingConfigColorsIntoTheme(themeJson as Object, configJson as Object) as Object
@@ -98,47 +104,34 @@ function GetMenuList() as object
     return labels
 end function
 
-Sub GetApiEndPoints(appConfig as object) as dynamic
+
+Sub GetApiEndPoints(appConfig as object) as Dynamic
     Print "Globals : GetApiEndPoints : appConfig : " appConfig
-    baseUrl = appConfig.baseUrl
+    feedBaseUrl = appConfig.feedBaseUrl
+    cdnBaseUrl = appConfig.cdnBaseUrl
+    tenant = appConfig.tenant
+
     apiEndPoints = {
-        ' Auth API end points
-        Login: baseUrl + "users/login"
-        SignUp: baseUrl + "users/register"
-        AutoLogin: baseUrl + "users/session"
-        GetDeviceCode: baseUrl + "users/device_code"
-        VerifyDevice: baseUrl + "users/device_verify"
+        ' Gateway único: auth y perfiles viven acá, diferenciados por "action"/"path" en el POST (se arma en Paso 4)
+        Gateway: appConfig.gatewayUrl
 
-        GetConfig: baseUrl + "config/all"
+        ' Catálogo: feed tipo WordPress en 13.cl
+        GetConfig: feedBaseUrl + "configuracion",
+        GetHomeConfig: feedBaseUrl + "configuracion-portada",
+        GetAllCategories: feedBaseUrl + "categorias",
+        GetPrograms: feedBaseUrl + "programa",
+        GetVideos: feedBaseUrl + "video",
 
-        ' Profile API end points
-        GetProfilesData: baseUrl + "profile/all"
-        AddProfile: baseUrl + "profile/add"
-        DeleteProfile: baseUrl + "profile/delete" 
-        UpdateProfile: baseUrl + "profile/update"
-        GetAllAvatar: baseUrl + "avatar/all"
-        ProfileManagement: baseUrl + "profile/"
+        ' Streaming / EPG: CDN de rudo.video, bajo el tenant "canal-13"
+        GetEPGChannels: cdnBaseUrl + "assets/" + tenant + "/playlists/static/playlist.json?random="
+        GetEPGPrograms: cdnBaseUrl + "assets/" + tenant + "/playlists/global_epg.json"
+        GetPlaylistPremium: cdnBaseUrl + "assets/" + tenant + "/playlists/static/playlist_premium.json"
+        GetRadios: cdnBaseUrl + "assets/" + tenant + "/playlists/static/radios.json"
 
-        ' Content API end points
-        GetAllCategories: baseUrl + "categories/all"
-        GetFeaturedSliderPrograms: baseUrl + "programs/slider"
-        GetMyListPrograms: baseUrl + "favorites/all"
-        GetSearchPrograms: baseUrl + "programs/all"
-        GetPrograms: baseUrl + "categories/all"
-        GetAllPrograms: baseUrl + "programs/all"
-        GetProgramDetails: baseUrl + "programs/get"
-        GetProgramEventsDetails: baseUrl + "events/get"
-        GetEventSeasonEpisodeDetails: baseUrl + "events/all"
-        GetSeasonEpisodeDetails: baseUrl + "chapters/all"
-        GetEpisodeDetails: baseUrl + "chapters/get"
-        GetEPGChannels: "https://cdn.rudo.video/assets/" + appConfig.client + "/playlists/static/playlist.json?random="
-        GetEPGPrograms: "https://cdn.rudo.video/assets/" + appConfig.client + "/playlists/global_epg.json"
-        GetRecommendedPrograms: baseUrl + "programs/recommended"
-        CheckItemInFavourite: baseUrl + "favorites/validate"
-        AddRemoveFavourite: baseUrl + "favorites/"
-        GetWatchHistory: baseUrl + "history/get"
-        GetAllWatchHistory: baseUrl + "history/all"
-        AddWatchHistory: baseUrl + "history/add"
+        ' Info de medios (API de rudo.video)
+        GetVodMediaInfo: appConfig.rudoApiUrl + "v3/media/info"
     }
+
     Return apiEndPoints
-End Sub 
+
+End Sub

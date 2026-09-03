@@ -124,6 +124,6 @@ No hay `package.json` ni build system: este es un canal Roku puro (BrightScript 
 ## Estado actual (ir marcando)
 
 - [x] Paso 1 — Copia de `roku-chv` a `roku_13go`, `.git` reiniciado.
-- [ ] Paso 2 — `manifest`: `title=13GO`, `build_version` actualizado. (En curso.)
-- [ ] Paso 3 — `AppConfig.json` y la arquitectura de backend distinta (feed 13.cl + gateway Firebase).
+- [x] Paso 2 — `manifest`: `title=13GO`, `build_version=090320260`.
+- [x] Paso 3 — `AppConfig.json` (feed 13.cl + gateway Firebase + CDN `canal-13`) y `Global.brs::GetApiEndPoints()` reescritos. Nota clave descubierta: auth y perfiles en 13go NO son endpoints REST por acción — es un único `gatewayUrl` (`https://rudo.video/gateway/13go/`) diferenciado por el campo `action`/`path` del POST (ver `c13_reloaded/src/features/auth/services/authentication.ts` y `src/services/profileService.ts`). Eso se resuelve recién en el Paso 4, al reescribir `ContentAPI.brs`/`BaseRequests.brs`.
 - [ ] Paso 4+ — tema/colores (`AppTheme.json`), fuentes (`FontManager.brs`), imágenes de marca definitivas, reescritura de `ContentAPI.brs`/`BaseRequests.brs`, resto de la migración.
