@@ -36,7 +36,7 @@ sub SetControls()
         backgroundColor: m.theme.clrSecondary
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "poppinsMedium24"
+        fontSize: "dmSansMedium24"
         margin: 20
     }
     m.cmViewMore.update(btnFields)
@@ -53,8 +53,8 @@ sub SetupColor()
 end sub
 
 sub SetupFonts()
-    m.lCategoryTitle.font = m.fonts.poppinsMedium39
-    m.lTotalCount.font = m.fonts.poppinsMedium24
+    m.lCategoryTitle.font = m.fonts.dmSansMedium39
+    m.lTotalCount.font = m.fonts.dmSansMedium24
 end sub
 
 sub SetObservers()

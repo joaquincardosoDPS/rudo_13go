@@ -26,7 +26,7 @@ sub setupColor()
 end sub
 
 sub setupFonts()
-    m.title.font = m.fonts.poppinsMedium29
+    m.title.font = m.fonts.dmSansMedium29
 end sub
 
 sub setObservers()

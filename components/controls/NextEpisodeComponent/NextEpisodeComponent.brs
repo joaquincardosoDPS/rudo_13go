@@ -34,9 +34,9 @@ sub SetupColor()
 end sub
 
 sub SetupFonts()
-    m.lTitle.font = m.fonts.poppinsBold48
-    m.lEpisodeTitle.font = m.fonts.poppinsBold48
-    m.lDescription.font = m.fonts.poppinsMedium24
+    m.lTitle.font = m.fonts.dmSansBold48
+    m.lEpisodeTitle.font = m.fonts.dmSansBold48
+    m.lDescription.font = m.fonts.dmSansMedium24
 end sub
 
 sub SetObservers()
@@ -57,7 +57,7 @@ sub onContentInfoChanged()
         end if
         if isValid(m.content.episodeTitle) AND m.content.episodeTitle <> ""
             m.lEpisodeTitle.text = m.content.episodeTitle
-            m.lEpisodeTitle.font = m.fonts.poppinsBold32
+            m.lEpisodeTitle.font = m.fonts.dmSansBold32
         else
             m.lgDetails.removeChild(m.lEpisodeTitle)
         end if
@@ -76,7 +76,7 @@ sub onContentInfoChanged()
             backgroundColor: m.theme.clrSecondary
             focusBorderImage: m.theme.filledBackGroundImage
             focusBackgroundColor: m.theme.focPrimary
-            fontSize: "poppinsMedium24"
+            fontSize: "dmSansMedium24"
             margin: 20
             addColorOnImage: true
         }

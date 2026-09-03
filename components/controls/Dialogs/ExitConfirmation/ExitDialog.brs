@@ -30,7 +30,7 @@ Sub SetControls()
 End Sub
 
 Sub SetupFonts()
-    m.message.font = m.fonts.poppinsMedium32
+    m.message.font = m.fonts.dmSansMedium32
 End Sub
 
 Sub SetupColors()
@@ -43,7 +43,7 @@ Sub SetupColors()
         backGroundImage: m.theme.filledBackGroundImage
         focusBorderImage: m.theme.filledBackGroundImage
         isFilledBgOnFocus: true
-        fontSize: "poppinsMedium26"
+        fontSize: "dmSansMedium26"
         margin: 10
     }
     m.bNo.update(btnFields)
@@ -134,7 +134,7 @@ Sub OnMessageChangedEvent(event as Dynamic)
             m.bLogout.backGroundImage = m.theme.filledBackGroundImage
             m.bLogout.focusBorderImage = m.theme.filledBackGroundImage
             m.bLogout.focusBackgroundColor = m.theme.focPrimary
-            m.bLogout.fontSize = "poppinsMedium26"
+            m.bLogout.fontSize = "dmSansMedium26"
             m.bLogout.margin = 10
             m.lgButtons.appendChild(m.bLogout)
             m.buttons.push(m.bLogout)

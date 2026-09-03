@@ -64,11 +64,11 @@ sub SetupColor()
 end sub
 
 sub SetupFonts()
-    m.lMyProfile.font = m.fonts.poppinsMedium24
-    m.lHidden.font = m.fonts.poppinsMedium24
-    m.lEditProfileAction.font = m.fonts.poppinsMedium20
-    m.lAccountAction.font = m.fonts.poppinsMedium20
-    m.lLogoutAction.font = m.fonts.poppinsMedium20
+    m.lMyProfile.font = m.fonts.dmSansMedium24
+    m.lHidden.font = m.fonts.dmSansMedium24
+    m.lEditProfileAction.font = m.fonts.dmSansMedium20
+    m.lAccountAction.font = m.fonts.dmSansMedium20
+    m.lLogoutAction.font = m.fonts.dmSansMedium20
 end sub
 
 sub SetObservers()
@@ -116,7 +116,7 @@ sub Initlization()
         backgroundColor: m.theme.clrSecondary
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "poppinsMedium24"
+        fontSize: "dmSansMedium24"
         margin: 20
     }
     m.loginButton.update(btnFields)

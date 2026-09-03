@@ -44,10 +44,10 @@ sub SetupColor()
 end sub
 
 sub SetupFonts()
-    m.mylistPageTitle.font = m.fonts.poppinsMedium39
-    m.mylistTitle.font = m.fonts.poppinsMedium31
-    m.mylistSubTitle.font = m.fonts.poppinsMedium24
-    m.loginTitle.font = m.fonts.poppinsMedium24
+    m.mylistPageTitle.font = m.fonts.dmSansMedium39
+    m.mylistTitle.font = m.fonts.dmSansMedium31
+    m.mylistSubTitle.font = m.fonts.dmSansMedium24
+    m.loginTitle.font = m.fonts.dmSansMedium24
 end sub
 
 sub SetObservers()
@@ -113,7 +113,7 @@ sub Initialize()
             backgroundColor: m.theme.clrSecondary
             focusBorderImage: m.theme.filledBackGroundImage
             focusBackgroundColor: m.theme.focPrimary
-            fontSize: "poppinsMedium24"
+            fontSize: "dmSansMedium24"
             margin: 20
         }
         m.loginButton.update(btnFields)

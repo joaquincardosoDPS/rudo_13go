@@ -5,7 +5,7 @@ sub init()
     m.titleLabel = m.top.findNode("titleLabel")
     m.avatarGrid = m.top.findNode("avatarGrid")
     m.backButton = m.top.findNode("backButton")
-    m.titleLabel.font = m.fonts.poppinsMedium24
+    m.titleLabel.font = m.fonts.dmSansMedium24
     m.titleLabel.color = m.theme.white
     m.backgroundPoster.blendColor = m.theme.clrPrimary
     m.avatarGrid.observeField("itemSelected", "OnAvatarSelected")
@@ -20,7 +20,7 @@ sub SetupBackButton()
         backgroundColor: m.theme.clrSecondary
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "poppinsMedium24"
+        fontSize: "dmSansMedium24"
         padding: 20
         posterImageSize: 35
         margin: 18

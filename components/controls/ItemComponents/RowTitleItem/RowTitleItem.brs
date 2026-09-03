@@ -17,8 +17,8 @@ sub SetControls()
 end sub
 
 sub SetupFonts()
-    m.lRowLabelBadgeText.font = m.fonts.poppinsMedium26
-    m.lCounter.font = m.fonts.poppinsMedium26
+    m.lRowLabelBadgeText.font = m.fonts.dmSansMedium26
+    m.lCounter.font = m.fonts.dmSansMedium26
 end sub
 
 sub SetupColor()

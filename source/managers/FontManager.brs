@@ -1,43 +1,43 @@
 Function CreateFontManager() as Object
     Print "FontManager : CreateFontManager"
 
-    poppinsRegular = "pkg:/Fonts/Poppins-Regular.ttf"
-    poppinsMedium = "pkg:/Fonts/Poppins-Medium.ttf"
-    poppinsBold = "pkg:/Fonts/Poppins-Bold.ttf"
+    dmSansRegular = "pkg:/Fonts/DMSans-Regular.ttf"
+    dmSansMedium = "pkg:/Fonts/DMSans-Medium.ttf"
+    dmSansBold = "pkg:/Fonts/DMSans-Bold.ttf"
 
     this = {}
-    ' *** Poppins Bold Fonts ***
-    this.poppinsBold48 = CreateFonts(poppinsBold, 48)
-    this.poppinsBold36 = CreateFonts(poppinsBold, 36)
-    this.poppinsBold32 = CreateFonts(poppinsBold, 32)
-    this.poppinsBold30 = CreateFonts(poppinsBold, 30)
-    this.poppinsBold28 = CreateFonts(poppinsBold, 28)
-    this.poppinsBold23 = CreateFonts(poppinsBold, 23)
-    this.poppinsBold20 = CreateFonts(poppinsBold, 20)
-    this.poppinsBold18 = CreateFonts(poppinsBold, 18)
+    ' *** DM Sans Bold Fonts ***
+    this.dmSansBold48 = CreateFonts(dmSansBold, 48)
+    this.dmSansBold36 = CreateFonts(dmSansBold, 36)
+    this.dmSansBold32 = CreateFonts(dmSansBold, 32)
+    this.dmSansBold30 = CreateFonts(dmSansBold, 30)
+    this.dmSansBold28 = CreateFonts(dmSansBold, 28)
+    this.dmSansBold23 = CreateFonts(dmSansBold, 23)
+    this.dmSansBold20 = CreateFonts(dmSansBold, 20)
+    this.dmSansBold18 = CreateFonts(dmSansBold, 18)
 
-    ' *** Poppins Medium Fonts ***
-    this.poppinsMedium12 = CreateFonts(poppinsMedium, 12)
-    this.poppinsMedium14 = CreateFonts(poppinsMedium, 14)
-    this.poppinsMedium18 = CreateFonts(poppinsMedium, 18)
-    this.poppinsMedium19 = CreateFonts(poppinsMedium, 19)
-    this.poppinsMedium20 = CreateFonts(poppinsMedium, 20)
-    this.poppinsMedium23 = CreateFonts(poppinsMedium, 23)
-    this.poppinsMedium24 = CreateFonts(poppinsMedium, 24)
-    this.poppinsMedium25 = CreateFonts(poppinsMedium, 25)
-    this.poppinsMedium26 = CreateFonts(poppinsMedium, 26)
-    this.poppinsMedium29 = CreateFonts(poppinsMedium, 29)
-    this.poppinsMedium30 = CreateFonts(poppinsMedium, 30)
-    this.poppinsMedium31 = CreateFonts(poppinsMedium, 31)
-    this.poppinsMedium32 = CreateFonts(poppinsMedium, 32)
-    this.poppinsMedium37 = CreateFonts(poppinsMedium, 37)
-    this.poppinsMedium39 = CreateFonts(poppinsMedium, 39)
+    ' *** DM Sans Medium Fonts ***
+    this.dmSansMedium12 = CreateFonts(dmSansMedium, 12)
+    this.dmSansMedium14 = CreateFonts(dmSansMedium, 14)
+    this.dmSansMedium18 = CreateFonts(dmSansMedium, 18)
+    this.dmSansMedium19 = CreateFonts(dmSansMedium, 19)
+    this.dmSansMedium20 = CreateFonts(dmSansMedium, 20)
+    this.dmSansMedium23 = CreateFonts(dmSansMedium, 23)
+    this.dmSansMedium24 = CreateFonts(dmSansMedium, 24)
+    this.dmSansMedium25 = CreateFonts(dmSansMedium, 25)
+    this.dmSansMedium26 = CreateFonts(dmSansMedium, 26)
+    this.dmSansMedium29 = CreateFonts(dmSansMedium, 29)
+    this.dmSansMedium30 = CreateFonts(dmSansMedium, 30)
+    this.dmSansMedium31 = CreateFonts(dmSansMedium, 31)
+    this.dmSansMedium32 = CreateFonts(dmSansMedium, 32)
+    this.dmSansMedium37 = CreateFonts(dmSansMedium, 37)
+    this.dmSansMedium39 = CreateFonts(dmSansMedium, 39)
 
-    ' *** Poppins Regular Fonts ***
-    this.poppinsReg53 = CreateFonts(poppinsRegular, 53)
-    this.poppinsReg42 = CreateFonts(poppinsRegular, 42)
-    this.poppinsReg35 = CreateFonts(poppinsRegular, 35)
-    this.poppinsReg26 = CreateFonts(poppinsRegular, 26)
+    ' *** DM Sans Regular Fonts ***
+    this.dmSansReg53 = CreateFonts(dmSansRegular, 53)
+    this.dmSansReg42 = CreateFonts(dmSansRegular, 42)
+    this.dmSansReg35 = CreateFonts(dmSansRegular, 35)
+    this.dmSansReg26 = CreateFonts(dmSansRegular, 26)
 
     node = CreateObject("roSGNode", "node")
     node.AddFields(this)

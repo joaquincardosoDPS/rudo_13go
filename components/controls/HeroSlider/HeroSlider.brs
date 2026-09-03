@@ -31,8 +31,8 @@ sub setScrollStateImageVisibility(hidden as boolean)
 end sub
 
 sub setUpFonts()
-    m.title.font = m.fonts.poppinsBold32 
-    m.desc.font = m.fonts.poppinsMedium24 
+    m.title.font = m.fonts.dmSansBold32 
+    m.desc.font = m.fonts.dmSansMedium24 
 end sub
 
 sub setUpColor()
@@ -86,7 +86,7 @@ sub setupWatchNowButton()
         backGroundImage: m.theme.filledBackGroundImage
         focusBorderImage: m.theme.filledBackGroundImage
         isFilledBgOnFocus: true
-        fontSize: "poppinsMedium26"
+        fontSize: "dmSansMedium26"
         posterImage: "pkg:/images/focus/btnplay.png"
         addColorOnImage: true
         padding: 20

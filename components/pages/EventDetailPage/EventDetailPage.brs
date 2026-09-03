@@ -52,7 +52,7 @@ sub setControls()
 end sub
 
 sub setUpFonts()
-    m.lRemainingTime.font = m.fonts.poppinsMedium20
+    m.lRemainingTime.font = m.fonts.dmSansMedium20
 end sub
 
 sub setUpColor()
@@ -184,7 +184,7 @@ sub updateMetaDetails()
             pBadge.loadDisplayMode = "scaleToFit"
             lBadge = createObject("roSGNode", "Label")
             lBadge.id = "lBadge"
-            lBadge.font = m.fonts.poppinsMedium14
+            lBadge.font = m.fonts.dmSansMedium14
             lBadge.color = m.theme.black
             lBadge.text = getBadgeText(m.programData, true)
             pBadge.width = lBadge.boundingRect().width + 12
@@ -227,7 +227,7 @@ sub updateMetaDetails()
             lTitle.lineSpacing = -3
             lTitle.wrap = true
             lTitle.maxLines = 2
-            lTitle.font = m.fonts.poppinsBold32
+            lTitle.font = m.fonts.dmSansBold32
             lTitle.color = m.theme.clrPrimaryTitle
             lTitle.text = m.programData.title
             m.lgDetails.appendChild(lTitle)
@@ -240,7 +240,7 @@ sub updateMetaDetails()
             pRating.blendColor = m.theme.black
             lRating = createObject("roSGNode", "Label")
             lRating.id = "lRating"
-            lRating.font = m.fonts.poppinsMedium14
+            lRating.font = m.fonts.dmSansMedium14
             lRating.color = m.theme.white
             lRating.text = UCase(m.programData.classification)
             pRating.width = lRating.boundingRect().width + 12
@@ -266,7 +266,7 @@ sub updateMetaDetails()
             backGroundImage: m.theme.filledBackGroundImage
             focusBorderImage: m.theme.filledBackGroundImage
             isFilledBgOnFocus: true
-            fontSize: "poppinsMedium26"
+            fontSize: "dmSansMedium26"
             posterImage: "pkg:/images/focus/btnplay.png"
             addColorOnImage: true
             padding: 20
@@ -299,7 +299,7 @@ sub updateMetaDetails()
                 lTitle.lineSpacing = -3
                 lTitle.wrap = true
                 lTitle.maxLines = 2
-                lTitle.font = m.fonts.poppinsmedium24
+                lTitle.font = m.fonts.dmSansMedium24
                 lTitle.color = m.theme.clrPrimaryTitle
                 lTitle.text = m.programData.category.name
                 lgHoriz.appendChild(lTitle)
@@ -313,7 +313,7 @@ sub updateMetaDetails()
         lMainTitle.lineSpacing = -3
         lMainTitle.wrap = true
         lMainTitle.maxLines = 2
-        lMainTitle.font = m.fonts.poppinsBold36
+        lMainTitle.font = m.fonts.dmSansBold36
         lMainTitle.color = m.theme.white
         lMainTitle.text = m.programData.title
         m.lgDetails.appendChild(lMainTitle)
@@ -324,7 +324,7 @@ sub updateMetaDetails()
             lDescription.lineSpacing = -3
             lDescription.wrap = true
             lDescription.maxLines = 3
-            lDescription.font = m.fonts.poppinsMedium24
+            lDescription.font = m.fonts.dmSansMedium24
             lDescription.color = m.theme.white
             if m.programData.description_short <> invalid AND m.programData.description_short <> ""
                 lDescription.text = m.programData.description_short
@@ -591,13 +591,13 @@ function createLeftSection(content as object, width as float) as object
     title.width = width
     title.text = "Synopsis"
     title.color = m.theme.White
-    title.font = m.fonts.poppinsBold28
+    title.font = m.fonts.dmSansBold28
     desc = CreateObject("roSGNode", "Label")
     desc.width = width
     desc.wrap = true
     desc.maxLines = 5
     desc.color = m.theme.clrSecondaryText
-    desc.font = m.fonts.poppinsMedium24
+    desc.font = m.fonts.dmSansMedium24
     if content.description <> invalid AND content.description <> ""
         desc.text = content.description
     else if content.description_short <> invalid AND content.description_short <> ""
@@ -633,7 +633,7 @@ function createLabel(label as string, value as dynamic, width as float) as objec
     node = CreateObject("roSGNode", "Label")
     node.width = width
     node.color = m.theme.clrSecondaryText
-    node.font = m.fonts.poppinsMedium20
+    node.font = m.fonts.dmSansMedium20
     node.text = label + ": " + value
     return node
 end function

@@ -35,10 +35,10 @@ sub setControls()
 end sub
 
 sub setupFonts()
-    m.noData.font = m.fonts.poppinsBold32
-    m.lNow.font = m.fonts.poppinsMedium30
-    m.lComing.font = m.fonts.poppinsMedium30
-    m.lDay.font = m.fonts.poppinsMedium30
+    m.noData.font = m.fonts.dmSansBold32
+    m.lNow.font = m.fonts.dmSansMedium30
+    m.lComing.font = m.fonts.dmSansMedium30
+    m.lDay.font = m.fonts.dmSansMedium30
 end sub
 
 sub setupPageLoader()
@@ -598,7 +598,7 @@ sub CreateMetaData()
         lRating.id = "lRating"
         lRating.width = 157
         lRating.height = 32
-        lRating.font = m.fonts.poppinsMedium18
+        lRating.font = m.fonts.dmSansMedium18
         lRating.color = m.theme.black
         lRating.horizAlign = "center"
         lRating.vertAlign = "center"
@@ -632,7 +632,7 @@ sub CreateMetaData()
             lTitle.lineSpacing = 0
             lTitle.maxlines = 2
             lTitle.horizAlign = "left"
-            lTitle.font = m.fonts.poppinsBold32
+            lTitle.font = m.fonts.dmSansBold32
             lTitle.text = m.focusedChildNode.title
             lTitle.color = m.theme.white
             m.lgDetailSection.appendChild(lTitle)

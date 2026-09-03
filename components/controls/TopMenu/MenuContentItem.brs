@@ -17,7 +17,7 @@ sub SetControls()
 end sub 
 
 sub SetupFonts()
-    m.itemTitle.font = m.fonts.poppinsMedium24
+    m.itemTitle.font = m.fonts.dmSansMedium24
 end sub 
 
 sub SetupColor()

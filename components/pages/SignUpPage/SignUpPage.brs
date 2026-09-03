@@ -52,11 +52,11 @@ sub SetControls()
 end sub
 
 sub SetupFonts()
-    m.stepLabel.font = m.fonts.poppinsMedium24
-    m.titleLabel.font = m.fonts.poppinsMedium29
-    m.inputPlaceholderLabel.font = m.fonts.poppinsMedium24
-    m.successTitle.font = m.fonts.poppinsMedium37
-    m.successSubtitle.font = m.fonts.poppinsMedium23
+    m.stepLabel.font = m.fonts.dmSansMedium24
+    m.titleLabel.font = m.fonts.dmSansMedium29
+    m.inputPlaceholderLabel.font = m.fonts.dmSansMedium24
+    m.successTitle.font = m.fonts.dmSansMedium37
+    m.successSubtitle.font = m.fonts.dmSansMedium23
 end sub
 
 sub SetupColor()
@@ -84,7 +84,7 @@ sub SetupColor()
         backgroundColor: m.theme.clrPrimaryButton
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "poppinsMedium24"
+        fontSize: "dmSansMedium24"
         margin: 20
     }
     m.actionButton.update(btnFields)
@@ -161,12 +161,12 @@ end function
 sub Initialize()
     fontStyle = {
         "Normal": {
-            "fontUri": "pkg:/fonts/Poppins-Medium.ttf"
+            "fontUri": "pkg:/fonts/DMSans-Medium.ttf"
             "fontSize": 24
             "color": m.theme.white
         }
         "Link": {
-            "fontUri": "pkg:/fonts/Poppins-Medium.ttf"
+            "fontUri": "pkg:/fonts/DMSans-Medium.ttf"
             "fontSize": 24
             "color": m.theme.focPrimary
         }
@@ -257,7 +257,7 @@ sub UpdateHelperLabel(helperText as string)
         m.helperLabel.width = 504
         m.helperLabel.horizAlign = "left"
         m.helperLabel.wrap = true
-        m.helperLabel.font = m.fonts.poppinsMedium19
+        m.helperLabel.font = m.fonts.dmSansMedium19
         m.helperLabel.color = m.theme.white
         m.lgSignUpForm.insertChild(m.helperLabel, 3)
         UpdateLoginLinkLayout()
@@ -537,7 +537,7 @@ sub ShowError(message as string)
         m.errorLabel.width = 504
         m.errorLabel.horizAlign = "left"
         m.errorLabel.wrap = true
-        m.errorLabel.font = m.fonts.poppinsMedium18
+        m.errorLabel.font = m.fonts.dmSansMedium18
         m.errorLabel.color = m.theme.focPrimary
         m.lgSignUpForm.insertChild(m.errorLabel, 3)
     end if

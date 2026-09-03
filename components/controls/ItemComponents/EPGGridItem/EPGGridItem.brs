@@ -21,8 +21,8 @@ sub setControls()
 end sub
 
 sub setupFonts()
-    m.programTitle.font = m.fonts.poppinsMedium30
-    if isValid(m.lLiveTime) then m.lLiveTime.font = m.fonts.poppinsReg26
+    m.programTitle.font = m.fonts.dmSansMedium30
+    if isValid(m.lLiveTime) then m.lLiveTime.font = m.fonts.dmSansReg26
 end sub
 
 sub setupColor()

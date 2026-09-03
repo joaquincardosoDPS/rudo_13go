@@ -47,13 +47,13 @@ sub SetControls()
 end sub
 
 sub SetupFonts()
-    m.lNumberRightTop.font = m.fonts.poppinsBold23
-    m.lVRightTop.font = m.fonts.poppinsMedium18
-    m.lHRightTop.font = m.fonts.poppinsMedium12
-    m.lViewMoreTitle.font = m.fonts.poppinsMedium24
-    m.lETime.font = m.fonts.poppinsBold23
-    m.lEDescription.font = m.fonts.poppinsMedium20
-    m.lVBottomTime.font = m.fonts.poppinsMedium12
+    m.lNumberRightTop.font = m.fonts.dmSansBold23
+    m.lVRightTop.font = m.fonts.dmSansMedium18
+    m.lHRightTop.font = m.fonts.dmSansMedium12
+    m.lViewMoreTitle.font = m.fonts.dmSansMedium24
+    m.lETime.font = m.fonts.dmSansBold23
+    m.lEDescription.font = m.fonts.dmSansMedium20
+    m.lVBottomTime.font = m.fonts.dmSansMedium12
 end sub
 
 sub SetupColors()

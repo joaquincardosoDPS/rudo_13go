@@ -52,10 +52,10 @@ sub SetupColor()
 end sub
 
 sub SetupFonts()
-    m.leftProgressLabel.font = m.fonts.poppinsMedium24
-    m.crossArrow.font = m.fonts.poppinsMedium24
-    m.rightProgressLabel.font = m.fonts.poppinsMedium24
-    m.lVideoTitle.font = m.fonts.poppinsBold28
+    m.leftProgressLabel.font = m.fonts.dmSansMedium24
+    m.crossArrow.font = m.fonts.dmSansMedium24
+    m.rightProgressLabel.font = m.fonts.dmSansMedium24
+    m.lVideoTitle.font = m.fonts.dmSansBold28
 end sub
 
 sub initilize()

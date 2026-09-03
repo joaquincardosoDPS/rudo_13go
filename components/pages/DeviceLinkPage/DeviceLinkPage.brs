@@ -45,13 +45,13 @@ sub SetControls()
 end sub
 
 sub SetupFonts()
-    m.DeviceLinkTitleText.font = m.fonts.poppinsMedium32
-    m.stepOneNumber.font = m.fonts.poppinsMedium30
-    m.stepOneText.font = m.fonts.poppinsMedium25
-    m.stepTwoNumber.font = m.fonts.poppinsMedium30
-    m.stepTwoText.font = m.fonts.poppinsMedium25
-    m.codeValueText.font = m.fonts.poppinsMedium24
-    m.emailText.font = m.fonts.poppinsMedium24
+    m.DeviceLinkTitleText.font = m.fonts.dmSansMedium32
+    m.stepOneNumber.font = m.fonts.dmSansMedium30
+    m.stepOneText.font = m.fonts.dmSansMedium25
+    m.stepTwoNumber.font = m.fonts.dmSansMedium30
+    m.stepTwoText.font = m.fonts.dmSansMedium25
+    m.codeValueText.font = m.fonts.dmSansMedium24
+    m.emailText.font = m.fonts.dmSansMedium24
 end sub
 
 sub SetupColor()

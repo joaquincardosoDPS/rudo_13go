@@ -360,7 +360,7 @@ function createDateLabel(dateStart, dateEnd, badgeObj = invalid as dynamic)
 
     dateText = CreateObject("roSGNode", "Label")
     dateText.color = m.theme.white
-    dateText.font = m.fonts.poppinsMedium18
+    dateText.font = m.fonts.dmSansMedium18
     dateText.text = dateTimeString
     if isValid(badgeObj)
         dateText.height = badgeObj.boundingRect().height

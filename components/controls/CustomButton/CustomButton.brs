@@ -103,7 +103,7 @@ End Sub
 
 Sub OnIsFilledBgOnFocusChange()
     If(m.top.isFilledBgOnFocus)
-        m.slButtonText.font = m.fonts.poppinsMedium25
+        m.slButtonText.font = m.fonts.dmSansMedium25
     End IF
 End Sub
 

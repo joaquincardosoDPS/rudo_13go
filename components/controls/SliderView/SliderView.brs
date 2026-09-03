@@ -34,7 +34,7 @@ sub onpEventLoad(event as object)
 end sub
 
 sub setFonts()
-    m.lEventTitle.font = m.fonts.poppinsReg26
+    m.lEventTitle.font = m.fonts.dmSansReg26
 end sub
 
 sub setColors()

@@ -52,12 +52,12 @@ sub SetControls()
 end sub
 
 sub SetupFonts()
-    m.loginEmailTitleText.font = m.fonts.poppinsMedium29
-    m.emailPlaceholderText.font = m.fonts.poppinsMedium24
+    m.loginEmailTitleText.font = m.fonts.dmSansMedium29
+    m.emailPlaceholderText.font = m.fonts.dmSansMedium24
 
-    m.loginPasswordTitleText.font = m.fonts.poppinsMedium29
-    m.passwordPlaceholderText.font = m.fonts.poppinsMedium24
-    m.forgotPasswordPromptText.font = m.fonts.poppinsMedium24
+    m.loginPasswordTitleText.font = m.fonts.dmSansMedium29
+    m.passwordPlaceholderText.font = m.fonts.dmSansMedium24
+    m.forgotPasswordPromptText.font = m.fonts.dmSansMedium24
 end sub
 
 sub SetupColor()
@@ -80,7 +80,7 @@ sub SetupColor()
         backgroundColor: m.theme.clrPrimaryButton
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "poppinsMedium24"
+        fontSize: "dmSansMedium24"
         margin: 20
     }
     m.continueButton.update(btnFields)
@@ -185,12 +185,12 @@ End Sub
 sub Initialize()
     fontStyle = {
         "Normal": {
-            "fontUri": "pkg:/fonts/Poppins-Medium.ttf"
+            "fontUri": "pkg:/fonts/DMSans-Medium.ttf"
             "fontSize": 24
             "color": m.theme.white
         }
         "Link": {
-            "fontUri": "pkg:/fonts/Poppins-Medium.ttf"
+            "fontUri": "pkg:/fonts/DMSans-Medium.ttf"
             "fontSize": 24
             "color": m.theme.focPrimary
         }
@@ -393,7 +393,7 @@ sub ShowError(message as string)
         m.errorLabel.width = 504
         m.errorLabel.horizAlign = "left"
         m.errorLabel.wrap = true
-        m.errorLabel.font = m.fonts.poppinsMedium18
+        m.errorLabel.font = m.fonts.dmSansMedium18
         m.errorLabel.color = m.theme.focPrimary
         parentGroup.insertChild(m.errorLabel, 2)
         m.errorParent = parentGroup

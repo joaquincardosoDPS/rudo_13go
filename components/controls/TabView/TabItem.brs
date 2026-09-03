@@ -26,7 +26,7 @@ sub setupColor()
 end sub
 
 sub setupFonts()
-    m.lTitle.font = m.fonts.poppinsMedium26
+    m.lTitle.font = m.fonts.dmSansMedium26
 end sub
 
 sub onContentChange()

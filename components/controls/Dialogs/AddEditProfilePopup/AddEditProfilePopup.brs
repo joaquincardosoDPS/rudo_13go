@@ -56,11 +56,11 @@ sub SetControls()
 end sub
 
 sub SetupFonts()
-    m.pageTitle.font = m.fonts.poppinsMedium29
-    m.profileNameText.font = m.fonts.poppinsMedium24
-    m.deleteProfileText.font = m.fonts.poppinsMedium24
-    m.deleteDialogText.font = m.fonts.poppinsMedium25
-    m.deleteDialogMeasureText.font = m.fonts.poppinsMedium25
+    m.pageTitle.font = m.fonts.dmSansMedium29
+    m.profileNameText.font = m.fonts.dmSansMedium24
+    m.deleteProfileText.font = m.fonts.dmSansMedium24
+    m.deleteDialogText.font = m.fonts.dmSansMedium25
+    m.deleteDialogMeasureText.font = m.fonts.dmSansMedium25
 end sub
 
 sub SetupColor()
@@ -78,7 +78,7 @@ sub SetupColor()
         backgroundColor: m.theme.clrPrimaryButton
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fotnSize: "poppinsMedium24"
+        fotnSize: "dmSansMedium24"
         margin: 18
     }
     m.profileNameButton.update(inputFields)
@@ -89,7 +89,7 @@ sub SetupColor()
         backgroundColor: m.theme.clrSecondary
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "poppinsMedium24"
+        fontSize: "dmSansMedium24"
         margin: 20
     }
     m.createProfileButton.update(btnFields)
@@ -470,7 +470,7 @@ sub ShowError(message as string)
         m.errorLabel.width = 600
         m.errorLabel.wrap = true
         m.errorLabel.horizAlign = "left"
-        m.errorLabel.font = m.fonts.poppinsMedium18
+        m.errorLabel.font = m.fonts.dmSansMedium18
         m.errorLabel.color = m.theme.focPrimary
         m.lgForm.appendChild(m.errorLabel)
     end if

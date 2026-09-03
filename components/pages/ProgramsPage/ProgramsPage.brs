@@ -37,8 +37,8 @@ sub setupColor()
 end sub
 
 sub setupFonts()
-    m.rlProgramList.rowLabelFont = m.fonts.poppinsMedium26
-    m.noData.font = m.fonts.poppinsBold32
+    m.rlProgramList.rowLabelFont = m.fonts.dmSansMedium26
+    m.noData.font = m.fonts.dmSansBold32
 end sub
 
 sub setObservers()

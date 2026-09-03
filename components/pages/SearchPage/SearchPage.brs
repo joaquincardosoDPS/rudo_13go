@@ -57,11 +57,11 @@ sub SetupColor()
 end sub
 
 sub SetupFonts()
-    m.searchPlaceholderHintText.font = m.fonts.poppinsMedium39
-    m.searchPlaceholderText.font = m.fonts.poppinsMedium39
-    m.searchScene.font = m.fonts.poppinsMedium30
-    m.minChar.font = m.fonts.poppinsMedium30
-    m.resFail.font = m.fonts.poppinsMedium30
+    m.searchPlaceholderHintText.font = m.fonts.dmSansMedium39
+    m.searchPlaceholderText.font = m.fonts.dmSansMedium39
+    m.searchScene.font = m.fonts.dmSansMedium30
+    m.minChar.font = m.fonts.dmSansMedium30
+    m.resFail.font = m.fonts.dmSansMedium30
     UpdateSearchFieldText("")
 end sub
 
@@ -72,7 +72,7 @@ sub setupPageLoader()
     m.pageLoader.loaderWidth = "100"
     m.pageLoader.pageSpinnerTextTranslation = "[-50,130]" 
     m.pageLoader.showSpinnerText = "CARGANDO..."
-    m.pageLoader.textFont = m.fonts.poppinsMedium30
+    m.pageLoader.textFont = m.fonts.dmSansMedium30
     m.pageLoader.isBackground = "false"
     m.pageLoader.pageTranslation = [1180, 440]
     m.pageLoader.visible = "false"

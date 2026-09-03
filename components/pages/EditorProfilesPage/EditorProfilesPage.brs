@@ -37,8 +37,8 @@ sub SetControls()
 end sub
 
 sub SetupFonts()
-    m.screenTitle.font = m.fonts.poppinsMedium29
-    m.screenSubtitle.font = m.fonts.poppinsMedium24
+    m.screenTitle.font = m.fonts.dmSansMedium29
+    m.screenSubtitle.font = m.fonts.dmSansMedium24
 end sub
 
 sub SetupColor()
@@ -93,7 +93,7 @@ sub Initialize()
         backgroundColor: m.theme.clrSecondary
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "poppinsMedium24"
+        fontSize: "dmSansMedium24"
         margin: 20
     }
     m.editProfilesButton.update(btnFields)

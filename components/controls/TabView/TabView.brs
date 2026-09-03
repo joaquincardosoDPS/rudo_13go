@@ -22,7 +22,7 @@ sub setObservers()
 end sub
 
 sub setupFonts()
-    m.lHiddenTitle.font = m.fonts.poppinsMedium26
+    m.lHiddenTitle.font = m.fonts.dmSansMedium26
 end sub
 
 sub setupColor()

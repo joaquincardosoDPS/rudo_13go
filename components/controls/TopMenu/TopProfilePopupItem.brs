@@ -4,7 +4,7 @@ sub init()
     m.mgAvatar = m.top.findNode("mgAvatar")
     m.pAvatar = m.top.findNode("pAvatar")
     m.lTitle = m.top.findNode("lTitle")
-    m.lTitle.font = m.fonts.poppinsMedium24
+    m.lTitle.font = m.fonts.dmSansMedium24
     m.lTitle.color = m.theme.white
 end sub
 

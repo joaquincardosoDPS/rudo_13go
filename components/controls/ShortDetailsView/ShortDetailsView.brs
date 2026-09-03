@@ -82,7 +82,7 @@ sub onContentInfoChanged()
             lTitle.lineSpacing = -3
             lTitle.wrap = true
             lTitle.maxLines = 2
-            lTitle.font = m.fonts.poppinsBold32
+            lTitle.font = m.fonts.dmSansBold32
             lTitle.color = m.theme.white
             lTitle.text = m.content.title
             m.lgDetails.appendChild(lTitle)
@@ -95,7 +95,7 @@ sub onContentInfoChanged()
             lDescription.lineSpacing = -3
             lDescription.wrap = true
             lDescription.maxLines = 4
-            lDescription.font = m.fonts.poppinsMedium24
+            lDescription.font = m.fonts.dmSansMedium24
             lDescription.color = m.theme.white
             if m.content.description_short <> invalid AND m.content.description_short <> ""
                 lDescription.text = m.content.description_short
@@ -136,7 +136,7 @@ sub createMetadataButtons()
     '     focusBackgroundColor: m.theme.white
     '     focusBorderImage: m.theme.filledBackGroundImage
     '     isFilledBgOnFocus: true
-    '     fontSize: "poppinsMedium26"
+    '     fontSize: "dmSansMedium26"
     '     posterImage: "pkg:/images/focus/btnplay.png"
     '     addColorOnImage: true
     '     padding: 20

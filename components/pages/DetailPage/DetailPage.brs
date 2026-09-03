@@ -56,8 +56,8 @@ sub setControls()
 end sub
 
 sub setUpFonts()
-    m.lRemainingTime.font = m.fonts.poppinsMedium20
-    m.lNoEpisode.font = m.fonts.poppinsMedium20
+    m.lRemainingTime.font = m.fonts.dmSansMedium20
+    m.lNoEpisode.font = m.fonts.dmSansMedium20
 end sub
 
 sub setUpColor()
@@ -319,7 +319,7 @@ sub updateMetaDetails()
             lTitle.lineSpacing = -3
             lTitle.wrap = true
             lTitle.maxLines = 2
-            lTitle.font = m.fonts.poppinsBold32
+            lTitle.font = m.fonts.dmSansBold32
             lTitle.color = m.theme.clrPrimaryTitle
             lTitle.text = m.programData.title
             m.lgDetails.appendChild(lTitle)
@@ -347,7 +347,7 @@ sub updateMetaDetails()
                 lRating.height = 32
                 lRating.horizAlign = "center"
                 lRating.vertAlign = "center"
-                lRating.font = m.fonts.poppinsMedium24
+                lRating.font = m.fonts.dmSansMedium24
                 lRating.color = m.theme.white
                 lRating.text = m.programData.classification
                 pRating.appendChild(lRating)
@@ -368,7 +368,7 @@ sub updateMetaDetails()
             lGender = createObject("roSGNode", "Label")
             lGender.id = "lGender"
             lGender.width = 800
-            lGender.font = m.fonts.poppinsMedium24
+            lGender.font = m.fonts.dmSansMedium24
             lGender.color = m.theme.white
             lGender.text = genderText
             lgHoriz.appendChild(lGender)
@@ -382,7 +382,7 @@ sub updateMetaDetails()
             lDescription.lineSpacing = -3
             lDescription.wrap = true
             lDescription.maxLines = 3
-            lDescription.font = m.fonts.poppinsMedium24
+            lDescription.font = m.fonts.dmSansMedium24
             lDescription.color = m.theme.white
             if m.programData.description_short <> invalid AND m.programData.description_short <> ""
                 lDescription.text = m.programData.description_short
@@ -430,7 +430,7 @@ sub createMetadataButtons()
         backGroundImage: m.theme.filledBackGroundImage
         focusBorderImage: m.theme.filledBackGroundImage
         isFilledBgOnFocus: true
-        fontSize: "poppinsMedium26"
+        fontSize: "dmSansMedium26"
         posterImage: "pkg:/images/focus/btnplay.png"
         addColorOnImage: true
         padding: 20
@@ -450,7 +450,7 @@ sub createMetadataButtons()
         focusBackgroundColor: m.theme.focPrimary
         focusBorderImage: "pkg:/images/icons/addToMylist-icon.png"
         isFilledBgOnFocus: false
-        fontSize: "poppinsMedium26"
+        fontSize: "dmSansMedium26"
         margin: 0
     }
     m.bAddToFavourite.update(buttonFields)
@@ -828,13 +828,13 @@ function createLeftSection(content as object, width as float) as object
     title.width = width
     title.text = "Synopsis"
     title.color = m.theme.white
-    title.font = m.fonts.poppinsBold28
+    title.font = m.fonts.dmSansBold28
     desc = CreateObject("roSGNode", "Label")
     desc.width = width
     desc.wrap = true
     desc.maxLines = 5
     desc.color = m.theme.clrSecondaryText
-    desc.font = m.fonts.poppinsMedium24
+    desc.font = m.fonts.dmSansMedium24
     if content.description <> invalid AND content.description <> ""
         desc.text = content.description
     else if content.description_short <> invalid AND content.description_short <> ""
@@ -870,7 +870,7 @@ function createLabel(label as string, value as dynamic, width as float) as objec
     node = CreateObject("roSGNode", "Label")
     node.width = width
     node.color = m.theme.clrSecondaryText
-    node.font = m.fonts.poppinsMedium20
+    node.font = m.fonts.dmSansMedium20
     node.text = label + ": " + value
     return node
 end function

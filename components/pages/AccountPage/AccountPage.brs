@@ -40,12 +40,12 @@ sub SetControls()
 end sub 
 
 sub SetupFonts()
-    m.titleLabel.font = m.fonts.poppinsMedium29
-    m.lProfileName.font = m.fonts.poppinsMedium20
-    m.lName.font = m.fonts.poppinsMedium20
-    m.lEmail.font = m.fonts.poppinsMedium20
-    m.lGender.font = m.fonts.poppinsMedium20
-    m.lBirthdate.font = m.fonts.poppinsMedium20
+    m.titleLabel.font = m.fonts.dmSansMedium29
+    m.lProfileName.font = m.fonts.dmSansMedium20
+    m.lName.font = m.fonts.dmSansMedium20
+    m.lEmail.font = m.fonts.dmSansMedium20
+    m.lGender.font = m.fonts.dmSansMedium20
+    m.lBirthdate.font = m.fonts.dmSansMedium20
 end sub
 
 sub SetupColor()
@@ -123,7 +123,7 @@ sub Initialize()
         backgroundColor: m.theme.clrSecondary
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "poppinsMedium24"
+        fontSize: "dmSansMedium24"
         padding: 20
         posterImageSize: "35"
         margin: 18

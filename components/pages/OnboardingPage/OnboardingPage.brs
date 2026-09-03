@@ -39,15 +39,15 @@ sub SetControls()
         backgroundColor: m.theme.focPrimary
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "poppinsMedium24"
+        fontSize: "dmSansMedium24"
         margin: 20
     }
     m.LoginButton.update(btnFields)
 end sub
 
 sub SetupFonts()
-    m.welcomeTitleText.font = m.fonts.poppinsMedium29
-    m.registerText.font = m.fonts.poppinsMedium26
+    m.welcomeTitleText.font = m.fonts.dmSansMedium29
+    m.registerText.font = m.fonts.dmSansMedium26
 end sub
 
 sub SetupColor()
@@ -98,12 +98,12 @@ end sub
 sub Initialize()
     fontStyle = {
         "Normal": {
-            "fontUri": "pkg:/fonts/Poppins-Medium.ttf"
+            "fontUri": "pkg:/fonts/DMSans-Medium.ttf"
             "fontSize": 24
             "color": m.theme.white
         }
         "Link": {
-            "fontUri": "pkg:/fonts/Poppins-Medium.ttf"
+            "fontUri": "pkg:/fonts/DMSans-Medium.ttf"
             "fontSize": 24
             "color": m.theme.focPrimary
         }

@@ -25,7 +25,7 @@ sub SetControls()
 end sub 
 
 sub SetupFonts()
-    m.noData.font = m.fonts.poppinsBold32
+    m.noData.font = m.fonts.dmSansBold32
 end sub
 
 sub SetupColor()

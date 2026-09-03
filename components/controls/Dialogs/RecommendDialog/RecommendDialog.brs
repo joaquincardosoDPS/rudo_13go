@@ -29,9 +29,9 @@ sub SetControls()
 end sub 
 
 sub SetupFonts()
-    m.titleLabel.font = m.fonts.poppinsMedium39
-    m.descLabel.font = m.fonts.poppinsMedium24
-    m.rlProgramList.rowLabelFont = m.fonts.poppinsMedium29
+    m.titleLabel.font = m.fonts.dmSansMedium39
+    m.descLabel.font = m.fonts.dmSansMedium24
+    m.rlProgramList.rowLabelFont = m.fonts.dmSansMedium29
 end sub
 
 sub SetupColor()
@@ -54,7 +54,7 @@ sub Initialize()
         backgroundColor: m.theme.clrSecondary
         focusBorderImage: m.theme.filledBackGroundImage
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "poppinsMedium24"
+        fontSize: "dmSansMedium24"
         padding: 20
         posterImageSize: "35"
         margin: 18
