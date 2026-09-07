@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <component name="MenuContentItem" extends="Group">
   <script type="text/brightscript" uri="MenuContentItem.brs" />
+  <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
   <interface>
     <field id="itemContent" type="node" onChange="ShowContent" />
     <field id="width" type="float" />
@@ -10,8 +11,6 @@
     <field id="itemHasFocus" type="Boolean" onChange="ItemHasFocusChanged" />
   </interface>
   <children>
-    <Label id="itemTitle" width="160" height="36" vertAlign="center" horizAlign="center" />
-    <Poster id="itemSelect" uri="pkg:/images/focus/underline.png" height="6" visible="false" />
-    <Poster id="itemFocus" uri="pkg:/images/focus/underline.png" height="6" opacity="0.0" />
+    <Poster id="itemIcon" width="40" height="40" loadWidth="40" loadHeight="40" loadDisplayMode="scaleToFit" translation="[25,25]" />
   </children>
 </component>

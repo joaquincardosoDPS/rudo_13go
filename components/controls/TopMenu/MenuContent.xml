@@ -3,5 +3,6 @@
     <interface>
         <field id="title" type="string" />
         <field id="isSelected" type="boolean" value="false" />
+        <field id="iconUri" type="string" />
     </interface>
 </component>

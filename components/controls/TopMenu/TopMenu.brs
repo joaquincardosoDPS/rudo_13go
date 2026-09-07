@@ -121,11 +121,24 @@ sub Initlization()
     }
     m.loginButton.update(btnFields)
     menuList = m.global.menuList.items
+
+    menuIcons = {
+        "Portada": "pkg:/images/icons/sidebar/icon_home.png"
+        "Programas": "pkg:/images/icons/sidebar/icon_vod.png"
+        "En vivo": "pkg:/images/icons/sidebar/icon_live.png"
+        "Radios": "pkg:/images/icons/sidebar/icon_radios.png"
+        "Búsqueda": "pkg:/images/icons/sidebar/icon_search.png"
+    }
+
+
     m.content = createObject("roSGNode", "ContentNode")
     for each menu in menuList
         menuContent = createObject("roSGNode", "MenuContent")
         menuContent.title = menu
         menuContent.isSelected = false
+        iconUri = ""
+        If menuIcons.DoesExist(menu) then iconUri = menuIcons[menu]
+        menuContent.iconUri = iconUri
         m.content.appendChild(menuContent)
     end for
     SetupContent()
@@ -487,18 +500,8 @@ sub OnFocusChild()
 end sub
 
 sub SetupContent()
-    columnWidth = []
-    for i = 0 to m.content.getChildCount() - 1
-        m.lHidden.width = 0
-        m.lHidden.text = m.content.getChild(i).title
-        labelBoundingRect = m.lHidden.boundingRect()
-        columnWidth.push(labelBoundingRect.width + 20)
-    end for
-    m.topMenuGrid.columnWidths = columnWidth
     m.topMenuGrid.content = m.content
     m.topMenuGrid.itemSelected = 0
-    brTopMenuGrid = m.topMenuGrid.boundingRect()
-    m.topMenuGrid.translation = [(1920 - brTopMenuGrid.width) / 2, 50]
 end sub
 
 sub OnItemSelected(event as dynamic)

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "c13_reloaded",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "C:\\Users\\Joaquin\\Documents\\projects\\c13_reloaded"],
+      "port": 5173
+    }
+  ]
+}

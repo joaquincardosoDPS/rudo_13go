@@ -1,46 +1,24 @@
 sub init()
     SetLocals()
     SetControls()
-    SetupFonts()
-    SetupColor()
 end sub
 
 sub SetLocals()
     m.theme = m.global.appTheme
-    m.fonts = m.global.Fonts
+    m.focusPercent = 0
 end sub 
 
 sub SetControls()
-    m.itemTitle = m.top.findNode("itemTitle")
-    m.itemSelect = m.top.findNode("itemSelect")
-    m.itemFocus = m.top.findNode("itemFocus")
+    m.itemIcon = m.top.findNode("itemIcon")
 end sub 
 
-sub SetupFonts()
-    m.itemTitle.font = m.fonts.dmSansMedium24
-end sub 
-
-sub SetupColor()
-    m.defaultTextColor = m.theme.clrSecondaryText
-    m.activeTextColor = m.theme.white
-    m.itemTitle.color = m.defaultTextColor
-    m.itemSelect.blendColor = m.theme.selectedFieldColor
-    m.itemFocus.blendColor = m.theme.focPrimary
-end sub 
 
 sub ShowContent()
     itemContent = m.top.itemContent
-    m.itemTitle.width = m.top.width
-    m.itemTitle.text = itemContent.title
-    textBounds = m.itemTitle.boundingRect()
-    underlineWidth = textBounds.width
-    underlineY = textBounds.height + 3
-    m.itemSelect.width = underlineWidth
-    m.itemFocus.width = underlineWidth
-    m.itemFocus.translation = [0, underlineY]
-    m.itemSelect.translation = [0, underlineY]
-    m.itemSelect.visible = itemContent.isSelected
-    UpdateTitleColor()
+    if isValid(itemContent) AND isNonEmptyString(itemContent.iconUri)
+        m.itemIcon.uri = itemContent.iconUri
+    end if
+    UpdateIconColor()
 end sub
 
 Sub FocusPercentChanged(event as Dynamic)
@@ -68,19 +46,20 @@ Sub GridHasFocusChanged()
 End Sub
 
 Sub ChangeFocus(focusPercent)
-    m.itemFocus.opacity = focusPercent
-    UpdateTitleColor()
+    m.focusPercent = focusPercent
+    UpdateIconColor()
 end Sub
 
-sub UpdateTitleColor()
+sub UpdateIconColor()
     itemContent = m.top.itemContent
-    hasActiveState = false
-    if ((itemContent <> invalid AND itemContent.isSelected) OR (m.itemFocus.opacity > 0))
-        hasActiveState = true
-    end if
-    if hasActiveState
-        m.itemTitle.color = m.activeTextColor
+    isFocused = isValid(m.FocusPercent) AND m.FocusPercent > 0
+    isActive = isValid(itemContent) and itemContent.isSelected
+
+    if isFocused
+        m.itemIcon.blendColor = m.theme.white
+    else if isActive
+        m.itemIcon.blendColor = m.theme.focPrimary
     else
-        m.itemTitle.color = m.defaultTextColor
+        m.itemIcon.blendColor = m.theme.clrSecondaryText
     end if
 End Sub
