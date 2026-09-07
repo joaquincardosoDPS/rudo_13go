@@ -498,7 +498,7 @@ sub OnFocusChild()
             SetFocusOnLoginMyProfile(true)
         end if
     end if
-    isGridFocused = m.top.hasFocus() AND isValid(m.top.focusedChild) AND m.top.focusedChild.id = "topMenuGrid"
+    isGridFocused = isValid(m.topMenuGrid) AND (m.topMenuGrid.hasFocus() OR m.topMenuGrid.isInFocusChain())
     SetMenuExpanded(isGridFocused)
 end sub
 
