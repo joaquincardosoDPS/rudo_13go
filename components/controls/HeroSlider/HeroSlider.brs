@@ -14,6 +14,7 @@ sub setLocals()
     m.items = []
     m.isImagesHidden = false
     m.activeIndex = 0
+    m.currentItem = invalid
 end sub
 
 sub setControls()
@@ -52,6 +53,7 @@ end sub
 
 sub setObservers()
     m.top.observeField("items", "onItemsSet")
+    m.top.observeField("focusedItem", "onFocusedItemSet")
     m.top.observeField("visible", "onVisibilityChanged")
     m.pImage.observeField("loadStatus", "onLoadStatusChanged")
     m.pLogo.observeField("loadStatus", "onLogoImageLoadStatusChanged")
@@ -113,9 +115,18 @@ sub onItemsSet()
         clearSlider()
         return
     end if
+    m.currentItem = m.items[m.activeIndex]
     setupPosters()
     updateMeta()
-    m.bWatchNow.visible = true
+    if m.top.variant <> "compact" then m.bWatchNow.visible = true
+end sub
+
+sub onFocusedItemSet()
+    item = m.top.focusedItem
+    if item = invalid then return
+    m.currentItem = item
+    setupPosters()
+    updateMeta()
 end sub
 
 sub clearSlider()
@@ -158,7 +169,7 @@ sub setupPosters()
         m.pFadeBottom.visible = false
         m.pFadeLeft.visible = false
     end if
-    m.pImage.uri = getSliderImage(m.items[m.activeIndex])
+    m.pImage.uri = getSliderImage(m.currentItem)
 end sub
 
 sub setPosterSize(node as object, w as dynamic, h as dynamic)
@@ -187,11 +198,12 @@ function getSliderImage(item as object) as string
 end function
 
 sub updateMeta()
-    if m.items = invalid OR m.items.count() = 0 then return
-    item = m.items[m.activeIndex]
+    item = m.currentItem
     if item = invalid then return
-    setupWatchNowButton()
-    SetFocus(m.bWatchNow)
+    if m.top.variant <> "compact"
+        setupWatchNowButton()
+        SetFocus(m.bWatchNow)
+    end if
     m.pLogo.uri = ""
     m.title.text = ""
     m.desc.text = ""
@@ -223,7 +235,7 @@ sub updateMeta()
 end sub
 
 sub onFocusedChild()
-    if m.top.hasFocus() AND m.bWatchNow <> invalid then setFocus(m.bWatchNow)
+    if m.top.hasFocus() AND m.top.variant <> "compact" AND m.bWatchNow <> invalid then setFocus(m.bWatchNow)
 end sub
 
 sub setOverlayVisibility(shouldShow as boolean)
@@ -242,7 +254,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
     if sliderHasFocus = false then return false
     if key = "OK"
         if isValid(m.bWatchNow) AND m.bWatchNow.hasFocus()
-            item = m.items[m.activeIndex]
+            item = m.currentItem
             if item <> invalid
                 itemContent = CreateObject("roSGNode", "ProgramItemNode")
                 itemContent.setFields(item)
@@ -256,6 +268,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
     else if key = "right"
         if m.items.count() > 1
             m.activeIndex = (m.activeIndex + 1) MOD m.items.count()
+            m.currentItem = m.items[m.activeIndex]
             setupPosters()
             updateMeta()
         end if
@@ -263,6 +276,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
     else if key = "left"
         if m.items.count() > 1
             m.activeIndex = (m.activeIndex - 1 + m.items.count()) MOD m.items.count()
+            m.currentItem = m.items[m.activeIndex]
             setupPosters()
             updateMeta()
         end if

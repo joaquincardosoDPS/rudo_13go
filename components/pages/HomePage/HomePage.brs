@@ -465,6 +465,8 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
                 title: raw.title
                 description: raw.bajada
                 description_short: raw.bajada
+                epigrafe: raw.show
+                llamado: raw.llamado
                 key: raw.nid
                 image_land: {
                     small: imageUrl,
@@ -484,17 +486,14 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
         end for
         if isValid(m.heroSlider)
             heroSlider = m.heroSlider
-            heroItem = items[0]
-            heroItem.epigrafe = rawItems[0].show
-            heroItem.llamado = rawItems[0].llamado
             heroSlider.variant = "compact"
-            heroSlider.items = [heroItem]
+            heroSlider.items = [items[0]]
             heroSlider.componentHeight = 660
             heroSlider.visible = true
             m.gDetails.translation = [106,0]
             m.categoriesNode.push(heroSlider)
         end if
-        if items.count() > 1
+        if items.count() > 0
             catData = {}
             catData.title = "Destacados"
             catData.format = "default"
@@ -503,7 +502,6 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
             catData.image_background_category = {}
             catData.image_logo_category = {}
             catData.key = "Destacados"
-            items.Delete(0)
             catData.total_display_records = items.count()
             catData.total_records = items.count()
             catData.programs = items
@@ -630,6 +628,9 @@ end sub
 sub onRowItemFocused(event as dynamic)
     focusedItem = event.getData()
     if isValid(focusedItem) AND isValid(focusedItem.itemData)
+        if focusedItem.sliderId = "destacados" AND isValid(m.heroSlider)
+            m.heroSlider.focusedItem = focusedItem.itemData
+        end if
     end if
 end sub
 

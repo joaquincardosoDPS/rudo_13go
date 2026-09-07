@@ -71,8 +71,8 @@ function getFirstContentIndex() as integer
     childCount = getContainerChildCount()
     if childCount <= 0 then return 0
 
-    heroIndex = getHeroSliderIndex(true)
-    if heroIndex = 0 AND childCount > 1
+    firstNode = m.gContainer.getChild(0)
+    if isValid(firstNode) AND firstNode.subType() = "HeroSlider" AND firstNode.variant = "compact" AND childCount > 1
         return 1
     end if
 
@@ -147,9 +147,10 @@ sub onFocusedChild()
             m.isFirstTime = false
             m.isReRenderUI = false
             if (m.gContainer.getChildCount() > 0)
-                compNode = m.gContainer.getChild(0)
+                targetIndex = getFirstContentIndex()
+                compNode = m.gContainer.getChild(targetIndex)
                 setFocus(compNode)
-                m.focusComponentIndex = 0
+                m.focusComponentIndex = targetIndex
                 if isValid(compNode) AND compNode.subType() = "HeroSlider"
                     setHeroImageHidden(false)
                 end if
