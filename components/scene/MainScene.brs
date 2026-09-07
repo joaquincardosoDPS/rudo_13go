@@ -429,6 +429,23 @@ sub onTopMenuItemSelected(event as dynamic)
             ' TODO Paso 5: pantalla de Radios pendiente de construir. Por ahora no navega a ningun lado.
             return
         end if
+
+        targetPageId = ""
+        if pageName = "Portada"
+            targetPageId = "homepage"
+        else if pageName = "Búsqueda"
+            targetPageId = "searchpage"
+        else if pageName = "Programas"
+            targetPageId = "showprogramspage"
+        else if pageName = "En vivo"
+            targetPageId = "livepage"
+        end if
+
+        topNode = m.ViewStackManager.GetTop()
+        if isValid(topNode) AND isNonEmptyString(targetPageId) AND LCase(topNode.id) = targetPageId
+            return
+        end if
+
         if isValid(m.HomePage) then m.HomePage.isDestroy = true
         if isValid(m.LivePage) then m.LivePage.isDestroy = true
         if isValid(m.MyListPage) then m.MyListPage.isDestroy = true
