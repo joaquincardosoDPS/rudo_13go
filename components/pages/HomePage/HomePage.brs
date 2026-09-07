@@ -346,7 +346,7 @@ end sub
 
 sub OnGetHomeTop10APIResponse(event as dynamic)
     apiResponse = event.getData()
-    rawItems = getValueFromProps(apiResponse, "data", [])
+    rawItems = getValueFromProps(apiResponse, "data.data", [])
     items = []
     for each raw in rawItems
         imageUrl = raw.image
@@ -432,7 +432,7 @@ end sub
 sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
     apiResponse = event.getData()
     print "OnGetFeaturedSliderProgramsAPIResponse : response : " 'FormatJson(apiResponse)
-    rawItems = getValueFromProps(apiResponse, "data", [])
+    rawItems = getValueFromProps(apiResponse, "data.data", [])
     if isValid(rawItems) AND rawItems.count() > 0
         items = []
         for each raw in rawItems
