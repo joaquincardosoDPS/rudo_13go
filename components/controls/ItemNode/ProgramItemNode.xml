@@ -26,5 +26,6 @@
         <field id="ringColor" type="string" />
         <field id="epigrafe" type="string" />
         <field id="llamado" type="string" />
+        <field id="duration" type="string" />
     </interface>
 </component>

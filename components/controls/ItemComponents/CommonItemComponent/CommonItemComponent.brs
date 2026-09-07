@@ -16,6 +16,8 @@ sub SetControls()
     m.mgHBorderMask = m.top.findNode("mgHBorderMask")
     m.rHRightTop = m.top.findNode("rHRightTop")
     m.lHRightTop = m.top.findNode("lHRightTop")
+    m.lHEpigrafe = m.top.findNode("lHEpigrafe")
+    m.lHTitle = m.top.findNode("lHTitle")
     m.pHCard = m.top.findNode("pHCard")
     m.pUnfillProgressRect = m.top.findNode("pUnfillProgressRect")
     m.pFillProgressRect = m.top.findNode("pFillProgressRect")
@@ -54,6 +56,8 @@ sub SetupFonts()
     m.lNumberRightTop.font = m.fonts.dmSansBold23
     m.lVRightTop.font = m.fonts.dmSansMedium18
     m.lHRightTop.font = m.fonts.dmSansMedium12
+    m.lHEpigrafe.font = m.fonts.dmSansBold18
+    m.lHTitle.font = m.fonts.dmSansMedium18
     m.lViewMoreTitle.font = m.fonts.dmSansMedium24
     m.lETime.font = m.fonts.dmSansBold23
     m.lEDescription.font = m.fonts.dmSansMedium20
@@ -63,7 +67,10 @@ end sub
 sub SetupColors()
     m.lNumberRightTop.color = m.theme.white
     m.lVRightTop.color = m.theme.black
-    m.lHRightTop.color = m.theme.black
+    m.lHRightTop.color = m.theme.white
+    m.rHRightTop.color = m.theme.focPrimary
+    m.lHEpigrafe.color = m.theme.focPrimary
+    m.lHTitle.color = m.theme.white
     m.pUnfillProgressRect.color = m.theme.white
     m.pFillProgressRect.color = m.theme.focPrimary
     m.rVRightTop.color = m.theme.focTertiary
@@ -153,9 +160,9 @@ sub itemContent_Changed()
         m.mgVBorderMask.maskSize = getMaskSize(m.mgVBorderMask)
         SetVerticalCardSchedule(itemContent)
         m.gVerticalCard.visible = true
-    else 
+    else
         imageURL = GetImageURL(itemContent.image_land, "small")
-        if isEmptyString(imageURL) then 
+        if isEmptyString(imageURL) then
             imageURL = "pkg:/images/card/card_320_180.png"
         end if
         m.pHCard.uri = imageURL
@@ -165,6 +172,21 @@ sub itemContent_Changed()
         else
             m.pFillProgressRect.visible = false
             m.pUnfillProgressRect.visible = false
+        end if
+        m.lHEpigrafe.text = ""
+        m.lHEpigrafe.visible = false
+        if isValid(itemContent.epigrafe) AND isNonEmptyString(itemContent.epigrafe)
+            m.lHEpigrafe.text = itemContent.epigrafe
+            m.lHEpigrafe.visible = true
+        end if
+        m.lHTitle.text = ""
+        if isValid(itemContent.title) AND isNonEmptyString(itemContent.title)
+            m.lHTitle.text = itemContent.title
+        end if
+        m.rHRightTop.visible = false
+        if isValid(itemContent.duration) AND isNonEmptyString(itemContent.duration)
+            m.lHRightTop.text = itemContent.duration
+            m.rHRightTop.visible = true
         end if
         m.gHorizCard.visible = true
     end if

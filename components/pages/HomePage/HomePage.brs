@@ -467,6 +467,7 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
                 description_short: raw.bajada
                 epigrafe: raw.show
                 llamado: raw.llamado
+                duration: raw.duration
                 key: raw.nid
                 image_land: {
                     small: imageUrl,

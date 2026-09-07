@@ -16,13 +16,14 @@
         <Group id="gHorizCard" translation="[0, 0]" visible="false">
             <MaskGroup id="mgHBorderMask" maskUri="pkg:/images/card/card_mask_320_180.png" translation="[0,0]">
                 <Poster id="pHCard" width="320" height="180" loadWidth="320" loadHeight="180" loadingBitmapUri="pkg:/images/card/card_320_180.png" failedBitmapUri="pkg:/images/card/card_320_180.png" loadDisplayMode="scaleToFit" visible="true" />
-                <Rectangle id="rHRightTop" width="100" height="22" translation="[0,0]" visible="false">
-                    <Label id="lHRightTop" width="100" height="22" horizAlign="left" vertAlign="center" translation="[0,0]" />
+                <Rectangle id="rHRightTop" width="70" height="22" translation="[244,152]" visible="false">
+                    <Label id="lHRightTop" width="70" height="22" horizAlign="center" vertAlign="center" translation="[0,0]" />
                 </Rectangle>
                 <Rectangle id="pUnfillProgressRect" width="320" height="10" opacity="0.8" visible="false" />
                 <Rectangle id="pFillProgressRect" width="320" height="10" visible="false" />
             </MaskGroup>
-            <Label id="lHRightTop" width="100" height="22" horizAlign="left" vertAlign="center" translation="[0,0]" />
+            <Label id="lHEpigrafe" width="320" height="20" horizAlign="left" vertAlign="center" wrap="false" translation="[0,188]" />
+            <Label id="lHTitle" width="320" height="24" horizAlign="left" vertAlign="center" wrap="false" translation="[0,208]" />
         </Group>
         <Group id="gViewMoreCard" translation="[0, 0]" visible="false">
             <MaskGroup id="mgViewMoreBorderMask" maskUri="pkg:/images/card/card_mask_320_180.png" translation="[0,0]">

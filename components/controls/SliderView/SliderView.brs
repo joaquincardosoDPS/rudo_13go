@@ -93,7 +93,7 @@ sub createDynamicCardsRowList()
 
     m.rowList = createObject("roSGNode", "RowList")
     m.rowList.vertFocusAnimationStyle = "floatingFocus"
-    m.rowList.horizFocusAnimationStyle = "floatingFocus"
+    m.rowList.rowFocusAnimationStyle = "floatingFocus"
     m.rowList.translation = [0, 0]
     m.gEventPage.visible = false
     if isEventCategory()
@@ -102,16 +102,16 @@ sub createDynamicCardsRowList()
         m.pEvent.uri = GetImageURL(m.top.category.image_logo_category)
         m.lEventTitle.text = m.top.category.title
         m.rowList.translation = [0, 106]
-        m.rowList.rowLabelOffset = [796, 15]
+        m.rowList.rowLabelOffset = [[796, 15]]
         m.rowList.itemClippingRect = "[796,0,1150,584]"
         m.rowList.focusxOffset = [796]
         m.rowList.showRowLabel = [false]
         m.rowList.itemSize = [1150, 584]
     else
-        m.rowList.rowLabelOffset = [100, 15]
+        m.rowList.rowLabelOffset = [[100, 15]]
         m.rowList.focusxOffset = [100]
         m.rowList.showRowLabel = [true]
-        m.rowList.itemSize = [1920, 1416]
+        m.rowList.itemSize = [320, 180]
     end if
     m.rowList.numRows = 3
     m.rowList.drawFocusFeedbackOnTop = "true"
