@@ -423,7 +423,12 @@ sub onTopMenuItemSelected(event as dynamic)
     if menuItem = invalid then return
 
     pageName = menuItem.title
+    print "MainScene : onTopMenuItemSelected : pageName = " pageName
     if isValid(pageName)
+        if pageName = "Radios"
+            ' TODO Paso 5: pantalla de Radios pendiente de construir. Por ahora no navega a ningun lado.
+            return
+        end if
         if isValid(m.HomePage) then m.HomePage.isDestroy = true
         if isValid(m.LivePage) then m.LivePage.isDestroy = true
         if isValid(m.MyListPage) then m.MyListPage.isDestroy = true
@@ -435,8 +440,6 @@ sub onTopMenuItemSelected(event as dynamic)
             ShowProgramsPage(true)
         else if pageName = "En vivo"
             ShowLivePage(true)
-        else if pageName = "Mi Lista"
-            ShowMyListPage(true)
         else
             ShowHomePage(true)
         end if
