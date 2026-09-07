@@ -135,12 +135,10 @@ sub setupPosters()
         m.title.width = w * 0.32
         m.desc.width = w * 0.32
         setOverlayVisibility(false)
-        m.pFadeBottom.width = imgWidth
-        m.pFadeBottom.height = imgHeight * 0.5
+        setPosterSize(m.pFadeBottom, imgWidth, imgHeight * 0.5)
         m.pFadeBottom.translation = [imgX, imgHeight * 0.5]
         m.pFadeBottom.visible = true
-        m.pFadeLeft.width = imgWidth * 0.6
-        m.pFadeLeft.height = imgHeight
+        setPosterSize(m.pFadeLeft, imgWidth * 0.6, imgHeight)
         m.pFadeLeft.translation = [imgX, 0]
         m.pFadeLeft.visible = true
     else

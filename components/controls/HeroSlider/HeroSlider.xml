@@ -17,8 +17,8 @@
         <Group id="pImageGroup" visible="false">
             <Poster id="pImage" loadDisplayMode="scaleToZoom" opacity="1.0" />
             <Poster id="overlayImage" uri="pkg:/images/overlay/detailpage_overlay.png" />
-            <Poster id="pFadeBottom" uri="pkg:/images/overlay/hero_fade_bottom.png" visible="false" />
-            <Poster id="pFadeLeft" uri="pkg:/images/overlay/hero_fade_left.png" visible="false" />
+            <Poster id="pFadeBottom" uri="pkg:/images/overlay/hero_fade_bottom.png" loadDisplayMode="stretchToFit" visible="false" />
+            <Poster id="pFadeLeft" uri="pkg:/images/overlay/hero_fade_left.png" loadDisplayMode="stretchToFit" visible="false" />
         </Group>
         <LayoutGroup id="lgDetails" addItemSpacingAfterChild="false" layoutDirection="vert" itemSpacings="[10,20,20,20]" translation="[100, 163]">
             <Poster id="pLogo" height="184" loadHeight="184" loadDisplayMode="scaleToZoom" />
