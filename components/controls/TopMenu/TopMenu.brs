@@ -567,12 +567,7 @@ function onKeyEvent(key, press) as Boolean
             end if
             return result
         end if
-        if key = "right"
-            if m.MyProfileLoginFocused = false
-                SetFocusOnLoginMyProfile(true)
-            end if
-            result = true
-        else if key = "left" AND (m.MyProfileLoginFocused = true OR (m.loginButton.hasFocus() OR m.loginButton.isInfocusChain())) AND m.gProfilePopup.visible = false
+        if key = "left" AND (m.MyProfileLoginFocused = true OR (m.loginButton.hasFocus() OR m.loginButton.isInfocusChain())) AND m.gProfilePopup.visible = false
             SetFocusOnLoginMyProfile(false)
             SetFocus(m.topMenuGrid)
             result = true

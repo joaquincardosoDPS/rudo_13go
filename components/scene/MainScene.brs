@@ -895,12 +895,12 @@ function OnkeyEvent(key as string, press as boolean) as boolean
         print "MainScene : onKeyEvent : key = " key " press = " press
         if key = "back"
             result = HandleBackKey()
-        else if key = "down"
+        else if key = "right"
             if (isValid(m.TopMenu) AND (m.TopMenu.hasFocus() OR m.TopMenu.IsInFocusChain()))
                 m.ViewStackManager.FocusTop()
                 result = true
             end if
-        else if key = "up"
+        else if key = "left"
             if isValid(m.TopMenu) AND m.TopMenu.visible 'and topNode.id <> "DetailPage"
                 SetFocus(m.TopMenu)
                 result = true
