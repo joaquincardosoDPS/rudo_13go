@@ -34,6 +34,10 @@ sub SetControls()
     m.lNumberRightTop = m.top.findNode("lNumberRightTop")
     m.pNCard = m.top.findNode("pNCard")
 
+    m.gCircle = m.top.findNode("gCircle")
+    m.pCircleCard = m.top.findNode("pCircleCard")
+    m.pCircleRing = m.top.findNode("pCircleRing")
+
     m.gEpisodeCard = m.top.findNode("gEpisodeCard")
     m.mgEBorderMask = m.top.findNode("mgEBorderMask")
     m.pECard = m.top.findNode("pECard")
@@ -78,10 +82,12 @@ sub itemContent_Changed()
     m.gNumber.visible = false
     m.gEpisodeCard.visible = false
     m.gViewMoreCard.visible = false
+    m.gCircle.visible = false
     ResetScheduleLabels()
     ' image_land, image_logo, image_port, image_slider
     if isValid(itemContent) AND isValid(itemContent.isViewMoreCard) AND itemContent.isViewMoreCard = true
         m.gViewMoreCard.visible = true
+        
         if isValid(itemContent.image_orientation) AND itemContent.image_orientation = "portrait"
             m.mgViewMoreBorderMask.maskUri = "pkg:/images/card/card_mask_324_576.png"
             m.pViewMoreCard.uri = "pkg:/images/card/card_324_576.png"
@@ -127,6 +133,14 @@ sub itemContent_Changed()
         m.lNumberRightTop.text = itemContent.number
         m.mgNumberBorderMask.maskSize = getMaskSize(m.mgNumberBorderMask)
         m.gNumber.visible = true
+    else if isValid(itemContent) AND isValid(itemContent.format) AND itemContent.format = "circle"
+        imageURL = itemContent.image
+        if isEmptyString(imageURL) then imageURL = "pkg:/images/other/default_user.png"
+        m.pCircleCard.uri = imageURL
+        ringColor = m.theme.focPrimary
+        if isNonEmptyString(itemContent.ringColor) then ringColor = itemContent.ringColor
+        m.pCircleRing.blendColor = ringColor
+        m.gCircle.visible = true
     else if isValid(itemContent) AND isValid(itemContent.image_orientation) AND itemContent.image_orientation = "portrait"
         if isValid(itemContent.type) AND (itemContent.type = "live" OR itemContent.type = "program") AND isValid(itemContent.gmt0_unlocked) AND itemContent.gmt0_unlocked <> ""
             SetBadge(itemContent)

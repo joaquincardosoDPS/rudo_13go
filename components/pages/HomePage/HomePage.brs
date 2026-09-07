@@ -277,7 +277,7 @@ end sub
 
 
 
-sub PushHomeRow(title as string, items as object, format = "default" as string)
+sub PushHomeRow(title as string, items as object, format = "default" as string, componentHeight = 626 as integer)
     if isValid(items) AND items.count() > 0
         catData = {}
         catData.title = title
@@ -295,7 +295,7 @@ sub PushHomeRow(title as string, items as object, format = "default" as string)
         sliderView.ObserveField("itemSelected", "onRowItemSelected")
         sliderView.ObserveField("itemFocused", "onRowItemFocused")
         sliderView.id = title
-        sliderView.componentHeight = 576 + 50
+        sliderView.componentHeight = componentHeight
         catNode = rowListDataParser(catData)
         if isValid(catNode)
             sliderView.category = catData
@@ -377,18 +377,15 @@ sub OnGetHomeSenalesAPIResponse(event as dynamic)
     rawItems = getValueFromProps(apiResponse, "data", [])
     items = []
     for each raw in rawItems
-        imageUrl = raw.imagen
         items.push({
             title: raw.titulo
-            description: raw.bajada
-            description_short: raw.bajada
             key: raw.nid
-            image_orientation: "portrait"
-            format: "default"
-            image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
+            image: raw.imagen
+            ringColor: raw.color_principal
+            format: "circle"
         })
     end for
-    PushHomeRow(m.pendingRowTitle, items)
+    PushHomeRow(m.pendingRowTitle, items, "circle", 220)
     m.getHomeSenalesTask = invalid
     ProcessNextHomeSection()
 end sub
@@ -407,16 +404,15 @@ sub OnGetHomeRadiosAPIResponse(event as dynamic)
     rawItems = getValueFromProps(apiResponse, "data", [])
     items = []
     for each raw in rawItems
-        imageUrl = raw.image
         items.push({
             title: raw.name
             key: raw.name
-            image_orientation: "portrait"
-            format: "default"
-            image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
+            image: raw.image
+            ringColor: raw.color
+            format: "circle"
         })
     end for
-    PushHomeRow(m.pendingRowTitle, items)
+    PushHomeRow(m.pendingRowTitle, items, "circle", 220)
     m.getHomeRadiosTask = invalid
     ProcessNextHomeSection()
 end sub
