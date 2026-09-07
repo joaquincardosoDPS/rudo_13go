@@ -123,10 +123,25 @@ sub setupPosters()
     h = m.top.height
     if w <= 0 then w = 1920
     if h <= 0 then h = 1080
-    setPosterSize(m.pImage, w, h)
-    setPosterSize(m.overlayImage, w, h)
+    if m.top.variant = "compact"
+        imgWidth = w * 0.72
+        imgHeight = w * 0.41
+        setPosterSize(m.pImage, imgWidth, imgHeight)
+        m.pImage.translation = [w - imgWidth, 0]
+        m.lgDetails.translation = [100, 220]
+        m.title.width = w * 0.32
+        m.desc.width = w * 0.32
+        setOverlayVisibility(false)
+    else
+        setPosterSize(m.pImage, w, h)
+        m.pImage.translation = [0, 0]
+        setPosterSize(m.overlayImage, w, h)
+        m.lgDetails.translation = [100, 163]
+        m.title.width = 900
+        m.desc.width = 900
+        setOverlayVisibility(true)
+    end if
     m.pImage.uri = getSliderImage(m.items[m.activeIndex])
-    setOverlayVisibility(true)
 end sub
 
 sub setPosterSize(node as object, w as dynamic, h as dynamic)

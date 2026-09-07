@@ -484,8 +484,9 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
         end for
         if isValid(m.heroSlider)
             heroSlider = m.heroSlider
+            heroSlider.variant = "compact"
             heroSlider.items = [items[0]]
-            heroSlider.componentHeight = 583
+            heroSlider.componentHeight = 660
             heroSlider.visible = true
             m.gDetails.translation = [0,0]
             m.categoriesNode.push(heroSlider)

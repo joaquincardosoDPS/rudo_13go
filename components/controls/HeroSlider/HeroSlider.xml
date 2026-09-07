@@ -9,6 +9,7 @@
         <field id="width" type="float" />
         <field id="componentHeight" type="integer" value="0" />
         <field id="height" type="float" />
+        <field id="variant" type="string" value="full" />
         <function name="setScrollStateImageVisibility" />
     </interface>
     <children>
