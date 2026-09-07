@@ -1,24 +1,43 @@
 sub init()
     SetLocals()
     SetControls()
+    SetupFonts()
 end sub
 
 sub SetLocals()
     m.theme = m.global.appTheme
+    m.fonts = m.global.fonts
     m.focusPercent = 0
 end sub 
 
 sub SetControls()
     m.itemIcon = m.top.findNode("itemIcon")
+    m.itemTitle = m.top.findNode("itemTitle")
 end sub 
 
+sub SetupFonts()
+    m.itemTitle.font = m.fonts.dmSansMedium24
+end sub
 
 sub ShowContent()
     itemContent = m.top.itemContent
-    if isValid(itemContent) AND isNonEmptyString(itemContent.iconUri)
-        m.itemIcon.uri = itemContent.iconUri
+    if isValid(itemContent)
+        if isNonEmptyString(itemContent.iconUri)
+            m.itemIcon.uri = itemContent.iconUri
+        end if
+        m.itemTitle.text = itemContent.title
+        itemContent.ObserveField("isExpanded", "OnExpandedChanged")
+        UpdateExpandedState(itemContent.isExpanded)
     end if
     UpdateIconColor()
+end sub
+
+sub OnExpandedChanged(event as dynamic)
+    UpdateExpandedState(event.GetData())
+end sub
+
+sub UpdateExpandedState(expanded as boolean)
+    m.itemTitle.visible = expanded
 end sub
 
 Sub FocusPercentChanged(event as Dynamic)
@@ -52,14 +71,14 @@ end Sub
 
 sub UpdateIconColor()
     itemContent = m.top.itemContent
-    isFocused = isValid(m.FocusPercent) AND m.FocusPercent > 0
-    isActive = isValid(itemContent) and itemContent.isSelected
-
+    isFocused = isValid(m.focusPercent) AND m.focusPercent > 0
+    isActive = isValid(itemContent) AND itemContent.isSelected
+    color = m.theme.clrSecondaryText
     if isFocused
-        m.itemIcon.blendColor = m.theme.white
+        color = m.theme.white
     else if isActive
-        m.itemIcon.blendColor = m.theme.focPrimary
-    else
-        m.itemIcon.blendColor = m.theme.clrSecondaryText
+        color = m.theme.focPrimary
     end if
-End Sub
+    m.itemIcon.blendColor = color
+    m.itemTitle.color = color
+end sub

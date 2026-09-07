@@ -12,5 +12,6 @@
   </interface>
   <children>
     <Poster id="itemIcon" width="40" height="40" loadWidth="40" loadHeight="40" loadDisplayMode="scaleToFit" translation="[25,25]" />
+    <Label id="itemTitle" text="" width="200" height="40" vertAlign="center" translation="[80,25]" visible="false" />
   </children>
 </component>

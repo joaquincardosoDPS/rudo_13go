@@ -11,6 +11,7 @@ sub SetLocals()
     m.theme = m.global.appTheme
     m.fonts = m.global.Fonts
     m.scene = m.top.getScene()
+    m.isMenuExpanded = false
     m.defaultProfileUri = "pkg:/images/other/default_user.png"
     m.addProfileUri = "pkg:/images/other/addProfile.png"
     m.rawProfileItems = []
@@ -496,6 +497,18 @@ sub OnFocusChild()
         if isValid(focusedNode) AND focusedNode.id = "gMyProfile"
             SetFocusOnLoginMyProfile(true)
         end if
+    end if
+    isGridFocused = m.top.hasFocus() AND isValid(m.top.focusedChild) AND m.top.focusedChild.id = "topMenuGrid"
+    SetMenuExpanded(isGridFocused)
+end sub
+
+sub SetMenuExpanded(expanded as boolean)
+    if m.isMenuExpanded = expanded then return
+    m.isMenuExpanded = expanded
+    if isValid(m.content)
+        for i = 0 to m.content.getChildCount() - 1
+            m.content.getChild(i).isExpanded = expanded
+        end for
     end if
 end sub
 
