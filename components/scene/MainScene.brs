@@ -19,7 +19,7 @@ sub SetLocals()
     m.appDialogCompleteBeaconSent = false
     m.ViewStackManager = CreateViewStackManager()
     m.registryManager = CreateRegistryManager()
-    m.top.backgroundURI = "pkg:/images/other/bg_home.png"
+    m.top.backgroundColor = m.theme.clrPrimary
     m.defaultProfileName = "Mi perfil"
     m.defaultProfileUri = "pkg:/images/focus/add_profile_img_unfocus.png"
     m.exitPopUpOpened = false
