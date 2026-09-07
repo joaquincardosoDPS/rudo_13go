@@ -19,6 +19,8 @@ end sub
 sub setControls()
     m.pImage = m.top.findNode("pImage")
     m.overlayImage = m.top.findNode("overlayImage")
+    m.pFadeBottom = m.top.findNode("pFadeBottom")
+    m.pFadeLeft = m.top.findNode("pFadeLeft")
     m.pLogo = m.top.findNode("pLogo")
     m.title = m.top.findNode("titleLabel")
     m.lgDetails = m.top.findNode("lgDetails")
@@ -126,12 +128,21 @@ sub setupPosters()
     if m.top.variant = "compact"
         imgWidth = w * 0.72
         imgHeight = w * 0.41
+        imgX = w - imgWidth
         setPosterSize(m.pImage, imgWidth, imgHeight)
-        m.pImage.translation = [w - imgWidth, 0]
+        m.pImage.translation = [imgX, 0]
         m.lgDetails.translation = [100, 220]
         m.title.width = w * 0.32
         m.desc.width = w * 0.32
         setOverlayVisibility(false)
+        m.pFadeBottom.width = imgWidth
+        m.pFadeBottom.height = imgHeight * 0.5
+        m.pFadeBottom.translation = [imgX, imgHeight * 0.5]
+        m.pFadeBottom.visible = true
+        m.pFadeLeft.width = imgWidth * 0.6
+        m.pFadeLeft.height = imgHeight
+        m.pFadeLeft.translation = [imgX, 0]
+        m.pFadeLeft.visible = true
     else
         setPosterSize(m.pImage, w, h)
         m.pImage.translation = [0, 0]
@@ -140,6 +151,8 @@ sub setupPosters()
         m.title.width = 900
         m.desc.width = 900
         setOverlayVisibility(true)
+        m.pFadeBottom.visible = false
+        m.pFadeLeft.visible = false
     end if
     m.pImage.uri = getSliderImage(m.items[m.activeIndex])
 end sub
