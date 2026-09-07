@@ -9,6 +9,7 @@
         <function name="UpdateSelectedTopMenu" />
     </interface>
     <children>
+        <Poster id="pExpandGradient" width="1728" height="1080" uri="pkg:/images/overlay/hero_fade_left.png" loadDisplayMode="stretchToFit" translation="[0,0]" visible="false" />
         <Poster id="bgProfilePopup" uri="pkg:/images/overlay/preference_gradient.png" height="1080" width="1920" visible="false" translation="[0,0]"/>
         <Poster id="pLogoImage" height="77" loadHeight="77" loadDisplayMode="scaleToFit" translation="[100,30]" />
         <Group id="gMyProfile" visible="false">

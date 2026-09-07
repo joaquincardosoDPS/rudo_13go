@@ -25,6 +25,7 @@ sub SetLocals()
 end sub
 
 sub SetControls()
+    m.pExpandGradient = m.top.findNode("pExpandGradient")
     m.pMyProfile = m.top.findNode("pMyProfile")
     m.pMyProfileBorder = m.top.findNode("pMyProfileBorder")
     m.pLogoImage = m.top.findNode("pLogoImage")
@@ -505,6 +506,7 @@ end sub
 sub SetMenuExpanded(expanded as boolean)
     if m.isMenuExpanded = expanded then return
     m.isMenuExpanded = expanded
+    m.pExpandGradient.visible = expanded
     if isValid(m.content)
         for i = 0 to m.content.getChildCount() - 1
             m.content.getChild(i).isExpanded = expanded
