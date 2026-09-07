@@ -488,7 +488,7 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
             heroSlider.items = [items[0]]
             heroSlider.componentHeight = 660
             heroSlider.visible = true
-            m.gDetails.translation = [0,0]
+            m.gDetails.translation = [106,0]
             m.categoriesNode.push(heroSlider)
         end if
         if items.count() > 1
@@ -518,7 +518,7 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
             m.categoriesNode.push(sliderView)
         end if
     else
-        m.gDetails.translation = [0,150]
+        m.gDetails.translation = [106,150]
     end if
     m.getFeaturedSliderProgramsTask = invalid
     ProcessNextHomeSection()
