@@ -22,6 +22,8 @@ sub setControls()
     m.pFadeBottom = m.top.findNode("pFadeBottom")
     m.pFadeLeft = m.top.findNode("pFadeLeft")
     m.pLogo = m.top.findNode("pLogo")
+    m.liveLabel = m.top.findNode("liveLabel")
+    m.epigrafeLabel = m.top.findNode("epigrafeLabel")
     m.title = m.top.findNode("titleLabel")
     m.lgDetails = m.top.findNode("lgDetails")
     m.desc = m.top.findNode("descLabel")
@@ -34,13 +36,17 @@ sub setScrollStateImageVisibility(hidden as boolean)
 end sub
 
 sub setUpFonts()
-    m.title.font = m.fonts.dmSansBold32 
-    m.desc.font = m.fonts.dmSansMedium24 
+    m.title.font = m.fonts.dmSansBold32
+    m.desc.font = m.fonts.dmSansMedium24
+    m.liveLabel.font = m.fonts.dmSansBold20
+    m.epigrafeLabel.font = m.fonts.dmSansBold23
 end sub
 
 sub setUpColor()
     m.title.color = m.theme.white
     m.desc.color = m.theme.white
+    m.liveLabel.color = m.theme.white
+    m.epigrafeLabel.color = m.theme.focPrimary
     ' m.overlayImage.blendColor = m.theme.black
 end sub
 
@@ -189,12 +195,24 @@ sub updateMeta()
     m.pLogo.uri = ""
     m.title.text = ""
     m.desc.text = ""
+    m.liveLabel.text = ""
+    m.liveLabel.visible = false
+    m.epigrafeLabel.text = ""
+    m.epigrafeLabel.visible = false
+    if isValid(item.llamado) AND isNonEmptyString(item.llamado)
+        m.liveLabel.text = UCase(item.llamado)
+        m.liveLabel.visible = true
+    end if
+    if isValid(item.epigrafe) AND isNonEmptyString(item.epigrafe)
+        m.epigrafeLabel.text = item.epigrafe
+        m.epigrafeLabel.visible = true
+    end if
     if item.image_logo <> invalid
-        m.lgDetails.itemSpacings = "[20,-60,20,20]"
+        m.lgDetails.itemSpacings = "[10,10,10,-60,20,20]"
         m.pLogo.uri = GetImageURL(item.image_logo, "medium")
     end if
     if item.title <> invalid AND m.pLogo.uri = ""
-        m.lgDetails.itemSpacings = "[0,20,20,20]"
+        m.lgDetails.itemSpacings = "[0,10,10,20,20,20]"
         m.title.text = item.title
     end if
     if item.description_short <> invalid AND item.description_short <> ""

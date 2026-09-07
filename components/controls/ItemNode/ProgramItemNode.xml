@@ -24,5 +24,7 @@
         <field id="type" type="string" />
         <field id="image" type="string" />
         <field id="ringColor" type="string" />
+        <field id="epigrafe" type="string" />
+        <field id="llamado" type="string" />
     </interface>
 </component>

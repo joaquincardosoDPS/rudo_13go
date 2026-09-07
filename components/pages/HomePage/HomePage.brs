@@ -484,8 +484,11 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
         end for
         if isValid(m.heroSlider)
             heroSlider = m.heroSlider
+            heroItem = items[0]
+            heroItem.epigrafe = rawItems[0].show
+            heroItem.llamado = rawItems[0].llamado
             heroSlider.variant = "compact"
-            heroSlider.items = [items[0]]
+            heroSlider.items = [heroItem]
             heroSlider.componentHeight = 660
             heroSlider.visible = true
             m.gDetails.translation = [106,0]
