@@ -483,11 +483,12 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
             })
         end for
         if isValid(m.heroSlider)
-            m.heroSlider.items = [items[0]]
-            m.heroSlider.componentHeight = 583
-            m.heroSlider.visible = true
+            heroSlider = m.heroSlider
+            heroSlider.items = [items[0]]
+            heroSlider.componentHeight = 583
+            heroSlider.visible = true
             m.gDetails.translation = [0,0]
-            m.categoriesNode.push(m.heroSlider)
+            m.categoriesNode.push(heroSlider)
         end if
         if items.count() > 1
             catData = {}
