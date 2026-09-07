@@ -277,11 +277,11 @@ end sub
 
 
 
-sub PushHomeRow(title as string, items as object)
+sub PushHomeRow(title as string, items as object, format = "default" as string)
     if isValid(items) AND items.count() > 0
         catData = {}
         catData.title = title
-        catData.format = "default"
+        catData.format = format
         catData.image_orientation = "portrait"
         catData.liveCategory = false
         catData.image_background_category = {}
@@ -358,7 +358,7 @@ sub OnGetHomeTop10APIResponse(event as dynamic)
             image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
         })
     end for
-    PushHomeRow(m.pendingRowTitle, items)
+    PushHomeRow(m.pendingRowTitle, items, "ranking")
     m.getHomeTop10Task = invalid
     ProcessNextHomeSection()
 end sub
