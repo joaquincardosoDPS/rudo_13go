@@ -19,7 +19,6 @@ sub SetLocals()
     m.appDialogCompleteBeaconSent = false
     m.ViewStackManager = CreateViewStackManager()
     m.registryManager = CreateRegistryManager()
-    m.top.backgroundColor = m.theme.clrPrimary
     m.defaultProfileName = "Mi perfil"
     m.defaultProfileUri = "pkg:/images/focus/add_profile_img_unfocus.png"
     m.exitPopUpOpened = false
@@ -34,6 +33,7 @@ sub SetControls()
     m.gTopMenu = m.top.findNode("gTopMenu")
     m.pageLoader = m.top.findNode("pageLoader")
     m.pTopMenuBackground = m.top.findNode("pTopMenuBackground")
+    m.rBackground = m.top.findNode("rBackground")
     CreateToastMessageControls()
 end sub
 
@@ -47,6 +47,7 @@ end sub
 
 sub SetupColor()
     m.pTopMenuBackground.blendColor = m.theme.black
+    m.rBackground.color = m.theme.clrPrimary
 end sub
 
 sub SetObservers()

@@ -51,7 +51,7 @@
     </interface>
 
     <children>
-        <Rectangle id="rBackground" width="1920" height="1080" visible="false">
+        <Rectangle id="rBackground" width="1920" height="1080" visible="true">
             <Poster id="pBackgound" width="1920" height="1080" loadwidth="1920" loadDisplayMode="scaleToZoom" loadheight="1080" />
         </Rectangle>
         <Group id="gPageContainer" />
