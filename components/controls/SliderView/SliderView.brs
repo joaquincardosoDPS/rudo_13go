@@ -123,6 +123,9 @@ sub createDynamicCardsRowList()
     end if
     m.rowList.focusBitmapBlendColor = m.theme.focPrimary
     m.rowList.itemComponentName = "CommonItemComponent"
+
+    m.rowList.rowLabelFont = m.fonts.dmSansBold32
+    m.rowList.rowLabelColor = m.theme.white
     for i = 0 to m.top.content.getChildCount() - 1
         child = m.top.content.getChild(i)
         AddSizeFields(child)
