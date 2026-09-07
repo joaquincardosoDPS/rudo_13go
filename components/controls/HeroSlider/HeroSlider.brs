@@ -13,6 +13,7 @@ sub setLocals()
     m.scene = m.top.getScene()
     m.items = []
     m.isImagesHidden = false
+    m.activeIndex = 0
 end sub
 
 sub setControls()
@@ -78,7 +79,7 @@ sub setupWatchNowButton()
         buttonWidth: 150,
         buttonHeight: 70,
         backGroundImage: "pkg:/images/focus/filled_r6.9.png",
-        buttonText: "Play",
+        buttonText: "Ver ahora",
         focusTextColor: m.theme.white
         unfocusTextColor: m.theme.black
         backgroundColor: m.theme.white
@@ -99,6 +100,7 @@ end sub
 sub onItemsSet()
     m.items = m.top.items
     if m.items = invalid then m.items = []
+    m.activeIndex = 0
     if m.items.count() = 0
         clearSlider()
         return
@@ -123,7 +125,7 @@ sub setupPosters()
     if h <= 0 then h = 1080
     setPosterSize(m.pImage, w, h)
     setPosterSize(m.overlayImage, w, h)
-    m.pImage.uri = getSliderImage(m.items[0])
+    m.pImage.uri = getSliderImage(m.items[m.activeIndex])
     setOverlayVisibility(true)
 end sub
 
@@ -154,7 +156,7 @@ end function
 
 sub updateMeta()
     if m.items = invalid OR m.items.count() = 0 then return
-    item = m.items[0]
+    item = m.items[m.activeIndex]
     if item = invalid then return
     setupWatchNowButton()
     SetFocus(m.bWatchNow)
@@ -196,7 +198,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
     if sliderHasFocus = false then return false
     if key = "OK"
         if isValid(m.bWatchNow) AND m.bWatchNow.hasFocus()
-            item = m.items[0]
+            item = m.items[m.activeIndex]
             if item <> invalid
                 itemContent = CreateObject("roSGNode", "ProgramItemNode")
                 itemContent.setFields(item)
@@ -208,8 +210,18 @@ function onKeyEvent(key as string, press as boolean) as boolean
             end if
         end if
     else if key = "right"
+        if m.items.count() > 1
+            m.activeIndex = (m.activeIndex + 1) MOD m.items.count()
+            setupPosters()
+            updateMeta()
+        end if
         return true
     else if key = "left"
+        if m.items.count() > 1
+            m.activeIndex = (m.activeIndex - 1 + m.items.count()) MOD m.items.count()
+            setupPosters()
+            updateMeta()
+        end if
         return true
     end if
     return false

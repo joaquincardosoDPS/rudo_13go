@@ -241,7 +241,7 @@ sub ProcessNextHomeSection()
         end if
     else if despliegue = "categoria_carrusel" OR despliegue = "categoria_destacada"
         if isNonEmptyString(section.categoria)
-            GetHomeCategoryPrograms(section.titulo, section.categoria)
+            GetHomeCategoryPrograms(section.titulo, section.categoria, despliegue)
         else
             ProcessNextHomeSection()
         end if
@@ -305,8 +305,21 @@ sub PushHomeRow(title as string, items as object, format = "default" as string, 
     end if
 end sub
 
-sub GetHomeCategoryPrograms(rowTitle as string, categoryId as string)
+sub PushMonumentalRow(title as string, items as object)
+    if isValid(items) AND items.count() > 0
+        heroSlider = createObject("roSGNode", "HeroSlider")
+        heroSlider.id = title
+        heroSlider.width = 1920
+        heroSlider.height = 500
+        heroSlider.componentHeight = 500 + 50
+        heroSlider.items = items
+        m.categoriesNode.push(heroSlider)
+    end if
+end sub
+
+sub GetHomeCategoryPrograms(rowTitle as string, categoryId as string, despliegue as string)
     m.pendingRowTitle = rowTitle
+    m.pendingRowDespliegue = despliegue
     m.getHomeCategoryTask = CreateObject("roSGNode", "ContentAPIAction")
     m.getHomeCategoryTask.functionName = "GetCategoryPrograms"
     m.getHomeCategoryTask.params = { "categoryId": categoryId }
@@ -317,20 +330,35 @@ end sub
 sub OnGetHomeCategoryProgramsAPIResponse(event as dynamic)
     apiResponse = event.getData()
     rawPrograms = getValueFromProps(apiResponse, "data.programs", [])
-    items = []
-    for each raw in rawPrograms
-        imageUrl = raw.image
-        items.push({
-            title: raw.title
-            description: raw.bajada
-            description_short: raw.bajada
-            key: raw.id
-            image_orientation: "portrait"
-            format: "default"
-            image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
-        })
-    end for
-    PushHomeRow(m.pendingRowTitle, items)
+    if m.pendingRowDespliegue = "categoria_destacada"
+        items = []
+        for each raw in rawPrograms
+            bgUrl = raw.imagen_fondo
+            items.push({
+                title: raw.title
+                description: raw.bajada
+                description_short: raw.bajada
+                key: raw.id
+                image_background: { small: bgUrl, medium: bgUrl, normal: bgUrl, big: bgUrl, default: bgUrl }
+            })
+        end for
+        PushMonumentalRow(m.pendingRowTitle, items)
+    else
+        items = []
+        for each raw in rawPrograms
+            imageUrl = raw.image
+            items.push({
+                title: raw.title
+                description: raw.bajada
+                description_short: raw.bajada
+                key: raw.id
+                image_orientation: "portrait"
+                format: "default"
+                image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
+            })
+        end for
+        PushHomeRow(m.pendingRowTitle, items)
+    end if
     m.getHomeCategoryTask = invalid
     ProcessNextHomeSection()
 end sub
@@ -531,7 +559,7 @@ sub createDynamicRowList()
         end for
     end if
     for each node in m.categoriesNode
-        if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR (node.id = "heroSlider")))
+        if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR node.subtype() = "HeroSlider"))
             m.focusableGroup.callFunc("setTranslation", node)
         end if
     end for
@@ -575,7 +603,7 @@ sub checkRefreshNodes(compNode as dynamic, mainContent as dynamic)
     end if
     if m.isReRenderUI
         for each node in m.categoriesNode
-            if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR (node.id = "heroSlider")))
+            if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR node.subtype() = "HeroSlider"))
                 m.focusableGroup.callFunc("setTranslation", node)
             end if
         end for
