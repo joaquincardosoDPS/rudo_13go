@@ -26,7 +26,7 @@ sub setObservers()
 end sub
 
 sub setTranslation(componentNode as object)
-    if isValid(componentNode) AND componentNode.subType() = "HeroSlider"
+    if isTopHeroNode(componentNode)
         m.heroSliderNode = componentNode
     end if
 
@@ -72,7 +72,7 @@ function getFirstContentIndex() as integer
     if childCount <= 0 then return 0
 
     firstNode = m.gContainer.getChild(0)
-    if isValid(firstNode) AND firstNode.subType() = "HeroSlider" AND firstNode.variant = "compact" AND childCount > 1
+    if isTopHeroNode(firstNode) AND childCount > 1
         return 1
     end if
 
@@ -133,7 +133,7 @@ function focusToIndex(targetIndex as integer) as boolean
 end function
 
 function showHideSlider(targetNode as dynamic)
-    if isValid(targetNode) AND targetNode.subType() = "HeroSlider"
+    if isTopHeroNode(targetNode)
         setHeroImageHidden(false)
     else
         setHeroImageHidden(true)
@@ -151,7 +151,7 @@ sub onFocusedChild()
                 compNode = m.gContainer.getChild(targetIndex)
                 setFocus(compNode)
                 m.focusComponentIndex = targetIndex
-                if isValid(compNode) AND compNode.subType() = "HeroSlider"
+                if isTopHeroNode(compNode)
                     setHeroImageHidden(false)
                 end if
             end if
@@ -170,6 +170,10 @@ end sub
 '     end if
 ' end sub
 
+function isTopHeroNode(node as dynamic) as boolean
+    return isValid(node) AND node.subType() = "HeroSlider" AND node.variant = "compact"
+end function
+
 function onKeyPressDown() as boolean
     nextCompNode = m.gContainer.getChild(m.focusComponentIndex + 1)
     currentFocusNode = m.gContainer.getChild(m.focusComponentIndex)
@@ -177,7 +181,7 @@ function onKeyPressDown() as boolean
         m.focusComponentIndex += 1
         slidePanel("down", nextCompNode)
         setFocus(nextCompNode)
-        if isValid(currentFocusNode) AND currentFocusNode.subType() = "HeroSlider" AND nextCompNode.subType() <> "HeroSlider"
+        if isTopHeroNode(currentFocusNode) AND nextCompNode.subType() <> "HeroSlider"
             setHeroImageHidden(true)
         end if
         return true
@@ -192,7 +196,7 @@ function onKeyPressUp() as boolean
         m.focusComponentIndex -= 1
         slidePanel("up", prevCompNode)
         setFocus(prevCompNode)
-        if prevCompNode.subType() = "HeroSlider" AND currentFocusNode.subType() <> "HeroSlider"
+        if isTopHeroNode(prevCompNode) AND currentFocusNode.subType() <> "HeroSlider"
             setHeroImageHidden(false)
         end if
         return true
@@ -213,13 +217,13 @@ function getHeroSliderNode() as dynamic
     if m.gContainer = invalid then return invalid
 
     compNode = m.gContainer.getChild(0)
-    if isValid(compNode) AND compNode.subType() = "HeroSlider"
+    if isTopHeroNode(compNode)
         m.heroSliderNode = compNode
         return m.heroSliderNode
     else
         for i = 0 to m.gContainer.getChildCount() - 1
             compNode = m.gContainer.getChild(i)
-            if isValid(compNode) AND compNode.subType() = "HeroSlider"
+            if isTopHeroNode(compNode)
                 m.heroSliderNode = compNode
                 return m.heroSliderNode
             end if
@@ -231,7 +235,7 @@ end function
 function getHeroSliderIndex(visibleOnly = false as boolean) as integer
     if m.gContainer = invalid then return -1
     compNode = m.gContainer.getChild(0)
-    if isValid(compNode) AND compNode.subType() = "HeroSlider"
+    if isTopHeroNode(compNode)
         if visibleOnly AND compNode.visible = false
             ' skip hidden hero
         else
@@ -240,7 +244,7 @@ function getHeroSliderIndex(visibleOnly = false as boolean) as integer
     else
         for i = 0 to m.gContainer.getChildCount() - 1
             compNode = m.gContainer.getChild(i)
-            if isValid(compNode) AND compNode.subType() = "HeroSlider"
+            if isTopHeroNode(compNode)
                 if visibleOnly AND compNode.visible = false
                     ' skip hidden hero
                 else
@@ -261,9 +265,10 @@ function slidePanel(key, nextFocusNode)
     extraoffset = 0
     yOffset = 0
     if (isValid(nextFocusNode)) then
+        isTopRow = (nextFocusNode.translation[1] <= 0)
         if key = "up" then
             ' Up key: align focused row to same viewport baseline used by down movement.
-            if nextFocusNode.subType() = "HeroSlider"
+            if isTopRow
                 newY = 0
             else
                 targetBottom = viewPortHeight - m.top.rowSpacing
@@ -277,7 +282,7 @@ function slidePanel(key, nextFocusNode)
             if nextFocusNode.componentHeight > remainingViewPortion
                 nextYTranslation = nextFocusNode.componentHeight - remainingViewPortion + yOffset
             end if
-            if nextFocusNode.subType() = "HeroSlider"
+            if isTopRow
                 newY = currentY - (nextFocusNode.translation[1] - Abs(currentY)) + yOffset
             else
                 newY = currentY - nextYTranslation - extraoffset
