@@ -407,10 +407,13 @@ sub OnGetHomeSenalesAPIResponse(event as dynamic)
     rawItems = getValueFromProps(apiResponse, "data", [])
     items = []
     for each raw in rawItems
+        logoUrl = raw.imagen
+        if isNonEmptyString(raw.logo_invertido) AND LCase(Right(raw.logo_invertido, 4)) <> ".svg" then logoUrl = raw.logo_invertido
+        if isNonEmptyString(raw.logo_blanco) AND LCase(Right(raw.logo_blanco, 4)) <> ".svg" then logoUrl = raw.logo_blanco
         items.push({
             title: raw.titulo
             key: raw.nid
-            image: raw.imagen
+            image: logoUrl
             ringColor: raw.color_principal
             format: "circle"
             type: "senal"
