@@ -176,7 +176,7 @@ sub setupPosters()
         m.pFadeLeft.translation = [imgX, 0]
         m.pFadeLeft.visible = true
     else if m.top.variant = "monumental"
-        cardHeight = w * 0.33
+        cardHeight = w * 0.375
         imgWidth = w * 0.83
         imgX = w - imgWidth
         setPosterSize(m.rCardBg, w, cardHeight)
@@ -191,13 +191,14 @@ sub setupPosters()
         setPosterSize(m.pFadeLeft, gradWidth, cardHeight)
         m.pFadeLeft.translation = [gradX, 0]
         m.pFadeLeft.visible = true
-        m.lgDetails.translation = [115, 170]
+        m.lgDetails.translation = [115, 310]
         m.title.width = w * 0.4
         m.desc.width = w * 0.4
         setPosterSize(m.pTitleBg, 576, 297)
         m.pTitleBg.translation = [0, 0]
         setPosterSize(m.pFocusBorder, w, cardHeight)
         m.pFocusBorder.translation = [0, 0]
+        m.pFocusBorder.visible = m.top.hasFocus()
     else
         setPosterSize(m.pImage, w, h)
         m.pImage.translation = [0, 0]
