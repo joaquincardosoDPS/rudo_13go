@@ -270,7 +270,10 @@ sub updateMeta()
     item = m.currentItem
     if item = invalid then return
     if m.top.variant <> "compact"
-        setupWatchNowButton()
+        if m.buttonStyled <> true
+            setupWatchNowButton()
+            m.buttonStyled = true
+        end if
         SetFocus(m.bWatchNow)
     end if
     m.pLogo.uri = ""
