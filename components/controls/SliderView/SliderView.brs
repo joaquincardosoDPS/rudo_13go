@@ -58,7 +58,12 @@ function AddSizeFields(childNode as dynamic)
         if isValid(childNode.format) AND childNode.format = "event" AND isValid(childNode.liveCategory) AND childNode.liveCategory = true
             isCatEvent = true
         end if
-        if childNode.image_orientation = "portrait"
+        if isValid(childNode.format) AND childNode.format = "circle"
+            m.rowHeights.push(220)
+            m.rowItemSize.push([192, 192])
+            m.rowSpacings.push(70)
+            m.rowItemSpacing.push([25, 100])
+        else if childNode.image_orientation = "portrait"
             if isCatEvent
                 m.rowHeights.push(706)
             else

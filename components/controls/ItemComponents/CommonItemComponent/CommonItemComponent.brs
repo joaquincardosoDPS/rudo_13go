@@ -141,9 +141,7 @@ sub itemContent_Changed()
         m.mgNumberBorderMask.maskSize = getMaskSize(m.mgNumberBorderMask)
         m.gNumber.visible = true
     else if isValid(itemContent) AND isValid(itemContent.format) AND itemContent.format = "circle"
-        imageURL = itemContent.image
-        if isEmptyString(imageURL) then imageURL = "pkg:/images/other/default_user.png"
-        m.pCircleCard.uri = imageURL
+        m.pCircleCard.uri = itemContent.image
         ringColor = m.theme.focPrimary
         if isNonEmptyString(itemContent.ringColor) then ringColor = itemContent.ringColor
         m.pCircleRing.blendColor = ringColor

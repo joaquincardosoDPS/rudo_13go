@@ -58,10 +58,11 @@
             </MaskGroup>
         </Group>
         <Group id="gCircle" translation="[0, 0]" visible="false">
-            <MaskGroup id="mgCircleMask" maskUri="pkg:/images/other/profile_mask.png" maskSize="[160,160]" translation="[20,20]">
-                <Poster id="pCircleCard" width="160" height="160" loadWidth="160" loadHeight="160" loadingBitmapUri="pkg:/images/other/default_user.png" failedBitmapUri="pkg:/images/other/default_user.png" loadDisplayMode="scaleToFit => Fill  => or Zoom" visible="true" />
+            <MaskGroup id="mgCircleMask" maskUri="pkg:/images/other/profile_mask.png" maskSize="[176,176]" translation="[8,8]">
+                <Rectangle id="rCircleBg" width="176" height="176" color="0x1C1D28FF" />
+                <Poster id="pCircleCard" width="125" height="125" loadWidth="125" loadHeight="125" translation="[25.5,25.5]" loadDisplayMode="scaleToFit" visible="true" />
             </MaskGroup>
-            <Poster id="pCircleRing" width="200" height="200" uri="pkg:/images/masks/circle_ring.png" translation="[0,0]" />
+            <Poster id="pCircleRing" width="192" height="192" uri="pkg:/images/masks/circle_ring.png" translation="[0,0]" />
         </Group>
     </children>
 </component>

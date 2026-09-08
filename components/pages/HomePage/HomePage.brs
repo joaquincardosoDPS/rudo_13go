@@ -413,6 +413,7 @@ sub OnGetHomeSenalesAPIResponse(event as dynamic)
             image: raw.imagen
             ringColor: raw.color_principal
             format: "circle"
+            type: "senal"
         })
     end for
     PushHomeRow(m.pendingRowTitle, items, "circle", 220)
@@ -440,6 +441,7 @@ sub OnGetHomeRadiosAPIResponse(event as dynamic)
             image: raw.image
             ringColor: raw.color
             format: "circle"
+            type: "radio"
         })
     end for
     PushHomeRow(m.pendingRowTitle, items, "circle", 220)
@@ -645,6 +647,8 @@ sub onRowItemSelected(event as dynamic)
             m.scene.callFunc("showCategoryDetailPage", selectedItem, false)
         else if isValid(selectedItem.itemData.format) AND selectedItem.itemData.format = "event"
             m.scene.callFunc("showEventDetailPage", selectedItem, false)
+        else if isValid(selectedItem.itemData.type) AND selectedItem.itemData.type = "senal"
+            m.scene.callFunc("ShowLivePage", false)
         else
             m.scene.callFunc("showDetailPage", selectedItem, false)
         end if

@@ -48,6 +48,7 @@
         <function name="ShowHideMenu" />
         <function name="StartVideo" />
         <function name="UpdateSelectedTopMenu" />
+        <function name="ShowLivePage" />
     </interface>
 
     <children>
