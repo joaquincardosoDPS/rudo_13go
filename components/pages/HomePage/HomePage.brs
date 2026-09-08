@@ -312,8 +312,8 @@ sub PushMonumentalRow(title as string, items as object)
         heroSlider.width = 1920
         heroSlider.variant = "monumental"
         heroSlider.sectionTitle = title
-        heroSlider.height = 634
-        heroSlider.componentHeight = 634 + 50
+        heroSlider.height = 363
+        heroSlider.componentHeight = 363 + 50
         heroSlider.items = items
         m.categoriesNode.push(heroSlider)
     end if

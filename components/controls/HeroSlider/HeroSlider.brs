@@ -142,12 +142,12 @@ sub finalizeMonumentalLayout()
     w = m.top.width
     if w <= 0 then w = 1920
     uw = w - 106
-    minCardHeight = uw * 0.33
+    minCardHeight = uw * 0.2
     textBottom = m.lgDetails.translation[1] + m.lgDetails.boundingRect().height
     cardHeight = minCardHeight
     if textBottom + 40 > cardHeight then cardHeight = textBottom + 40
-    imgWidth = uw * 0.83
-    gradWidth = uw * 0.84
+    imgWidth = uw * 0.5
+    gradWidth = uw * 0.51
     setPosterSize(m.rCardBg, uw, cardHeight)
     setPosterSize(m.pImage, imgWidth, cardHeight)
     setPosterSize(m.pFadeLeft, gradWidth, cardHeight)
@@ -196,8 +196,8 @@ sub setupPosters()
         m.pFadeLeft.visible = true
     else if m.top.variant = "monumental"
         uw = w - 106
-        cardHeight = uw * 0.33
-        imgWidth = uw * 0.83
+        cardHeight = uw * 0.2
+        imgWidth = uw * 0.5
         imgX = uw - imgWidth
         setPosterSize(m.rCardBg, uw, cardHeight)
         m.rCardBg.translation = [0, 0]
@@ -206,16 +206,16 @@ sub setupPosters()
         m.pImage.translation = [imgX, 0]
         setOverlayVisibility(false)
         m.pFadeBottom.visible = false
-        gradWidth = uw * 0.84
+        gradWidth = uw * 0.51
         gradX = uw - gradWidth
         setPosterSize(m.pFadeLeft, gradWidth, cardHeight)
         m.pFadeLeft.translation = [gradX, 0]
         m.pFadeLeft.visible = true
-        m.lgDetails.translation = [115, 310]
-        m.title.width = uw * 0.4
-        m.desc.width = uw * 0.4
+        m.lgDetails.translation = [115, 190]
+        m.title.width = uw * 0.3
+        m.desc.width = uw * 0.3
         m.desc.maxLines = 2
-        setPosterSize(m.pTitleBg, 576, 297)
+        setPosterSize(m.pTitleBg, 350, 180)
         m.pTitleBg.translation = [0, 0]
         setPosterSize(m.pFocusBorder, uw, cardHeight)
         m.pFocusBorder.translation = [0, 0]
