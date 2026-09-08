@@ -141,9 +141,10 @@ end sub
 sub finalizeMonumentalLayout()
     w = m.top.width
     if w <= 0 then w = 1920
-    cw = w - 212
+    topInset = 20
+    cw = w - 312
     minCardHeight = cw * 0.2
-    textBottom = m.lgDetails.translation[1] + m.lgDetails.boundingRect().height
+    textBottom = (m.lgDetails.translation[1] - topInset) + m.lgDetails.boundingRect().height
     cardHeight = minCardHeight
     if textBottom + 40 > cardHeight then cardHeight = textBottom + 40
     imgWidth = cw * 0.5
@@ -152,7 +153,7 @@ sub finalizeMonumentalLayout()
     setPosterSize(m.pImage, imgWidth, cardHeight)
     setPosterSize(m.pFadeLeft, gradWidth, cardHeight)
     setPosterSize(m.pFocusBorder, cw, cardHeight)
-    m.top.componentHeight = cardHeight + 50
+    m.top.componentHeight = topInset + cardHeight + 50
 end sub
 
 sub onSectionTitleSet()
@@ -196,23 +197,25 @@ sub setupPosters()
         m.pFadeLeft.visible = true
     else if m.top.variant = "monumental"
         sideMargin = 106
-        cw = w - (sideMargin * 2)
+        leftInset = 100
+        topInset = 20
+        cw = w - (sideMargin * 2) - leftInset
         cardHeight = cw * 0.2
         imgWidth = cw * 0.5
         imgX = cw - imgWidth
         setPosterSize(m.rCardBg, cw, cardHeight)
-        m.rCardBg.translation = [0, 0]
+        m.rCardBg.translation = [leftInset, topInset]
         m.rCardBg.visible = true
         setPosterSize(m.pImage, imgWidth, cardHeight)
-        m.pImage.translation = [imgX, 0]
+        m.pImage.translation = [leftInset + imgX, topInset]
         setOverlayVisibility(false)
         m.pFadeBottom.visible = false
         gradWidth = cw * 0.51
         gradX = cw - gradWidth
         setPosterSize(m.pFadeLeft, gradWidth, cardHeight)
-        m.pFadeLeft.translation = [gradX, 0]
+        m.pFadeLeft.translation = [leftInset + gradX, topInset]
         m.pFadeLeft.visible = true
-        m.lgDetails.translation = [115, 190]
+        m.lgDetails.translation = [leftInset + 115, topInset + 190]
         m.pLogo.visible = false
         m.pLogo.height = 0
         m.pLogo.loadHeight = 0
@@ -220,9 +223,9 @@ sub setupPosters()
         m.desc.width = cw * 0.3
         m.desc.maxLines = 2
         setPosterSize(m.pTitleBg, 350, 180)
-        m.pTitleBg.translation = [0, 0]
+        m.pTitleBg.translation = [leftInset, topInset]
         setPosterSize(m.pFocusBorder, cw, cardHeight)
-        m.pFocusBorder.translation = [0, 0]
+        m.pFocusBorder.translation = [leftInset, topInset]
         m.pFocusBorder.visible = m.top.hasFocus()
     else
         setPosterSize(m.pImage, w, h)
