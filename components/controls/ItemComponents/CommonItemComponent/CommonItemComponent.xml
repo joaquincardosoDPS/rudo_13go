@@ -62,7 +62,7 @@
             <MaskGroup id="mgCircleMask" maskUri="pkg:/images/other/profile_mask.png" maskSize="[176,176]" translation="[8,8]">
                 <Poster id="pCircleCard" width="125" height="125" loadWidth="125" loadHeight="125" translation="[25.5,25.5]" loadDisplayMode="scaleToFit" visible="true" />
             </MaskGroup>
-            <Poster id="pCircleRing" width="192" height="192" uri="pkg:/images/masks/circle_ring.png" translation="[0,0]" />
+            <Poster id="pCircleRing" width="192" height="192" uri="pkg:/images/masks/circle_ring_thin.png" translation="[0,0]" />
         </Group>
     </children>
 </component>

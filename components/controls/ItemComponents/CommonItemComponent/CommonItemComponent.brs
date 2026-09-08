@@ -261,8 +261,12 @@ end function
 
 
 sub setSize(percent as float)
-    if percent > 0
-    else
+    if m.gCircle.visible
+        if percent > 0
+            m.pCircleRing.uri = "pkg:/images/masks/circle_ring_thick.png"
+        else
+            m.pCircleRing.uri = "pkg:/images/masks/circle_ring_thin.png"
+        end if
     end if
 end sub
 

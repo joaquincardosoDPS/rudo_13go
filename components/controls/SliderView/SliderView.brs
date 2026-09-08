@@ -119,8 +119,9 @@ sub createDynamicCardsRowList()
         m.rowList.itemSize = [1814, 1416]
     end if
     m.rowList.numRows = 3
+    isCircleRow = isValid(m.top.category) AND isValid(m.top.category.format) AND m.top.category.format = "circle"
     m.rowList.drawFocusFeedbackOnTop = "true"
-    m.rowList.drawFocusFeedback = "true"
+    m.rowList.drawFocusFeedback = not isCircleRow
     if(m.global.designResolution = "720p")
         m.rowList.focusBitmapUri = "pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png"
     else
