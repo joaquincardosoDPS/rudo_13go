@@ -121,7 +121,7 @@ sub createDynamicCardsRowList()
         m.rowList.rowLabelOffset = [[100, 15]]
         m.rowList.focusxOffset = [100]
         m.rowList.showRowLabel = [true]
-        m.rowList.itemSize = [1814, 1416]
+        m.rowList.itemSize = [1760, 1416]
     end if
     m.rowList.numRows = 3
     m.rowList.drawFocusFeedbackOnTop = "true"
