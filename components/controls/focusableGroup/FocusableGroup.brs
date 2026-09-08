@@ -129,6 +129,8 @@ function focusToIndex(targetIndex as integer) as boolean
 
     m.focusComponentIndex = targetIndex
     setFocus(targetNode)
+    if isValid(currentNode) AND currentIndex <> targetIndex then setNodeFocusState(currentNode, false)
+    setNodeFocusState(targetNode, true)
     return showHideSlider(targetNode)
 end function
 
@@ -150,6 +152,7 @@ sub onFocusedChild()
                 targetIndex = getFirstContentIndex()
                 compNode = m.gContainer.getChild(targetIndex)
                 setFocus(compNode)
+                setNodeFocusState(compNode, true)
                 m.focusComponentIndex = targetIndex
                 if isTopHeroNode(compNode)
                     setHeroImageHidden(false)
@@ -174,6 +177,12 @@ function isTopHeroNode(node as dynamic) as boolean
     return isValid(node) AND node.subType() = "HeroSlider" AND node.variant = "compact"
 end function
 
+sub setNodeFocusState(node as dynamic, focused as boolean)
+    if isValid(node) AND node.subType() = "HeroSlider"
+        node.callFunc("setFocusState", focused)
+    end if
+end sub
+
 function onKeyPressDown() as boolean
     nextCompNode = m.gContainer.getChild(m.focusComponentIndex + 1)
     currentFocusNode = m.gContainer.getChild(m.focusComponentIndex)
@@ -181,6 +190,8 @@ function onKeyPressDown() as boolean
         m.focusComponentIndex += 1
         slidePanel("down", nextCompNode)
         setFocus(nextCompNode)
+        setNodeFocusState(currentFocusNode, false)
+        setNodeFocusState(nextCompNode, true)
         if isTopHeroNode(currentFocusNode) AND nextCompNode.subType() <> "HeroSlider"
             setHeroImageHidden(true)
         end if
@@ -196,6 +207,8 @@ function onKeyPressUp() as boolean
         m.focusComponentIndex -= 1
         slidePanel("up", prevCompNode)
         setFocus(prevCompNode)
+        setNodeFocusState(currentFocusNode, false)
+        setNodeFocusState(prevCompNode, true)
         if isTopHeroNode(prevCompNode) AND currentFocusNode.subType() <> "HeroSlider"
             setHeroImageHidden(false)
         end if

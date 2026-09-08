@@ -13,6 +13,7 @@
         <field id="focusedItem" type="node" />
         <field id="sectionTitle" type="string" />
         <function name="setScrollStateImageVisibility" />
+        <function name="setFocusState" />
     </interface>
     <children>
         <Rectangle id="rCardBg" color="0x08090CFF" visible="false" />

@@ -311,6 +311,11 @@ sub onFocusedChild()
     if m.top.hasFocus() AND m.top.variant <> "compact" AND m.bWatchNow <> invalid then setFocus(m.bWatchNow)
 end sub
 
+sub setFocusState(focused as boolean)
+    if m.top.variant = "monumental" then m.pFocusBorder.visible = focused
+    if focused AND m.top.variant <> "compact" AND m.bWatchNow <> invalid then setFocus(m.bWatchNow)
+end sub
+
 sub setOverlayVisibility(shouldShow as boolean)
     if m.overlayImage = invalid then return
     if shouldShow
