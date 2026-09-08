@@ -141,7 +141,7 @@ end sub
 sub finalizeMonumentalLayout()
     w = m.top.width
     if w <= 0 then w = 1920
-    minCardHeight = w * 0.375
+    minCardHeight = w * 0.33
     textBottom = m.lgDetails.translation[1] + m.lgDetails.boundingRect().height
     cardHeight = minCardHeight
     if textBottom + 40 > cardHeight then cardHeight = textBottom + 40
@@ -194,7 +194,7 @@ sub setupPosters()
         m.pFadeLeft.translation = [imgX, 0]
         m.pFadeLeft.visible = true
     else if m.top.variant = "monumental"
-        cardHeight = w * 0.375
+        cardHeight = w * 0.33
         imgWidth = w * 0.83
         imgX = w - imgWidth
         setPosterSize(m.rCardBg, w, cardHeight)
