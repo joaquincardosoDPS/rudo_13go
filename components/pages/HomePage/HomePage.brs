@@ -96,7 +96,7 @@ sub onPageDestroy()
 end sub
 
 sub Initialize()
-    m.rowSpacing = 62
+    m.rowSpacing = 134
     m.focusableGroup.rowSpacing = m.rowSpacing
     GetHomeSections()
     fetchAndStoreWatchHistory()
