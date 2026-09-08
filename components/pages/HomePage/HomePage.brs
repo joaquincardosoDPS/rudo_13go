@@ -310,8 +310,10 @@ sub PushMonumentalRow(title as string, items as object)
         heroSlider = createObject("roSGNode", "HeroSlider")
         heroSlider.id = title
         heroSlider.width = 1920
-        heroSlider.height = 500
-        heroSlider.componentHeight = 500 + 50
+        heroSlider.variant = "monumental"
+        heroSlider.sectionTitle = title
+        heroSlider.height = 704
+        heroSlider.componentHeight = 704 + 50
         heroSlider.items = items
         m.categoriesNode.push(heroSlider)
     end if

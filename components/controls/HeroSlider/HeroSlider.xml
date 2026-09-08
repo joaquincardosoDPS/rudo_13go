@@ -11,9 +11,11 @@
         <field id="height" type="float" />
         <field id="variant" type="string" value="full" />
         <field id="focusedItem" type="node" />
+        <field id="sectionTitle" type="string" />
         <function name="setScrollStateImageVisibility" />
     </interface>
     <children>
+        <Label id="lSectionTitle" text="" visible="false" translation="[100, 20]" />
         <!-- Posters -->
         <Group id="pImageGroup" visible="false">
             <Poster id="pImage" loadDisplayMode="scaleToZoom" opacity="1.0" />
@@ -26,8 +28,8 @@
             <Label id="liveLabel" text="" visible="false" />
             <Label id="epigrafeLabel" text="" visible="false" />
             <Label id="titleLabel" width="900" wrap="true" lineSpacing="-3" maxLines="2" />
-            <CustomButton id="bWatchNow" visible="false" />
             <Label id="descLabel" width="900" wrap="true" lineSpacing="-3" maxLines="3" />
+            <CustomButton id="bWatchNow" visible="false" />
         </LayoutGroup>
     </children>
 </component>

@@ -30,6 +30,7 @@ sub setControls()
     m.desc = m.top.findNode("descLabel")
     m.bWatchNow = m.top.findNode("bWatchNow")
     m.pImageGroup = m.top.findNode("pImageGroup")
+    m.lSectionTitle = m.top.findNode("lSectionTitle")
 end sub
 
 sub setScrollStateImageVisibility(hidden as boolean)
@@ -41,6 +42,7 @@ sub setUpFonts()
     m.desc.font = m.fonts.dmSansMedium24
     m.liveLabel.font = m.fonts.dmSansBold20
     m.epigrafeLabel.font = m.fonts.dmSansBold23
+    m.lSectionTitle.font = m.fonts.dmSansBold32
 end sub
 
 sub setUpColor()
@@ -48,12 +50,14 @@ sub setUpColor()
     m.desc.color = m.theme.white
     m.liveLabel.color = m.theme.white
     m.epigrafeLabel.color = m.theme.focPrimary
+    m.lSectionTitle.color = m.theme.white
     ' m.overlayImage.blendColor = m.theme.black
 end sub
 
 sub setObservers()
     m.top.observeField("items", "onItemsSet")
     m.top.observeField("focusedItem", "onFocusedItemSet")
+    m.top.observeField("sectionTitle", "onSectionTitleSet")
     m.top.observeField("visible", "onVisibilityChanged")
     m.pImage.observeField("loadStatus", "onLoadStatusChanged")
     m.pLogo.observeField("loadStatus", "onLogoImageLoadStatusChanged")
@@ -129,6 +133,16 @@ sub onFocusedItemSet()
     updateMeta()
 end sub
 
+sub onSectionTitleSet()
+    title = m.top.sectionTitle
+    m.lSectionTitle.text = ""
+    m.lSectionTitle.visible = false
+    if isValid(title) AND isNonEmptyString(title)
+        m.lSectionTitle.text = title
+        m.lSectionTitle.visible = true
+    end if
+end sub
+
 sub clearSlider()
     m.pImage.uri = ""
     setOverlayVisibility(false)
@@ -158,6 +172,23 @@ sub setupPosters()
         setPosterSize(m.pFadeLeft, imgWidth * 0.6, imgHeight)
         m.pFadeLeft.translation = [imgX, 0]
         m.pFadeLeft.visible = true
+    else if m.top.variant = "monumental"
+        headerHeight = 70
+        cardHeight = w * 0.33
+        imgWidth = w * 0.83
+        imgX = w - imgWidth
+        setPosterSize(m.pImage, imgWidth, cardHeight)
+        m.pImage.translation = [imgX, headerHeight]
+        setOverlayVisibility(false)
+        m.pFadeBottom.visible = false
+        gradWidth = w * 0.84
+        gradX = w - gradWidth
+        setPosterSize(m.pFadeLeft, gradWidth, cardHeight)
+        m.pFadeLeft.translation = [gradX, headerHeight]
+        m.pFadeLeft.visible = true
+        m.lgDetails.translation = [115, headerHeight + 170]
+        m.title.width = w * 0.4
+        m.desc.width = w * 0.4
     else
         setPosterSize(m.pImage, w, h)
         m.pImage.translation = [0, 0]
