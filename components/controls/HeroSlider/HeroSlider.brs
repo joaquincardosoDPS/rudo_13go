@@ -212,6 +212,9 @@ sub setupPosters()
         m.pFadeLeft.translation = [gradX, 0]
         m.pFadeLeft.visible = true
         m.lgDetails.translation = [115, 190]
+        m.pLogo.visible = false
+        m.pLogo.height = 0
+        m.pLogo.loadHeight = 0
         m.title.width = uw * 0.3
         m.desc.width = uw * 0.3
         m.desc.maxLines = 2
