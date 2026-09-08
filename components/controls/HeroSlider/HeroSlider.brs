@@ -31,6 +31,9 @@ sub setControls()
     m.bWatchNow = m.top.findNode("bWatchNow")
     m.pImageGroup = m.top.findNode("pImageGroup")
     m.lSectionTitle = m.top.findNode("lSectionTitle")
+    m.pTitleBg = m.top.findNode("pTitleBg")
+    m.pFocusBorder = m.top.findNode("pFocusBorder")
+    m.rCardBg = m.top.findNode("rCardBg")
 end sub
 
 sub setScrollStateImageVisibility(hidden as boolean)
@@ -51,6 +54,7 @@ sub setUpColor()
     m.liveLabel.color = m.theme.white
     m.epigrafeLabel.color = m.theme.focPrimary
     m.lSectionTitle.color = m.theme.white
+    m.pFocusBorder.blendColor = m.theme.focPrimary
     ' m.overlayImage.blendColor = m.theme.black
 end sub
 
@@ -90,22 +94,21 @@ end sub
 sub setupWatchNowButton()
     if m.bWatchNow = invalid then return
     buttonFields = {
-        buttonWidth: 150,
-        buttonHeight: 70,
-        backGroundImage: "pkg:/images/focus/filled_r6.9.png",
+        buttonWidth: 220,
+        buttonHeight: 60,
         buttonText: "Ver ahora",
         focusTextColor: m.theme.white
-        unfocusTextColor: m.theme.black
-        backgroundColor: m.theme.white
+        unfocusTextColor: m.theme.white
+        backgroundColor: m.theme.clrSecondaryText
         focusBackgroundColor: m.theme.focPrimary
-        backGroundImage: m.theme.filledBackGroundImage
-        focusBorderImage: m.theme.filledBackGroundImage
-        isFilledBgOnFocus: true
+        backGroundImage: "pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png"
+        focusBorderImage: "pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png"
+        isFilledBgOnFocus: false
         fontSize: "dmSansMedium26"
         posterImage: "pkg:/images/focus/btnplay.png"
         addColorOnImage: true
         padding: 20
-        posterImageSize: 35
+        posterImageSize: 25
         margin: 10
     }
     m.bWatchNow.update(buttonFields)
@@ -136,10 +139,10 @@ end sub
 sub onSectionTitleSet()
     title = m.top.sectionTitle
     m.lSectionTitle.text = ""
-    m.lSectionTitle.visible = false
+    m.pTitleBg.visible = false
     if isValid(title) AND isNonEmptyString(title)
         m.lSectionTitle.text = title
-        m.lSectionTitle.visible = true
+        m.pTitleBg.visible = true
     end if
 end sub
 
@@ -173,22 +176,28 @@ sub setupPosters()
         m.pFadeLeft.translation = [imgX, 0]
         m.pFadeLeft.visible = true
     else if m.top.variant = "monumental"
-        headerHeight = 70
         cardHeight = w * 0.33
         imgWidth = w * 0.83
         imgX = w - imgWidth
+        setPosterSize(m.rCardBg, w, cardHeight)
+        m.rCardBg.translation = [0, 0]
+        m.rCardBg.visible = true
         setPosterSize(m.pImage, imgWidth, cardHeight)
-        m.pImage.translation = [imgX, headerHeight]
+        m.pImage.translation = [imgX, 0]
         setOverlayVisibility(false)
         m.pFadeBottom.visible = false
         gradWidth = w * 0.84
         gradX = w - gradWidth
         setPosterSize(m.pFadeLeft, gradWidth, cardHeight)
-        m.pFadeLeft.translation = [gradX, headerHeight]
+        m.pFadeLeft.translation = [gradX, 0]
         m.pFadeLeft.visible = true
-        m.lgDetails.translation = [115, headerHeight + 170]
+        m.lgDetails.translation = [115, 170]
         m.title.width = w * 0.4
         m.desc.width = w * 0.4
+        setPosterSize(m.pTitleBg, 576, 297)
+        m.pTitleBg.translation = [0, 0]
+        setPosterSize(m.pFocusBorder, w, cardHeight)
+        m.pFocusBorder.translation = [0, 0]
     else
         setPosterSize(m.pImage, w, h)
         m.pImage.translation = [0, 0]
@@ -266,6 +275,7 @@ sub updateMeta()
 end sub
 
 sub onFocusedChild()
+    if m.top.variant = "monumental" then m.pFocusBorder.visible = m.top.hasFocus()
     if m.top.hasFocus() AND m.top.variant <> "compact" AND m.bWatchNow <> invalid then setFocus(m.bWatchNow)
 end sub
 

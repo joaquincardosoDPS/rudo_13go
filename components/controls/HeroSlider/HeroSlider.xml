@@ -15,7 +15,7 @@
         <function name="setScrollStateImageVisibility" />
     </interface>
     <children>
-        <Label id="lSectionTitle" text="" visible="false" translation="[100, 20]" />
+        <Rectangle id="rCardBg" color="0x08090CFF" visible="false" />
         <!-- Posters -->
         <Group id="pImageGroup" visible="false">
             <Poster id="pImage" loadDisplayMode="scaleToZoom" opacity="1.0" />
@@ -31,5 +31,9 @@
             <Label id="descLabel" width="900" wrap="true" lineSpacing="-3" maxLines="3" />
             <CustomButton id="bWatchNow" visible="false" />
         </LayoutGroup>
+        <Poster id="pFocusBorder" uri="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" visible="false" />
+        <Poster id="pTitleBg" uri="https://www-storage.13.cl/13go-premium/img/soporte.png" loadDisplayMode="scaleToFit" visible="false" translation="[0,0]">
+            <Label id="lSectionTitle" text="" translation="[40, 40]" />
+        </Poster>
     </children>
 </component>
