@@ -97,8 +97,13 @@ sub createDynamicCardsRowList()
     m.rowSpacings = []
 
     m.rowList = createObject("roSGNode", "RowList")
+    isCircleRow = isValid(m.top.category) AND isValid(m.top.category.format) AND m.top.category.format = "circle"
     m.rowList.vertFocusAnimationStyle = "floatingFocus"
-    m.rowList.rowFocusAnimationStyle = "floatingFocus"
+    if isCircleRow
+        m.rowList.rowFocusAnimationStyle = "fixedFocus"
+    else
+        m.rowList.rowFocusAnimationStyle = "floatingFocus"
+    end if
     m.rowList.translation = [0, 0]
     m.gEventPage.visible = false
     if isEventCategory()
@@ -119,7 +124,6 @@ sub createDynamicCardsRowList()
         m.rowList.itemSize = [1814, 1416]
     end if
     m.rowList.numRows = 3
-    isCircleRow = isValid(m.top.category) AND isValid(m.top.category.format) AND m.top.category.format = "circle"
     m.rowList.drawFocusFeedbackOnTop = "true"
     m.rowList.drawFocusFeedback = not isCircleRow
     if(m.global.designResolution = "720p")
