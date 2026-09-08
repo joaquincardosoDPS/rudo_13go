@@ -126,6 +126,7 @@ sub onItemsSet()
     setupPosters()
     updateMeta()
     if m.top.variant <> "compact" then m.bWatchNow.visible = true
+    if m.top.variant = "monumental" then finalizeMonumentalLayout()
 end sub
 
 sub onFocusedItemSet()
@@ -134,6 +135,23 @@ sub onFocusedItemSet()
     m.currentItem = item
     setupPosters()
     updateMeta()
+    if m.top.variant = "monumental" then finalizeMonumentalLayout()
+end sub
+
+sub finalizeMonumentalLayout()
+    w = m.top.width
+    if w <= 0 then w = 1920
+    minCardHeight = w * 0.375
+    textBottom = m.lgDetails.translation[1] + m.lgDetails.boundingRect().height
+    cardHeight = minCardHeight
+    if textBottom + 40 > cardHeight then cardHeight = textBottom + 40
+    imgWidth = w * 0.83
+    gradWidth = w * 0.84
+    setPosterSize(m.rCardBg, w, cardHeight)
+    setPosterSize(m.pImage, imgWidth, cardHeight)
+    setPosterSize(m.pFadeLeft, gradWidth, cardHeight)
+    setPosterSize(m.pFocusBorder, w, cardHeight)
+    m.top.componentHeight = cardHeight + 50
 end sub
 
 sub onSectionTitleSet()
@@ -313,6 +331,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
             m.currentItem = m.items[m.activeIndex]
             setupPosters()
             updateMeta()
+            if m.top.variant = "monumental" then finalizeMonumentalLayout()
         end if
         return true
     else if key = "left"
@@ -321,6 +340,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
             m.currentItem = m.items[m.activeIndex]
             setupPosters()
             updateMeta()
+            if m.top.variant = "monumental" then finalizeMonumentalLayout()
         end if
         return true
     end if
