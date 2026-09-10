@@ -49,6 +49,7 @@
         <function name="StartVideo" />
         <function name="UpdateSelectedTopMenu" />
         <function name="ShowLivePage" />
+        <function name="ShowRadioPage" />
     </interface>
 
     <children>

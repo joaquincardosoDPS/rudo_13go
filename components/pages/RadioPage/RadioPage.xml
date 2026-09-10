@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="RadioPage" extends="Group">
+    <script type="text/brightscript" uri="RadioPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <interface>
+        <field id="isDestroy" type="boolean" value="false" alwaysNotify="true" onChange="onPageDestroy" />
+    </interface>
+    <children>
+        <Rectangle id="rBg" width="1920" height="1080" color="#060608" />
+        <Poster id="pPlayerBg" width="1920" height="648" loadDisplayMode="scaleToFit" translation="[0,0]" />
+        <Group id="gPlayer" translation="[624,228]">
+            <Audio id="audio" />
+            <Poster id="pPlayerCardBg" width="672" height="192" uri="pkg:/images/radio/radio_player_bg.png" loadDisplayMode="scaleToZoom" />
+            <Poster id="pPlayerLogoBg" width="192" height="192" uri="pkg:/images/radio/radio_player_logo_bg.png" loadDisplayMode="scaleToZoom" />
+            <Poster id="pPlayerLogo" width="134" height="134" translation="[29,29]" loadWidth="134" loadDisplayMode="scaleToFit" />
+            <Label id="lLive" text="EN VIVO" translation="[230,55]" />
+            <Label id="lRadioName" text="" translation="[230,88]" />
+            <Poster id="pPlayPause" width="57" height="57" translation="[548,68]" loadDisplayMode="scaleToFit" />
+            <BusySpinner id="bsLoading" translation="[552,72]" visible="false" clockwise="true" spinInterval="0.8" />
+            <Poster id="pPlayerFocusBorder" width="672" height="192" uri="pkg:/images/radio/radio_player_border.png" loadDisplayMode="scaleToZoom" visible="false" />
+        </Group>
+        <Label id="lTitle" text="Radios" width="1920" height="50" horizAlign="center" translation="[0,690]" />
+        <Group id="gCardsTrack" translation="[0,760]" />
+    </children>
+</component>

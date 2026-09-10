@@ -364,6 +364,8 @@ sub RefreshVisiblePageForProfile()
         ShowProgramsPage(true)
     else if pageId = "LivePage"
         ShowLivePage(true)
+    else if pageId = "RadioPage"
+        ShowRadioPage(true)
     else if pageId = "MyListPage"
         ShowMyListPage(true)
     else if pageId = "CategoryDetailPage"
@@ -426,11 +428,6 @@ sub onTopMenuItemSelected(event as dynamic)
     pageName = menuItem.title
     print "MainScene : onTopMenuItemSelected : pageName = " pageName
     if isValid(pageName)
-        if pageName = "Radios"
-            ' TODO Paso 5: pantalla de Radios pendiente de construir. Por ahora no navega a ningun lado.
-            return
-        end if
-
         targetPageId = ""
         if pageName = "Portada"
             targetPageId = "homepage"
@@ -440,6 +437,8 @@ sub onTopMenuItemSelected(event as dynamic)
             targetPageId = "showprogramspage"
         else if pageName = "En vivo"
             targetPageId = "livepage"
+        else if pageName = "Radios"
+            targetPageId = "radiopage"
         end if
 
         topNode = m.ViewStackManager.GetTop()
@@ -450,6 +449,7 @@ sub onTopMenuItemSelected(event as dynamic)
         if isValid(m.HomePage) then m.HomePage.isDestroy = true
         if isValid(m.LivePage) then m.LivePage.isDestroy = true
         if isValid(m.MyListPage) then m.MyListPage.isDestroy = true
+        if isValid(m.RadioPage) then m.RadioPage.isDestroy = true
         if pageName = "Portada"
             ShowHomePage(true)
         else if pageName = "Búsqueda"
@@ -458,6 +458,8 @@ sub onTopMenuItemSelected(event as dynamic)
             ShowProgramsPage(true)
         else if pageName = "En vivo"
             ShowLivePage(true)
+        else if pageName = "Radios"
+            ShowRadioPage(true)
         else
             ShowHomePage(true)
         end if
@@ -785,6 +787,30 @@ function GetLivePageObject(isReplace as boolean) as object
     end if
     m.gPageContainer.appendChild(m.LivePage)
     return m.LivePage
+end function
+
+sub ShowRadioPage(isReplace = false as boolean)
+    m.RadioPage = GetRadioPageObject(true)
+    if (isReplace = true)
+        m.ViewStackManager.ReplaceScreen(m.RadioPage)
+    else
+        m.ViewStackManager.ShowScreen(m.RadioPage)
+    end if
+    setFocus(m.RadioPage)
+end sub
+
+function GetRadioPageObject(isReplace as boolean) as object
+    if isReplace
+        m.gPageContainer.removeChild(m.RadioPage)
+        m.RadioPage = invalid
+    end if
+    if isInvalid(m.RadioPage)
+        m.RadioPage = createObject("roSGNode", "RadioPage")
+        m.RadioPage.visible = true
+        m.RadioPage.id = "RadioPage"
+    end if
+    m.gPageContainer.appendChild(m.RadioPage)
+    return m.RadioPage
 end function
 
 sub ShowMyListPage(isReplace = false as boolean)

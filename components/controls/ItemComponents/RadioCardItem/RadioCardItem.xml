@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="RadioCardItem" extends="Group">
+    <script type="text/brightscript" uri="RadioCardItem.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="imageUri" type="string" alwaysNotify="true" onChange="onImageChanged" />
+        <field id="bgColor" type="string" alwaysNotify="true" onChange="onBgColorChanged" />
+        <field id="borderColor" type="string" alwaysNotify="true" onChange="onBorderColorChanged" />
+        <field id="itemHasFocus" type="boolean" alwaysNotify="true" onChange="onFocusChanged" />
+    </interface>
+    <children>
+        <Poster id="pBg" width="192" height="192" uri="pkg:/images/focus/white_fill_corner_radius_10.9.png" loadDisplayMode="scaleToZoom" />
+        <Poster id="pLogo" width="192" height="192" translation="[0,0]" loadWidth="192" loadDisplayMode="scaleToFit" />
+        <Poster id="pDim" width="192" height="192" uri="pkg:/images/focus/white_fill_corner_radius_10.9.png" loadDisplayMode="scaleToZoom" blendColor="#000000" opacity="0.55" />
+        <Poster id="pBorderThin" width="192" height="192" uri="pkg:/images/radio/radio_card_border_thin.png" loadDisplayMode="scaleToZoom" />
+        <Poster id="pBorderThick" width="192" height="192" uri="pkg:/images/radio/radio_card_border_thick.png" loadDisplayMode="scaleToZoom" visible="false" />
+    </children>
+</component>
