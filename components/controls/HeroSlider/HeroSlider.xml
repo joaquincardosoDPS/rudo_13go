@@ -11,15 +11,15 @@
         <field id="height" type="float" />
         <field id="variant" type="string" value="full" />
         <field id="focusedItem" type="node" />
-        <field id="sectionTitle" type="string" />
         <function name="setScrollStateImageVisibility" />
         <function name="setFocusState" />
     </interface>
     <children>
-        <Rectangle id="rCardBg" color="0x08090CFF" visible="false" />
         <!-- Posters -->
         <Group id="pImageGroup" visible="false">
-            <Poster id="pImage" loadDisplayMode="scaleToZoom" opacity="1.0" />
+            <MaskGroup id="mgImageMask" maskUri="pkg:/images/card/card_mask_320_180.png">
+                <Poster id="pImage" loadDisplayMode="scaleToZoom" opacity="1.0" />
+            </MaskGroup>
             <Poster id="overlayImage" uri="pkg:/images/overlay/detailpage_overlay.png" />
             <Poster id="pFadeBottom" uri="pkg:/images/overlay/hero_fade_bottom.png" loadDisplayMode="stretchToFit" visible="false" />
             <Poster id="pFadeLeft" uri="pkg:/images/overlay/hero_fade_left.png" loadDisplayMode="stretchToFit" visible="false" />
@@ -32,9 +32,5 @@
             <Label id="descLabel" width="900" wrap="true" lineSpacing="-3" maxLines="3" />
             <CustomButton id="bWatchNow" visible="false" />
         </LayoutGroup>
-        <Poster id="pFocusBorder" uri="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" visible="false" />
-        <Poster id="pTitleBg" uri="https://www-storage.13.cl/13go-premium/img/soporte.png" loadDisplayMode="scaleToFit" visible="false" translation="[0,0]">
-            <Label id="lSectionTitle" text="" translation="[40, 40]" />
-        </Poster>
     </children>
 </component>

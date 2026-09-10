@@ -19,6 +19,7 @@ end sub
 
 sub setControls()
     m.pImage = m.top.findNode("pImage")
+    m.mgImageMask = m.top.findNode("mgImageMask")
     m.overlayImage = m.top.findNode("overlayImage")
     m.pFadeBottom = m.top.findNode("pFadeBottom")
     m.pFadeLeft = m.top.findNode("pFadeLeft")
@@ -30,10 +31,6 @@ sub setControls()
     m.desc = m.top.findNode("descLabel")
     m.bWatchNow = m.top.findNode("bWatchNow")
     m.pImageGroup = m.top.findNode("pImageGroup")
-    m.lSectionTitle = m.top.findNode("lSectionTitle")
-    m.pTitleBg = m.top.findNode("pTitleBg")
-    m.pFocusBorder = m.top.findNode("pFocusBorder")
-    m.rCardBg = m.top.findNode("rCardBg")
 end sub
 
 sub setScrollStateImageVisibility(hidden as boolean)
@@ -45,7 +42,6 @@ sub setUpFonts()
     m.desc.font = m.fonts.dmSansMedium24
     m.liveLabel.font = m.fonts.dmSansBold20
     m.epigrafeLabel.font = m.fonts.dmSansBold23
-    m.lSectionTitle.font = m.fonts.dmSansBold32
 end sub
 
 sub setUpColor()
@@ -53,15 +49,12 @@ sub setUpColor()
     m.desc.color = m.theme.white
     m.liveLabel.color = m.theme.white
     m.epigrafeLabel.color = m.theme.focPrimary
-    m.lSectionTitle.color = m.theme.white
-    m.pFocusBorder.blendColor = m.theme.focPrimary
     ' m.overlayImage.blendColor = m.theme.black
 end sub
 
 sub setObservers()
     m.top.observeField("items", "onItemsSet")
     m.top.observeField("focusedItem", "onFocusedItemSet")
-    m.top.observeField("sectionTitle", "onSectionTitleSet")
     m.top.observeField("visible", "onVisibilityChanged")
     m.pImage.observeField("loadStatus", "onLoadStatusChanged")
     m.pLogo.observeField("loadStatus", "onLogoImageLoadStatusChanged")
@@ -126,7 +119,6 @@ sub onItemsSet()
     setupPosters()
     updateMeta()
     if m.top.variant <> "compact" then m.bWatchNow.visible = true
-    if m.top.variant = "monumental" then finalizeMonumentalLayout()
 end sub
 
 sub onFocusedItemSet()
@@ -135,35 +127,6 @@ sub onFocusedItemSet()
     m.currentItem = item
     setupPosters()
     updateMeta()
-    if m.top.variant = "monumental" then finalizeMonumentalLayout()
-end sub
-
-sub finalizeMonumentalLayout()
-    w = m.top.width
-    if w <= 0 then w = 1920
-    topInset = 20
-    cw = w - 312
-    minCardHeight = cw * 0.2
-    textBottom = (m.lgDetails.translation[1] - topInset) + m.lgDetails.boundingRect().height
-    cardHeight = minCardHeight
-    if textBottom + 40 > cardHeight then cardHeight = textBottom + 40
-    imgWidth = cw * 0.5
-    gradWidth = cw * 0.51
-    setPosterSize(m.rCardBg, cw, cardHeight)
-    setPosterSize(m.pImage, imgWidth, cardHeight)
-    setPosterSize(m.pFadeLeft, gradWidth, cardHeight)
-    setPosterSize(m.pFocusBorder, cw, cardHeight)
-    m.top.componentHeight = topInset + cardHeight + 50
-end sub
-
-sub onSectionTitleSet()
-    title = m.top.sectionTitle
-    m.lSectionTitle.text = ""
-    m.pTitleBg.visible = false
-    if isValid(title) AND isNonEmptyString(title)
-        m.lSectionTitle.text = title
-        m.pTitleBg.visible = true
-    end if
 end sub
 
 sub clearSlider()
@@ -183,8 +146,10 @@ sub setupPosters()
         imgWidth = w * 0.72
         imgHeight = w * 0.41
         imgX = w - imgWidth
+        m.pImage.loadDisplayMode = "scaleToZoom"
+        setMaskBox(imgWidth, imgHeight, imgX, 0)
         setPosterSize(m.pImage, imgWidth, imgHeight)
-        m.pImage.translation = [imgX, 0]
+        m.pImage.translation = [0, 0]
         m.lgDetails.translation = [100, 220]
         m.title.width = w * 0.32
         m.desc.width = w * 0.32
@@ -194,40 +159,11 @@ sub setupPosters()
         m.pFadeBottom.visible = true
         setPosterSize(m.pFadeLeft, imgWidth * 0.6, imgHeight)
         m.pFadeLeft.translation = [imgX, 0]
+        m.pFadeLeft.uri = "pkg:/images/overlay/hero_fade_left.png"
         m.pFadeLeft.visible = true
-    else if m.top.variant = "monumental"
-        sideMargin = 106
-        leftInset = 100
-        topInset = 20
-        cw = w - (sideMargin * 2) - leftInset
-        cardHeight = cw * 0.2
-        imgWidth = cw * 0.5
-        imgX = cw - imgWidth
-        setPosterSize(m.rCardBg, cw, cardHeight)
-        m.rCardBg.translation = [leftInset, topInset]
-        m.rCardBg.visible = true
-        setPosterSize(m.pImage, imgWidth, cardHeight)
-        m.pImage.translation = [leftInset + imgX, topInset]
-        setOverlayVisibility(false)
-        m.pFadeBottom.visible = false
-        gradWidth = cw * 0.51
-        gradX = cw - gradWidth
-        setPosterSize(m.pFadeLeft, gradWidth, cardHeight)
-        m.pFadeLeft.translation = [leftInset + gradX, topInset]
-        m.pFadeLeft.visible = true
-        m.lgDetails.translation = [leftInset + 115, topInset + 190]
-        m.pLogo.visible = false
-        m.pLogo.height = 0
-        m.pLogo.loadHeight = 0
-        m.title.width = cw * 0.3
-        m.desc.width = cw * 0.3
-        m.desc.maxLines = 2
-        setPosterSize(m.pTitleBg, 350, 180)
-        m.pTitleBg.translation = [leftInset, topInset]
-        setPosterSize(m.pFocusBorder, cw, cardHeight)
-        m.pFocusBorder.translation = [leftInset, topInset]
-        m.pFocusBorder.visible = m.top.hasFocus()
     else
+        m.pImage.loadDisplayMode = "scaleToZoom"
+        setMaskBox(w, h, 0, 0)
         setPosterSize(m.pImage, w, h)
         m.pImage.translation = [0, 0]
         setPosterSize(m.overlayImage, w, h)
@@ -247,6 +183,12 @@ sub setPosterSize(node as object, w as dynamic, h as dynamic)
     node.height = h
     node.loadWidth = w
     node.loadHeight = h
+end sub
+
+sub setMaskBox(w as float, h as float, x as float, y as float)
+    if m.mgImageMask = invalid then return
+    m.mgImageMask.maskSize = [w, h]
+    m.mgImageMask.translation = [x, y]
 end sub
 
 function getSliderImage(item as object) as string
@@ -307,12 +249,10 @@ sub updateMeta()
 end sub
 
 sub onFocusedChild()
-    if m.top.variant = "monumental" then m.pFocusBorder.visible = m.top.hasFocus()
     if m.top.hasFocus() AND m.top.variant <> "compact" AND m.bWatchNow <> invalid then setFocus(m.bWatchNow)
 end sub
 
 sub setFocusState(focused as boolean)
-    if m.top.variant = "monumental" then m.pFocusBorder.visible = focused
     if focused AND m.top.variant <> "compact" AND m.bWatchNow <> invalid then setFocus(m.bWatchNow)
 end sub
 
@@ -349,7 +289,6 @@ function onKeyEvent(key as string, press as boolean) as boolean
             m.currentItem = m.items[m.activeIndex]
             setupPosters()
             updateMeta()
-            if m.top.variant = "monumental" then finalizeMonumentalLayout()
         end if
         return true
     else if key = "left"
@@ -358,7 +297,6 @@ function onKeyEvent(key as string, press as boolean) as boolean
             m.currentItem = m.items[m.activeIndex]
             setupPosters()
             updateMeta()
-            if m.top.variant = "monumental" then finalizeMonumentalLayout()
         end if
         return true
     end if

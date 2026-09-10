@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MonumentalCard" extends="Group">
+    <script type="text/brightscript" uri="MonumentalCard.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/ImageUtils.brs" />
+    <interface>
+        <field id="items" type="array" />
+        <field id="width" type="float" value="1920" />
+        <field id="componentHeight" type="integer" value="0" />
+        <field id="sectionTitle" type="string" />
+        <function name="setFocusState" />
+    </interface>
+    <children>
+        <Rectangle id="rCardBg" color="0x08090CFF" visible="false" />
+        <Group id="gSlideClip">
+            <Group id="gSlide">
+                <Group id="pImageGroup" visible="false">
+                    <MaskGroup id="mgImageMask" maskUri="pkg:/images/card/card_mask_320_180.png">
+                        <Poster id="pImage" loadDisplayMode="scaleToFit" opacity="1.0" />
+                    </MaskGroup>
+                </Group>
+                <!-- Fuera del MaskGroup a proposito: un MaskGroup como hermano puede romper el
+                     alpha-blending de contenido semi-transparente que se dibuja despues de el. -->
+                <Poster id="pFadeLeft" uri="pkg:/images/overlay/hero_fade_left_strong.png" loadDisplayMode="stretchToFit" visible="false" />
+                <LayoutGroup id="lgDetails" addItemSpacingAfterChild="false" layoutDirection="vert" itemSpacings="[0,10,20]">
+                    <Label id="titleLabel" width="900" wrap="true" lineSpacing="-3" maxLines="2" />
+                    <Label id="descLabel" width="900" wrap="true" lineSpacing="-3" maxLines="4" />
+                    <CustomButton id="bWatchNow" visible="false" />
+                </LayoutGroup>
+            </Group>
+        </Group>
+        <Poster id="pTitleBg" uri="https://www-storage.13.cl/13go-premium/img/soporte.png" loadDisplayMode="scaleToFit" visible="false" translation="[0,0]">
+            <Label id="lSectionTitle" text="" translation="[40, 40]" />
+        </Poster>
+        <Poster id="pFocusBorder" uri="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" visible="false" />
+        <Animation id="slideAnim" duration="0.3" easeFunction="inOutQuad" repeat="false">
+            <Vector2DFieldInterpolator id="slideInterp" key="[0.0, 1.0]" fieldToInterp="gSlide.translation" />
+        </Animation>
+    </children>
+</component>

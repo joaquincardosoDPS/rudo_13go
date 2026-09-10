@@ -307,15 +307,13 @@ end sub
 
 sub PushMonumentalRow(title as string, items as object)
     if isValid(items) AND items.count() > 0
-        heroSlider = createObject("roSGNode", "HeroSlider")
-        heroSlider.id = title
-        heroSlider.width = 1920
-        heroSlider.variant = "monumental"
-        heroSlider.sectionTitle = title
-        heroSlider.height = 342
-        heroSlider.componentHeight = 342 + 50
-        heroSlider.items = items
-        m.categoriesNode.push(heroSlider)
+        monumentalCard = createObject("roSGNode", "MonumentalCard")
+        monumentalCard.id = title
+        monumentalCard.width = 1920
+        monumentalCard.sectionTitle = title
+        monumentalCard.componentHeight = 342 + 50
+        monumentalCard.items = items
+        m.categoriesNode.push(monumentalCard)
     end if
 end sub
 
@@ -337,9 +335,9 @@ sub OnGetHomeCategoryProgramsAPIResponse(event as dynamic)
         for each raw in rawPrograms
             bgUrl = raw.imagen_fondo
             items.push({
-                title: raw.title
-                description: raw.bajada
-                description_short: raw.bajada
+                title: decodeHtmlEntities(raw.title)
+                description: decodeHtmlEntities(raw.bajada)
+                description_short: decodeHtmlEntities(raw.bajada)
                 key: raw.id
                 image_background: { small: bgUrl, medium: bgUrl, normal: bgUrl, big: bgUrl, default: bgUrl }
             })
@@ -350,9 +348,9 @@ sub OnGetHomeCategoryProgramsAPIResponse(event as dynamic)
         for each raw in rawPrograms
             imageUrl = raw.image
             items.push({
-                title: raw.title
-                description: raw.bajada
-                description_short: raw.bajada
+                title: decodeHtmlEntities(raw.title)
+                description: decodeHtmlEntities(raw.bajada)
+                description_short: decodeHtmlEntities(raw.bajada)
                 key: raw.id
                 image_orientation: "portrait"
                 format: "default"
@@ -381,7 +379,7 @@ sub OnGetHomeTop10APIResponse(event as dynamic)
     for each raw in rawItems
         imageUrl = raw.image
         items.push({
-            title: raw.title
+            title: decodeHtmlEntities(raw.title)
             key: raw.id
             image_orientation: "portrait"
             format: "default"
@@ -411,7 +409,7 @@ sub OnGetHomeSenalesAPIResponse(event as dynamic)
         if isNonEmptyString(raw.logo_invertido) AND LCase(Right(raw.logo_invertido, 4)) <> ".svg" then logoUrl = raw.logo_invertido
         if isNonEmptyString(raw.logo_blanco) AND LCase(Right(raw.logo_blanco, 4)) <> ".svg" then logoUrl = raw.logo_blanco
         items.push({
-            title: raw.titulo
+            title: decodeHtmlEntities(raw.titulo)
             key: raw.nid
             image: logoUrl
             ringColor: raw.color_principal
@@ -439,7 +437,7 @@ sub OnGetHomeRadiosAPIResponse(event as dynamic)
     items = []
     for each raw in rawItems
         items.push({
-            title: raw.name
+            title: decodeHtmlEntities(raw.name)
             key: raw.name
             image: raw.image
             ringColor: raw.color
@@ -469,10 +467,10 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
         for each raw in rawItems
             imageUrl = raw.image
             items.push({
-                title: raw.title
-                description: raw.bajada
-                description_short: raw.bajada
-                epigrafe: raw.show
+                title: decodeHtmlEntities(raw.title)
+                description: decodeHtmlEntities(raw.bajada)
+                description_short: decodeHtmlEntities(raw.bajada)
+                epigrafe: decodeHtmlEntities(raw.show)
                 llamado: raw.llamado
                 duration: raw.duration
                 key: raw.nid
@@ -570,7 +568,7 @@ sub createDynamicRowList()
         end for
     end if
     for each node in m.categoriesNode
-        if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR node.subtype() = "HeroSlider"))
+        if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR node.subtype() = "HeroSlider" OR node.subtype() = "MonumentalCard"))
             m.focusableGroup.callFunc("setTranslation", node)
         end if
     end for
@@ -614,7 +612,7 @@ sub checkRefreshNodes(compNode as dynamic, mainContent as dynamic)
     end if
     if m.isReRenderUI
         for each node in m.categoriesNode
-            if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR node.subtype() = "HeroSlider"))
+            if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR node.subtype() = "HeroSlider" OR node.subtype() = "MonumentalCard"))
                 m.focusableGroup.callFunc("setTranslation", node)
             end if
         end for

@@ -178,7 +178,7 @@ function isTopHeroNode(node as dynamic) as boolean
 end function
 
 sub setNodeFocusState(node as dynamic, focused as boolean)
-    if isValid(node) AND node.subType() = "HeroSlider"
+    if isValid(node) AND (node.subType() = "HeroSlider" OR node.subType() = "MonumentalCard")
         node.callFunc("setFocusState", focused)
     end if
 end sub

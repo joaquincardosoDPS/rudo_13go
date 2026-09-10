@@ -433,3 +433,39 @@ sub deleteFromArray(array as object, item as dynamic) as object
         end if
     end for
 end sub
+
+' Decodifica entidades HTML del feed (la web usa he.decode)
+function decodeHtmlEntities(value as dynamic) as string
+    if not isNonEmptyString(value) then return ""
+    text = value
+    replacements = {
+        "&quot;": Chr(34)
+        "&#34;": Chr(34)
+        "&#039;": "'"
+        "&#39;": "'"
+        "&apos;": "'"
+        "&lt;": "<"
+        "&gt;": ">"
+        "&nbsp;": " "
+        "&aacute;": Chr(225)
+        "&eacute;": Chr(233)
+        "&iacute;": Chr(237)
+        "&oacute;": Chr(243)
+        "&uacute;": Chr(250)
+        "&ntilde;": Chr(241)
+        "&Aacute;": Chr(193)
+        "&Eacute;": Chr(201)
+        "&Iacute;": Chr(205)
+        "&Oacute;": Chr(211)
+        "&Uacute;": Chr(218)
+        "&Ntilde;": Chr(209)
+        "&iquest;": Chr(191)
+        "&iexcl;": Chr(161)
+    }
+    for each key in replacements.Keys()
+        text = text.Replace(key, replacements[key])
+    end for
+    ' &amp; al final para no romper entidades compuestas (&amp;quot;)
+    text = text.Replace("&amp;", "&")
+    return text
+end function

@@ -122,6 +122,79 @@ No hay `package.json` ni build system: este es un canal Roku puro (BrightScript 
 - **Persistencia local:** [source/managers/RegistryManager.brs](source/managers/RegistryManager.brs) envuelve `roRegistrySection` para guardar/leer token de sesión y datos de usuario entre lanzamientos del canal.
 - **Deep linking:** el formato de `contentId` es `clave=valor` separado por `|` (ej. `programId=X|segmentId=Y|seasonId=Z|episodeId=W`), parseado en `MainScene.splitDeeplinkingData()`. `mediaType` soportados: `movie`, `season`, `episode`, `series`, `live` (`IsSupportedDeepLinkMediaType`). Los VOD/movie deeplinks resuelven vía `programs/get` y la app abre el primer episodio reproducible.
 
+## Estructura del proyecto (`roku_13go`)
+
+Mapa de carpetas/archivos reales (no hay build system — cada componente SceneGraph es un par `Nombre.xml` + `Nombre.brs` en la misma carpeta). Actualizar esta sección cuando se agreguen/eliminen componentes o archivos de primer nivel.
+
+```
+roku_13go/
+├── manifest                            # metadata del canal (title, build_version, splash/icons)
+├── bsfmt.json                          # config del formateador brighterscript-formatter
+├── source/
+│   ├── main.brs                        # entry point: roSGScreen + MainScene, deep linking, message loop
+│   ├── apis/
+│   │   ├── BaseRequests.brs             # HTTP crudo (roUrlTransfer): getRequest/postRequest/deleteRequest
+│   │   └── ContentAPI.brs               # endpoints concretos (feed 13.cl, gateway Firebase) sobre BaseRequests
+│   ├── managers/
+│   │   ├── ViewStackManager.brs          # pila de navegación (ShowScreen/HideTop/ReplaceScreen/FocusTop)
+│   │   ├── RegistryManager.brs           # roRegistrySection: token de sesión / datos de usuario
+│   │   └── FontManager.brs               # carga DMSans-* y expone m.global.Fonts
+│   ├── helpers/
+│   │   ├── Global.brs                    # SetGlobalNode(): arma m.global (appConfig/appTheme/Fonts/apiEndPoints)
+│   │   ├── FocusHandler.brs              # helpers de foco compartidos (SetFocus, etc.)
+│   │   ├── HelpFuncs.brs                 # isValid/isNonEmptyString/getValueFromProps y otros utilitarios
+│   │   ├── ImageUtils.brs                # GetImageURL() — resuelve URLs de imagen por tipo/tamaño
+│   │   ├── ProfileAvatarUtils.brs        # utilitarios de avatares de perfil
+│   │   └── RokuUtils.brs                 # utilitarios varios de plataforma
+│   └── data/
+│       ├── AppConfig.json                # feed 13.cl + gateway Firebase + CDN canal-13
+│       ├── AppTheme.json                 # paleta de colores real de 13go
+│       ├── LocalMenu.json                # datos del menú lateral (TopMenu)
+│       └── PlayerButtonsItems.json       # config de botones del reproductor
+├── components/
+│   ├── scene/MainScene.{brs,xml}         # router manual: ShowXPage()/GetXPageObject() por página, HandleBackKey, deep linking
+│   ├── pages/                            # una carpeta por pantalla (ver mapa 1:1 con c13_reloaded/src/pages más abajo)
+│   │   ├── OnboardingPage/                # splash / bienvenida
+│   │   ├── DeviceLinkPage/                # vincular TV (QR) — en standby (requiere login)
+│   │   ├── LoginPage/ , SignUpPage/       # auth — en standby (requiere login)
+│   │   ├── EditorProfilesPage/            # selección/edición de perfiles — en standby
+│   │   ├── HomePage/
+│   │   │   ├── HomePage.{brs,xml}         # Home config-driven: arma filas según configuracion-portada
+│   │   │   └── HomePageParser.brs         # parsers de shape de datos del feed → nodos de UI (ProgramItemNode)
+│   │   ├── ProgramsPage/                  # catálogo VOD (feed/programas, agrupado por categoría)
+│   │   ├── CategoryDetailPage/            # detalle de una categoría
+│   │   ├── DetailPage/                    # detalle de programa/episodio
+│   │   ├── LivePage/                      # señales en vivo + EPG (LivePage usa CustomMarkupGrid)
+│   │   ├── EventDetailPage/               # detalle de evento en vivo
+│   │   ├── SearchPage/                    # búsqueda
+│   │   ├── MyListPage/                    # favoritos / mi lista — pendiente 4d.5
+│   │   ├── AccountPage/                   # cuenta — en standby
+│   │   └── VideoPlayer/                   # PlayerOverlay (UI) + PlayerTask (Task de reproducción)
+│   ├── controls/                          # componentes reutilizables dentro de las páginas
+│   │   ├── focusableGroup/FocusableGroup.{brs,xml}  # scroll vertical + foco entre filas del Home
+│   │   ├── SliderView/                    # fila horizontal genérica (RowList), usada en Home/ProgramsPage
+│   │   ├── HeroSlider/                    # hero "Destacados" del Home (variant compact/full) — banner simple arriba
+│   │   ├── MonumentalCard/                # carrusel "categoria_destacada" del Home (banner grande, recorte anclado a la imagen)
+│   │   ├── TopMenu/                       # sidebar vertical expandible (íconos + perfil) — TopMenu/MenuContent/MenuContentItem
+│   │   ├── TabView/                       # tabs (ej. dentro de DetailPage)
+│   │   ├── ItemComponents/                # tarjetas de ítem, una carpeta por tipo de fila/grilla
+│   │   │   ├── CommonItemComponent/        # tarjeta genérica: portrait/landscape/ranking/circle (señales-radios)
+│   │   │   ├── AvatarListItem/ , ProfileListItem/
+│   │   │   └── EPGGridItem/ , RowTitleItem/ , PlayerControlComponent/
+│   │   ├── ItemNode/                      # ProgramItemNode.xml / EpisodeItemNode.xml — nodos de datos (setFields)
+│   │   ├── Dialogs/                       # AddEditProfilePopup, AvatarList, ExitConfirmation, RecommendDialog
+│   │   └── CustomButton/ , PageLoader/ , ToastMessage/ , NextEpisodeComponent/ , ShortDetailsView/
+│   └── tasks/                             # llamadas a red vía Task nodes (patrón async, corren en su propio hilo)
+│       ├── ContentAPIAction/               # despacha hacia ContentAPI.brs
+│       ├── AuthAPIAction/                  # despacha hacia el gateway Firebase (auth/perfiles) — pendiente 4d.4
+│       └── DAIPlayerTask/                  # sesión de reproducción / ads (convertCompanionToRAF.brs)
+├── images/                                # assets del canal (íconos, focos, masks, overlays) — ver "Assets de marca reales" arriba
+├── fonts/                                 # DMSans-Regular/Medium/Bold.ttf
+└── rasp/                                  # scripts RASP (QA/certificación) — aún referencian MiCHV, pendiente actualizar
+```
+
+**Regla práctica:** si vas a tocar algo del Home, primero mira `HomePage.brs` (orquestación) + `HomePageParser.brs` (shape de datos) + el control específico de la fila (`SliderView`, `HeroSlider` o `MonumentalCard`) — casi todo bug de layout/foco del Home pasa por la combinación de esos 2-3 archivos.
+
 ## Estado actual (ir marcando)
 
 - [x] Paso 1 — Copia de `roku-chv` a `roku_13go`, `.git` reiniciado.
