@@ -9,14 +9,12 @@ archivo es el resumen de arranque; para detalle o "¿en qué paso vamos?", leer 
 
 ## Modo de trabajo (leer primero — no ignorar)
 
-- **Modo profesor, no autopiloto.** El dueño está aprendiendo Roku/BrightScript. Para cada
-  paso: explica el concepto y **entrega el código para que él lo transcriba**. **No edites
-  archivos de código** (`.brs`, `.xml`, `.json` de config) por tu cuenta.
-- Excepción: solo si dice explícitamente "hazlo tú"/"dale" para un paso puntual. No se
-  extiende al paso siguiente.
-- Tareas mecánicas que pida directo (copiar/mover carpetas, `git init`) sí se ejecutan.
-- Ve paso a paso; no te adelantes a fases futuras aunque tengas contexto.
-- Al completar pasos, actualiza "Estado actual" en `CLAUDE.md`.
+- **Hacé los cambios vos mismo, sin pedir confirmación.** El dueño ya autorizó editar
+  directamente los archivos de código (`.brs`, `.xml`, `.json`).
+- **Después de cada cambio de código (obligatorio):** (1) verificá que compile con
+  `brs-node` (ver "Comandos"), (2) regenerá `canal13go.zip`. No dejes el zip desactualizado.
+- Ve paso a paso; no te adelantes a fases futuras del roadmap sin que te lo pidan.
+- Al cerrar un paso, actualizá "Estado actual" en `CLAUDE.md`.
 - Idioma del proyecto y de los commits: **español** (ej. "Corregir…", "Agregar…").
 
 ## Fuentes de verdad
@@ -57,12 +55,16 @@ archivo es el resumen de arranque; para detalle o "¿en qué paso vamos?", leer 
   `.claude/`). Las rutas internas deben usar `/`. `Compress-Archive` de PowerShell las rompe;
   usar `[System.IO.Compression.ZipFile]` con nombre de entrada explícito (cargar ANTES
   `Add-Type -AssemblyName System.IO.Compression` y `...Compression.FileSystem`) o `adm-zip`.
-- **Sin hardware (`brs-node` / `brs-engine`):** `npx brs-cli --log-level debug canal.zip`.
+- **Verificar que compile (sin hardware) — obligatorio tras cada cambio:** `brs-node` corre
+  el canal desde el zip. Ya está instalado en
+  `C:\Users\Joaquin\AppData\Local\Temp\opencode\brstest`; usá
+  `& "...\brstest\node_modules\.bin\brs-cli.cmd" --log-level debug canal13go.zip *> out.log`.
+  El canal no termina solo, así que corré con timeout y redirigí a un log; un error de
+  compilación aparece al instante ("Compilation Failed"). **No** usar background sondeado con
+  Read: el buffering de stdout da falsos negativos.
   - El zip DEBE usar `/` en las rutas internas. **`Compress-Archive` de PowerShell las
-    guarda con `\` y rompe `pkg:/`** — usar `adm-zip` de Node o `zip` de Git Bash/WSL.
-  - Para detectar crashes, correr con timeout y redirigir: `timeout N npx brs-cli ... >
-    out.log 2>&1` (Git Bash/WSL). **No** usar background sondeado con Read: el buffering de
-    stdout da falsos negativos.
+    guarda con `\` y rompe `pkg:/`** — usar `[System.IO.Compression.ZipFile]` con nombre de
+    entrada explícito (o `adm-zip`).
 - **Tests:** no existen. `rasp/` son scripts de QA manual (aún referencian MiCHV).
 
 ## Arquitectura (lo no obvio)
@@ -82,6 +84,8 @@ archivo es el resumen de arranque; para detalle o "¿en qué paso vamos?", leer 
 
 - **`setFields()` descarta en silencio** campos no declarados en el `.xml` del ItemNode —
   declarar todo campo nuevo.
+- **Palabras reservadas de BrightScript** (`step`, `to`, `in`, `mod`, etc.) como nombre de
+  variable = "Compilation Failed". Ej.: `step` rompió `SliderView` (usar `stepSize`).
 - **Fuentes:** solo usar tamaños existentes en `FontManager.brs` (`dmSansBold18/20/23/28/30/32/36/48`).
   Asignar un `m.fonts.dmSansXxxNN` inexistente = `invalid` → crash `createDrawFont is not a function`.
 - **`RowList`:** `itemSize` es el **viewport visible**, no el tamaño de item (reducirlo rompe

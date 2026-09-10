@@ -273,35 +273,12 @@ end function
 function slidePanel(key, nextFocusNode)
     if isValid(m.slideAnimation) AND m.slideAnimation.state = "running" then m.slideAnimation.control = "finish"
     currentX = m.gContainer.translation[0]
-    currentY = m.gContainer.translation[1]
-    viewPortHeight = 990
-    extraoffset = 0
-    yOffset = 0
-    if (isValid(nextFocusNode)) then
-        isTopRow = (nextFocusNode.translation[1] <= 0)
-        if key = "up" then
-            ' Up key: align focused row to same viewport baseline used by down movement.
-            if isTopRow
-                newY = 0
-            else
-                targetBottom = viewPortHeight - m.top.rowSpacing
-                newY = targetBottom - (nextFocusNode.translation[1] + nextFocusNode.componentHeight)
-                if newY > 0 then newY = 0
-            end if
-        else
-            ' Down key'
-            remainingViewPortion = viewPortHeight - nextFocusNode.translation[1] - currentY
-            nextYTranslation = 0
-            if nextFocusNode.componentHeight > remainingViewPortion
-                nextYTranslation = nextFocusNode.componentHeight - remainingViewPortion + yOffset
-            end if
-            if isTopRow
-                newY = currentY - (nextFocusNode.translation[1] - Abs(currentY)) + yOffset
-            else
-                newY = currentY - nextYTranslation - extraoffset
-            end if
-            newY -= m.top.rowSpacing
-        end if
+    if (isValid(nextFocusNode))
+        ' Centra verticalmente la fila enfocada en la pantalla
+        screenHeight = 1080
+        targetTop = (screenHeight - nextFocusNode.componentHeight) / 2
+        newY = targetTop - nextFocusNode.translation[1]
+        if newY > 0 then newY = 0
         translationAnimation([m.gContainer.translation, [currentX, newY]])
     end if
 end function

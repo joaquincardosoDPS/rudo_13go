@@ -22,5 +22,11 @@
             <Poster id="pEvent" height="282" loadHeight="282" loadDisplayMode="scaleToZoom" translation="[211,173]" />
             <Label id="lEventTitle" width="289" height="282" wrap="true" maxLines="2" horizAlign="center" vertAlign="center" translation="[421,173]" />
         </Group>
+        <Group id="gCircleClip" clippingRect="[0,0,0,0]">
+            <Group id="gCircleTrack" translation="[0,0]" />
+        </Group>
+        <Animation id="circleSlideAnim" duration="0.35" easeFunction="inOutQuad" repeat="false">
+            <Vector2DFieldInterpolator id="circleSlideInterp" key="[0.0, 1.0]" fieldToInterp="gCircleTrack.translation" />
+        </Animation>
     </children>
 </component>

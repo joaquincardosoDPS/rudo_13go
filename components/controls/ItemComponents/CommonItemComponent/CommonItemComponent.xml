@@ -57,7 +57,7 @@
                 </Poster>
             </MaskGroup>
         </Group>
-        <Group id="gCircle" translation="[0, 0]" visible="false">
+        <Group id="gCircle" translation="[4, 4]" visible="false">
             <Poster id="pCircleBg" width="176" height="176" uri="pkg:/images/masks/circle_bg.png" translation="[8,8]" />
             <MaskGroup id="mgCircleMask" maskUri="pkg:/images/other/profile_mask.png" maskSize="[176,176]" translation="[8,8]">
                 <Poster id="pCircleCard" width="125" height="125" loadWidth="125" loadHeight="125" translation="[25.5,25.5]" loadDisplayMode="scaleToFit" visible="true" />

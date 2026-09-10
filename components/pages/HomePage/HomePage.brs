@@ -335,9 +335,9 @@ sub OnGetHomeCategoryProgramsAPIResponse(event as dynamic)
         for each raw in rawPrograms
             bgUrl = raw.imagen_fondo
             items.push({
-                title: decodeHtmlEntities(raw.title)
-                description: decodeHtmlEntities(raw.bajada)
-                description_short: decodeHtmlEntities(raw.bajada)
+                title: stripEmojis(decodeHtmlEntities(raw.title))
+                description: stripEmojis(decodeHtmlEntities(raw.bajada))
+                description_short: stripEmojis(decodeHtmlEntities(raw.bajada))
                 key: raw.id
                 image_background: { small: bgUrl, medium: bgUrl, normal: bgUrl, big: bgUrl, default: bgUrl }
             })
@@ -348,9 +348,9 @@ sub OnGetHomeCategoryProgramsAPIResponse(event as dynamic)
         for each raw in rawPrograms
             imageUrl = raw.image
             items.push({
-                title: decodeHtmlEntities(raw.title)
-                description: decodeHtmlEntities(raw.bajada)
-                description_short: decodeHtmlEntities(raw.bajada)
+                title: stripEmojis(decodeHtmlEntities(raw.title))
+                description: stripEmojis(decodeHtmlEntities(raw.bajada))
+                description_short: stripEmojis(decodeHtmlEntities(raw.bajada))
                 key: raw.id
                 image_orientation: "portrait"
                 format: "default"
@@ -379,7 +379,7 @@ sub OnGetHomeTop10APIResponse(event as dynamic)
     for each raw in rawItems
         imageUrl = raw.image
         items.push({
-            title: decodeHtmlEntities(raw.title)
+            title: stripEmojis(decodeHtmlEntities(raw.title))
             key: raw.id
             image_orientation: "portrait"
             format: "default"
@@ -409,7 +409,7 @@ sub OnGetHomeSenalesAPIResponse(event as dynamic)
         if isNonEmptyString(raw.logo_invertido) AND LCase(Right(raw.logo_invertido, 4)) <> ".svg" then logoUrl = raw.logo_invertido
         if isNonEmptyString(raw.logo_blanco) AND LCase(Right(raw.logo_blanco, 4)) <> ".svg" then logoUrl = raw.logo_blanco
         items.push({
-            title: decodeHtmlEntities(raw.titulo)
+            title: stripEmojis(decodeHtmlEntities(raw.titulo))
             key: raw.nid
             image: logoUrl
             ringColor: raw.color_principal
@@ -437,10 +437,10 @@ sub OnGetHomeRadiosAPIResponse(event as dynamic)
     items = []
     for each raw in rawItems
         items.push({
-            title: decodeHtmlEntities(raw.name)
+            title: stripEmojis(decodeHtmlEntities(raw.name))
             key: raw.name
             image: raw.image
-            ringColor: raw.color
+            ringColor: m.theme.focPrimary
             format: "circle"
             type: "radio"
         })
@@ -467,10 +467,10 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
         for each raw in rawItems
             imageUrl = raw.image
             items.push({
-                title: decodeHtmlEntities(raw.title)
-                description: decodeHtmlEntities(raw.bajada)
-                description_short: decodeHtmlEntities(raw.bajada)
-                epigrafe: decodeHtmlEntities(raw.show)
+                title: stripEmojis(decodeHtmlEntities(raw.title))
+                description: stripEmojis(decodeHtmlEntities(raw.bajada))
+                description_short: stripEmojis(decodeHtmlEntities(raw.bajada))
+                epigrafe: stripEmojis(decodeHtmlEntities(raw.show))
                 llamado: raw.llamado
                 duration: raw.duration
                 key: raw.nid

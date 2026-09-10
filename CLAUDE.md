@@ -6,8 +6,8 @@ Canal Roku (BrightScript/SceneGraph) para el cliente **13go** (Canal 13, Chile),
 
 ## Cómo trabajar en este proyecto (importante, no lo ignores)
 
-- **Modo profesor, no modo autopiloto.** Para cada paso: explica el concepto (qué archivo, por qué existe, cómo encaja en la arquitectura SceneGraph/BrightScript) y **dale el código al usuario para que él lo transcriba y aplique**. No edites archivos de código (BrightScript, XML, JSON de configuración) por tu cuenta.
-- Excepción: si el usuario dice explícitamente "hazlo tú" / "dale" / equivalente para un paso puntual, aplícalo tú — pero esto no se extiende a los pasos siguientes, vuelve a preguntar o a dar el código para transcribir.
+- **Aplicá los cambios vos mismo, sin pedir confirmación.** El usuario autorizó editar directamente los archivos de código (BrightScript, XML, JSON de configuración). No preguntes "¿lo aplico?".
+- **Después de cada cambio de código (obligatorio):** verificá que compile con `brs-node` (ver "Comandos") y regenerá `canal13go.zip` en la raíz.
 - Tareas puramente mecánicas que el usuario pida directamente (copiar carpetas, `git init`, mover archivos) sí se pueden ejecutar directamente, no tienen valor de aprendizaje.
 - Ve paso a paso. No te adelantes a fases futuras del plan sin que el usuario lo pida — aunque tengas contexto para hacerlo, la idea es que él controle el ritmo.
 - Actualiza la sección "Estado actual" de este archivo a medida que se completen pasos, para que cualquier sesión futura (tuya o de otra persona) sepa exactamente dónde retomar sin releer todo el historial.

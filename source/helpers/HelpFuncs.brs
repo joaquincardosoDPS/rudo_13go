@@ -434,6 +434,33 @@ sub deleteFromArray(array as object, item as dynamic) as object
     end for
 end sub
 
+' Roku no tiene fuente de emojis (salen como cuadrados); los sacamos del texto.
+function stripEmojis(value as dynamic) as string
+    if not isNonEmptyString(value) then return ""
+    result = ""
+    i = 1
+    n = Len(value)
+    while i <= n
+        code = Asc(Mid(value, i, 1))
+        if (code >= 55296 AND code <= 57343) OR isEmojiCode(code)
+            i = i + 1
+        else
+            result = result + Mid(value, i, 1)
+            i = i + 1
+        end if
+    end while
+    return result
+end function
+
+function isEmojiCode(code as integer) as boolean
+    if code >= 9728 AND code <= 10175 then return true
+    if code >= 11008 AND code <= 11263 then return true
+    if code >= 126976 AND code <= 129791 then return true
+    if code >= 65024 AND code <= 65039 then return true
+    if code = 8205 then return true
+    return false
+end function
+
 ' Decodifica entidades HTML del feed (la web usa he.decode)
 function decodeHtmlEntities(value as dynamic) as string
     if not isNonEmptyString(value) then return ""
