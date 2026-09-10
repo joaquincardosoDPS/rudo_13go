@@ -80,6 +80,9 @@ sub SetupColors()
     m.lEDescription.color = m.theme.clrSecondaryText
     m.rVBottomTime.color = m.theme.focPrimary
     m.lVBottomTime.color = m.theme.white
+    ' La web atenúa la imagen de las tarjetas verticales (brightness .6) y la
+    ' ilumina con foco (brightness 1).
+    m.pVCard.blendColor = "#999999"
 end sub
 
 sub itemContent_Changed()
@@ -266,6 +269,13 @@ sub setSize(percent as float)
             m.pCircleRing.uri = "pkg:/images/masks/circle_ring_thick.png"
         else
             m.pCircleRing.uri = "pkg:/images/masks/circle_ring_thin.png"
+        end if
+    end if
+    if m.gVerticalCard.visible
+        if percent > 0
+            m.pVCard.blendColor = m.theme.white
+        else
+            m.pVCard.blendColor = "#999999"
         end if
     end if
 end sub

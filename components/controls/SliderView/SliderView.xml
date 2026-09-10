@@ -9,12 +9,14 @@
     <interface>
         <field id="categoryId" type="string" value="" />
         <field id="isFeatured" type="boolean" value="false" />
+        <field id="keepHeroVisible" type="boolean" value="false" />
         <field id="componentHeight" type="integer" value="0" />
         <field id="content" type="node" alwaysNotify="true" onChange="initialize" />
         <field id="category" type="assocArray" alwaysNotify="true" />
         <field id="itemSelected" type="assocArray" />
         <field id="itemFocused" type="assocArray" />
         <field id="updateContent" type="node" alwaysNotify="true" onChange="updateSliderContent" />
+        <function name="setFocusState" />
     </interface>
     <children>
         <Group id="gEventPage" translation="[0,0]" visible="false">
@@ -22,6 +24,7 @@
             <Poster id="pEvent" height="282" loadHeight="282" loadDisplayMode="scaleToZoom" translation="[211,173]" />
             <Label id="lEventTitle" width="289" height="282" wrap="true" maxLines="2" horizAlign="center" vertAlign="center" translation="[421,173]" />
         </Group>
+        <Label id="lCircleTitle" text="" width="1700" height="50" horizAlign="left" vertAlign="center" translation="[100,0]" visible="false" />
         <Group id="gCircleClip" clippingRect="[0,0,0,0]">
             <Group id="gCircleTrack" translation="[0,0]" />
         </Group>

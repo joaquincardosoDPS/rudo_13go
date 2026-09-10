@@ -71,12 +71,23 @@ function getFirstContentIndex() as integer
     childCount = getContainerChildCount()
     if childCount <= 0 then return 0
 
-    firstNode = m.gContainer.getChild(0)
-    if isTopHeroNode(firstNode) AND childCount > 1
-        return 1
-    end if
+    ' Salta nodos que no son filas focusables (ej. el header de la vista de
+    ' Programas) y el hero compacto del Home.
+    for i = 0 to childCount - 1
+        if isFocusableContentNode(m.gContainer.getChild(i)) then return i
+    end for
 
     return 0
+end function
+
+function isFocusableContentNode(node as dynamic) as boolean
+    if not isValid(node) then return false
+    subType = node.subType()
+    if subType = "SliderView" OR subType = "MonumentalCard" then return true
+    if subType = "HeroSlider"
+        if node.variant <> "compact" then return true
+    end if
+    return false
 end function
 
 function getFocusComponentIndex() as integer
@@ -124,7 +135,7 @@ function focusToIndex(targetIndex as integer) as boolean
         if targetIndex < currentIndex
             direction = "up"
         end if
-        slidePanel(direction, targetNode)
+        slidePanel(direction, targetNode, targetIndex <= getFirstContentIndex())
     end if
 
     m.focusComponentIndex = targetIndex
@@ -135,11 +146,7 @@ function focusToIndex(targetIndex as integer) as boolean
 end function
 
 function showHideSlider(targetNode as dynamic)
-    if isTopHeroNode(targetNode)
-        setHeroImageHidden(false)
-    else
-        setHeroImageHidden(true)
-    end if
+    setHeroImageHidden(not keepsHeroImageVisible(targetNode))
     return true
 end function
 
@@ -154,9 +161,7 @@ sub onFocusedChild()
                 setFocus(compNode)
                 setNodeFocusState(compNode, true)
                 m.focusComponentIndex = targetIndex
-                if isTopHeroNode(compNode)
-                    setHeroImageHidden(false)
-                end if
+                setHeroImageHidden(not keepsHeroImageVisible(compNode))
             end if
         else if not m.isFirstTime
             restoreFocus()
@@ -177,8 +182,18 @@ function isTopHeroNode(node as dynamic) as boolean
     return isValid(node) AND node.subType() = "HeroSlider" AND node.variant = "compact"
 end function
 
+' El hero de arriba y la fila de "destacados" son una sola unidad: mientras el
+' foco esté en cualquiera de los dos, la imagen del hero debe seguir visible.
+function keepsHeroImageVisible(node as dynamic) as boolean
+    if isTopHeroNode(node) then return true
+    if isValid(node) AND node.subType() = "SliderView"
+        if node.keepHeroVisible = true then return true
+    end if
+    return false
+end function
+
 sub setNodeFocusState(node as dynamic, focused as boolean)
-    if isValid(node) AND (node.subType() = "HeroSlider" OR node.subType() = "MonumentalCard")
+    if isValid(node) AND (node.subType() = "HeroSlider" OR node.subType() = "MonumentalCard" OR node.subType() = "SliderView")
         node.callFunc("setFocusState", focused)
     end if
 end sub
@@ -188,30 +203,28 @@ function onKeyPressDown() as boolean
     currentFocusNode = m.gContainer.getChild(m.focusComponentIndex)
     if isValid(nextCompNode)
         m.focusComponentIndex += 1
-        slidePanel("down", nextCompNode)
+        slidePanel("down", nextCompNode, m.focusComponentIndex <= getFirstContentIndex())
         setFocus(nextCompNode)
         setNodeFocusState(currentFocusNode, false)
         setNodeFocusState(nextCompNode, true)
-        if isTopHeroNode(currentFocusNode) AND nextCompNode.subType() <> "HeroSlider"
-            setHeroImageHidden(true)
-        end if
+        setHeroImageHidden(not keepsHeroImageVisible(nextCompNode))
         return true
     end if
     return false
 end function
 
 function onKeyPressUp() as boolean
+    ' La primera fila de contenido es el límite superior del Home: no se sube al hero.
+    if m.focusComponentIndex <= getFirstContentIndex() then return false
     prevCompNode = m.gContainer.getChild(m.focusComponentIndex - 1)
     currentFocusNode = m.gContainer.getChild(m.focusComponentIndex)
     if isValid(prevCompNode) AND isValid(currentFocusNode)
         m.focusComponentIndex -= 1
-        slidePanel("up", prevCompNode)
+        slidePanel("up", prevCompNode, m.focusComponentIndex <= getFirstContentIndex())
         setFocus(prevCompNode)
         setNodeFocusState(currentFocusNode, false)
         setNodeFocusState(prevCompNode, true)
-        if isTopHeroNode(prevCompNode) AND currentFocusNode.subType() <> "HeroSlider"
-            setHeroImageHidden(false)
-        end if
+        setHeroImageHidden(not keepsHeroImageVisible(prevCompNode))
         return true
     end if
     return false
@@ -219,8 +232,10 @@ end function
 
 sub setHeroImageHidden(hidden as boolean)
     heroNode = getHeroSliderNode()
-    m.scene.hasTopMenuBackground = hidden
+    ' Solo las páginas con hero (Home) usan el degradado del TopMenu; en la
+    ' vista de Programas no hay hero y el header no debe oscurecerse.
     if isValid(heroNode)
+        m.scene.hasTopMenuBackground = hidden
         heroNode.callFunc("setScrollStateImageVisibility", hidden)
     end if
 end sub
@@ -270,15 +285,18 @@ function getHeroSliderIndex(visibleOnly = false as boolean) as integer
     return -1
 end function
 
-function slidePanel(key, nextFocusNode)
+function slidePanel(key, nextFocusNode, isTopContent = false as boolean)
     if isValid(m.slideAnimation) AND m.slideAnimation.state = "running" then m.slideAnimation.control = "finish"
     currentX = m.gContainer.translation[0]
     if (isValid(nextFocusNode))
-        ' Centra verticalmente la fila enfocada en la pantalla
-        screenHeight = 1080
-        targetTop = (screenHeight - nextFocusNode.componentHeight) / 2
-        newY = targetTop - nextFocusNode.translation[1]
-        if newY > 0 then newY = 0
+        newY = 0
+        if not isTopContent
+            ' Centra verticalmente la fila enfocada en la pantalla
+            screenHeight = 1080
+            targetTop = (screenHeight - nextFocusNode.componentHeight) / 2
+            newY = targetTop - nextFocusNode.translation[1]
+            if newY > 0 then newY = 0
+        end if
         translationAnimation([m.gContainer.translation, [currentX, newY]])
     end if
 end function

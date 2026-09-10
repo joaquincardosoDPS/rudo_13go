@@ -11,6 +11,7 @@
     <field id="itemHasFocus" type="Boolean" onChange="ItemHasFocusChanged" />
   </interface>
   <children>
+    <Poster id="pFocusBg" uri="pkg:/images/focus/R5Filled_30px.9.png" width="256" height="80" translation="[2,5]" opacity="0.22" visible="false" />
     <Poster id="itemIcon" width="40" height="40" loadWidth="40" loadHeight="40" loadDisplayMode="scaleToFit" translation="[25,25]" />
     <Label id="itemTitle" text="" width="200" height="40" vertAlign="center" translation="[80,25]" visible="false" />
   </children>

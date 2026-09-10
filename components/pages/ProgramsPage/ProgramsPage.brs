@@ -13,39 +13,31 @@ sub setLocals()
     m.fonts = m.global.fonts
     m.config = m.global.appConfig
     m.theme = m.global.appTheme
-    m.isPagination = false
-    m.indexValForPagination = 5
+    m.homeConfig = m.global.homeConfig
+    m.rowSpacing = 134
 end sub
 
 sub setControls()
-    m.shortDetailsViewControl = m.top.findNode("shortDetailsViewControl")
-    m.rlProgramList = m.top.findNode("rlProgramList")
+    m.focusableGroup = m.top.findNode("focusableGroup")
+    m.focusableGroup.rowSpacing = m.rowSpacing
     m.pageLoader = m.top.findNode("pageLoader")
-    if(m.global.designResolution = "720p")
-        m.rlProgramList.focusBitmapUri = "pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png"
-    else
-        m.rlProgramList.focusBitmapUri = "pkg:/images/focus/R8_T3_50PX_border.9.png"
-    end if
     m.noData = m.top.findNode("noData")
 end sub
 
 sub setupColor()
-    m.rlProgramList.rowLabelColor = m.theme.white
-    m.rlProgramList.focusFootprintBlendColor = m.theme.white
-    m.rlProgramList.focusBitmapBlendColor = m.theme.focPrimary
     m.noData.color = m.theme.white
+    ' La vista de Programas no tiene hero: el header es contenido scrolleable,
+    ' así que no se oscurece la barra superior.
+    m.scene.hasTopMenuBackground = false
 end sub
 
 sub setupFonts()
-    m.rlProgramList.rowLabelFont = m.fonts.dmSansMedium26
     m.noData.font = m.fonts.dmSansBold32
 end sub
 
 sub setObservers()
     m.top.observeField("focusedChild", "OnFocusedChild")
     m.top.observeField("visible", "onVisibleChanged")
-    m.rlProgramList.observeField("rowItemSelected", "RlSItems_RowItemSelected")
-    m.rlProgramList.observeField("rowItemFocused", "RlsItems_RowItemFocused")
 end sub
 
 sub onVisibleChanged()
@@ -57,14 +49,7 @@ end sub
 sub onPageDestroy()
     if m.top.isDestroy
         clearTask()
-        if(m.rlProgramList <> invalid AND m.rlProgramList.content <> invalid AND m.rlProgramList.content.GetChildCount() > 0)
-            for i = 0 to m.rlProgramList.content.GetChildCount() - 1
-                childRow = m.rlProgramList.content.getChild(i)
-                childRow.RemoveChildrenIndex(childRow.GetChildCount(), 0)
-            end for
-            m.rlProgramList.content.RemoveChildrenIndex(m.rlProgramList.content.GetChildCount(), 0)
-            m.rlProgramList.content = invalid
-        end if
+        if isValid(m.focusableGroup) then m.focusableGroup.callFunc("clearNodes")
     end if
 end sub
 
@@ -79,30 +64,37 @@ sub OnFocusedChild()
     if m.top.hasFocus()
         focusRestored = RestoreFocus()
         if focusRestored = false
-            if isValid(m.rlProgramList.content) AND m.rlProgramList.content.getChild(0).getChildCount() > 0
-                SetFocus(m.rlProgramList)
+            if isValid(m.focusableGroup) AND m.focusableGroup.callFunc("getContainerChildCount") > 0
+                SetFocus(m.focusableGroup)
             end if
         end if
     end if
 end sub
 
 sub initialize()
-    ResetPagination()
-    m.currentPage = 1
-    callGetProgramsAPI(m.currentPage)
+    setupHeader()
+    callGetProgramsAPI()
 end sub
 
-sub ResetPagination()
-    m.currentPage = 0
-    m.isPagination = false
-    m.paginationData = {}
+sub setupHeader()
+    header = createObject("roSGNode", "VodHeader")
+    header.id = "vodHeader"
+    header.componentHeight = 420
+    header.title = "On Demand"
+    header.description = "Revive lo mejor del 13." + Chr(10) + "Teleseries, realities, programas de entretención, documentales y más."
+    if isValid(m.homeConfig)
+        if isNonEmptyString(m.homeConfig.fondo_corporativo)
+            header.backgroundImage = m.homeConfig.fondo_corporativo
+        end if
+    end if
+    m.focusableGroup.callFunc("setTranslation", header)
 end sub
 
 sub ShowLoading(flag as boolean)
     m.pageLoader.visible = flag
 end sub
 
-sub callGetProgramsAPI(page = 1 as Integer)
+sub callGetProgramsAPI()
     ShowLoading(true)
     m.GetProgramsTask = CreateObject("roSGNode", "ContentAPIAction")
     m.GetProgramsTask.functionName = "GetPrograms"
@@ -112,163 +104,114 @@ sub callGetProgramsAPI(page = 1 as Integer)
 end sub
 
 sub OnProgramsResult(event as dynamic)
-    apiResponse  = event.getData()
+    apiResponse = event.getData()
     categoriesByName = getValueFromProps(apiResponse, "data", {})
+    print "ProgramsPage : OnProgramsResult : categories : " categoriesByName.count()
     if isValid(categoriesByName) AND categoriesByName.count() > 0
-        mainContent = CreateObject("roSGNode", "ContentNode")
         for each categoryName in categoriesByName
             rawPrograms = categoriesByName[categoryName]
-            if isValid(rawPrograms) and rawPrograms.count() > 0
-                rowContent = mainContent.CreateChild("ContentNode")
-                rowContent.title = categoryName
-                counter = 0
+            if isValid(rawPrograms) AND rawPrograms.count() > 0
+                items = []
                 for each raw in rawPrograms
-                    if counter >= 10
-                        itemAA = {}
-                        itemAA.image_orientation = "portrait"
-                        itemAA.format = "default"
-                        itemAA.title = "Ver Más"
-                        itemAA.isViewMoreCard = true
-                        itemContent = CreateObject("roSGNode", "ProgramItemNode")
-                        itemContent.setFields(itemAA)
-                        rowContent.appendChild(itemContent)
-                        exit for
-                    end if
                     imageUrl = raw.imagen_vertical
-                    itemContent = rowContent.CreateChild("ProgramItemNode")
-                    itemContent.setFields({
-                        title: raw.titulo,
-                        key: raw.id,
-                        image_orientation: "portrait",
+                    items.push({
+                        title: raw.titulo
+                        key: raw.id
+                        image_orientation: "portrait"
                         format: "default"
-                        image_port: {
-                            small: imageUrl,
-                            medium: imageUrl,
-                            normal: imageUrl,
-                            big: imageUrl,
-                            default: imageUrl
-                        }
+                        image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
                     })
-                    counter++
                 end for
+                PushCategoryRow(categoryName, items)
             end if
         end for
-        m.rlProgramList.content = mainContent
-        if isValid(m.rlProgramList.content) AND m.rlProgramList.content.getChildCount() > 0 AND m.rlProgramList.content.getChild(0).getChildCount() > 0
-            SetFocus(m.rlProgramList)
-        else
-            m.noData.visible = true
-            SetFocus(m.noData)
+    end if
+    manageFocus()
+    ShowLoading(false)
+    clearTask()
+end sub
+
+sub PushCategoryRow(title as string, items as object)
+    if isValid(items) AND items.count() > 0
+        catData = {}
+        catData.title = title
+        catData.format = "default"
+        catData.image_orientation = "portrait"
+        catData.liveCategory = false
+        catData.image_background_category = {}
+        catData.image_logo_category = {}
+        catData.key = title
+        catData.total_display_records = items.count()
+        catData.total_records = items.count()
+        catData.programs = items
+
+        sliderView = createObject("roSGNode", "SliderView")
+        sliderView.ObserveField("itemSelected", "onRowItemSelected")
+        sliderView.ObserveField("itemFocused", "onRowItemFocused")
+        sliderView.id = title
+        sliderView.componentHeight = 361
+        catNode = buildCategoryContent(title, items)
+        if isValid(catNode)
+            sliderView.category = catData
+            sliderView.content = catNode
         end if
+        m.focusableGroup.callFunc("setTranslation", sliderView)
+    end if
+end sub
+
+function buildCategoryContent(title as string, items as object) as dynamic
+    mainContent = CreateObject("roSGNode", "ContentNode")
+    rowNode = mainContent.CreateChild("ContentNode")
+    rowNode.title = title
+    rowNode.AddFields({ image_orientation: "portrait", liveCategory: false, format: "default", key: title })
+    for each itemAA in items
+        itemContent = CreateObject("roSGNode", "ProgramItemNode")
+        itemContent.setFields(itemAA)
+        rowNode.appendChild(itemContent)
+    end for
+    return mainContent
+end function
+
+sub manageFocus()
+    m.noData.visible = false
+    if isValid(m.focusableGroup) AND m.focusableGroup.callFunc("getContainerChildCount") > 0
+        SetFocus(m.focusableGroup)
+        ' Si la página ya tenía foco (el header se agrega en init, antes de que
+        ' lleguen los datos), el SetFocus de arriba es no-op y el foco queda en el
+        ' header. Forzar la primera fila de contenido.
+        m.focusableGroup.callFunc("focusToFirstRow")
     else
         m.noData.visible = true
         SetFocus(m.noData)
     end if
-
-    ShowLoading(false)
-    clearTask()
 end sub
 
-sub OnProgramsPaginationResult(event as dynamic)
-    response = event.getData()
-    print "ProgramsPage OnGetMyListProgramsPaginationResponse " 'formatjson(response)
-    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND response.data.data.count() > 0
-        programsData = response.data.data
-        UpdatePaginationData(response.data)
-        paginationData = []
-        for each item in programsData
-            if ((isValid(item.format) AND item.format = "default") OR isInvalid(item.format))
-                if isValid(item) AND isValid(item.key) AND isValid(item.programs) AND item.programs.count() > 0
-                    rowContent = CreateObject("roSGNode", "ContentNode")
-                    rowContent.title = item.title
-                    for each program in item.programs
-                        program.image_orientation = "landscape"
-                        itemContent = rowContent.CreateChild("ProgramItemNode")
-                        itemContent.setFields(program)
-                        if rowContent.getChildCount() > 10
-                            itemAA = {}
-                            itemAA.image_orientation = "landscape"
-                            itemAA.category_key = rowContent.key
-                            itemAA.format = program.format
-                            itemAA.title = "Ver Más"
-                            itemAA.isViewMoreCard = true
-                            itemContent = CreateObject("roSGNode", "ProgramItemNode")
-                            itemContent.setFields(itemAA)
-                            rowContent.appendChild(itemContent)
-                            exit for
-                        end if
-                    end for
-                    paginationData.push(rowContent)
-                end if
-            end if
-        end for
-        if hasValidRowlist()
-            m.rlProgramList.content.insertChildren(paginationData, m.rlProgramList.content.getChildCount())
-        end if
-    end if
-    m.isPagination = false
-    ShowLoading(false)
-    clearTask()
-end sub
-
-sub UpdatePaginationData(responseData as Object)
-    m.paginationData = {}
-    if isValid(responseData.total_display_records) then m.paginationData["total_display_records"] = responseData.total_display_records
-    if isValid(responseData.total_records) then m.paginationData["total_records"] = responseData.total_records
-    if isValid(responseData.last_page) then m.paginationData["last_page"] = responseData.last_page
-end sub
-
-function hasValidRowlist() as Boolean
-    return isValid(m.rlProgramList) AND isValid(m.rlProgramList.content) AND m.rlProgramList.content.getChildCount() > 0
-end function
-
-sub RlsItems_RowItemSelected(event as object)
-    data = event.GetData()
-    childNode = m.rlProgramList.content.getChild(data[0]).getChild(data[1])
-    if isValid(childNode)
-        print "rlProgramList : RlsItems_RowItemSelected : childNode" childNode
-        data = {}
-        data.itemData = childNode
-        if childNode.isViewMoreCard
-            m.scene.callFunc("showCategoryDetailPage", data, false)
+sub onRowItemSelected(event as dynamic)
+    selectedItem = event.getData()
+    if isValid(selectedItem) AND isValid(selectedItem.itemData)
+        item = {}
+        item.itemData = selectedItem.itemData
+        if isValid(selectedItem.itemData.isViewMoreCard) AND selectedItem.itemData.isViewMoreCard
+            m.scene.callFunc("showCategoryDetailPage", item, false)
         else
-            m.scene.callFunc("ShowDetailPage", data, false)
+            m.scene.callFunc("ShowDetailPage", item, false)
         end if
     end if
 end sub
 
-sub RlsItems_RowItemFocused(event as object)
-    data = event.GetData()
-    print "ProgramsPage : RlsItems_RowItemFocused : data : " 'data
-    childNode = m.rlProgramList.content.getChild(data[0]).getChild(data[1])
-    if isValid(childNode)
-        print "rlProgramList : RlsItems_RowItemFocused : childNode" childNode
-        m.shortDetailsViewControl.contentNode = childNode
-        m.shortDetailsViewControl.visible = true
-    end if
-    if isValid(data) AND hasValidRowlist()
-        gridCount = m.rlProgramList.content.getChild(data[0]).getChildCount()
-        if m.isPagination = false AND isValid(m.paginationData) AND m.paginationData.count() > 0 AND m.paginationData.total_records > 0 AND m.paginationData.total_display_records > 0
-            if gridCount - data[0] <= m.indexValForPagination AND m.currentPage <= m.paginationData.last_page AND m.rlProgramList.content.getChild(data[0]).getChildCount() < m.paginationData.total_records
-                m.isPagination = true
-                m.currentPage++
-                callGetProgramsAPI(m.currentPage)
-            end if
-        end if
-    end if
+sub onRowItemFocused(event as dynamic)
+    ' La vista web (VODView) no muestra detalle al enfocar; solo el carrusel.
 end sub
 
 Function onKeyEvent(key as String, press as Boolean) as Boolean
     handled = false
     if press
-        print " Page : MyListPage : onKeyEvent : key = " key " press = " press
-        if key = "OK"
-            handled = true
-        else if key = "back"
-            if (m.rlProgramList.IsInFocusChain() OR m.rlProgramList.hasFocus()) AND m.rlProgramList.rowItemFocused <> invalid
-                if m.rlProgramList.rowItemFocused[0] > 0
-                    m.rlProgramList.jumpToRowItem = [0, 0]
-                    handled = true
+        if key = "back"
+            if isValid(m.focusableGroup) AND (m.focusableGroup.hasFocus() OR m.focusableGroup.isInFocusChain())
+                focusIndex = m.focusableGroup.callFunc("getFocusComponentIndex")
+                firstContentIndex = m.focusableGroup.callFunc("getFirstContentIndex")
+                if focusIndex > firstContentIndex
+                    handled = m.focusableGroup.callFunc("focusToFirstRow")
                 end if
             end if
         end if

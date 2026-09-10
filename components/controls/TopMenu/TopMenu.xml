@@ -19,7 +19,6 @@
             </MaskGroup>
             <Poster id="pMyProfileBorder" uri="pkg:/images/focus/MyProfile_focus_border.png" width="64" height="64" translation="[1770,38.5]" visible="true" />
         </Group>
-        <CustomButton id="loginButton" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" buttonWidth="200" buttonHeight="55" buttonText="Iniciar Sesión" isFilledBgOnFocus="true" translation="[1670,45]" visible="false" />
         <MarkupGrid id="topMenuGrid" itemComponentName="MenuContentItem" numColumns="1" numRows="5" itemSize="[260,90]" itemSpacing="[0,40]" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="floatingFocus" drawFocusFeedback="false" translation="[25,220]" />
         <Label id="lHidden" visible="false" />
         <Group id="gProfilePopup" visible="false" translation="[1505,108]">

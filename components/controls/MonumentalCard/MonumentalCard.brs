@@ -274,15 +274,21 @@ function onKeyEvent(key as string, press as boolean) as boolean
             end if
         end if
     else if key = "right"
-        if m.slidePhase = 0 AND m.items.count() > 1
-            navigateTo((m.activeIndex + 1) MOD m.items.count(), 1)
+        ' Sin wrap: en el último ítem "derecha" no hace nada (burbujea).
+        if m.slidePhase <> 0 then return true
+        if m.items.count() > 1 AND m.activeIndex < m.items.count() - 1
+            navigateTo(m.activeIndex + 1, 1)
+            return true
         end if
-        return true
+        return false
     else if key = "left"
-        if m.slidePhase = 0 AND m.items.count() > 1
-            navigateTo((m.activeIndex - 1 + m.items.count()) MOD m.items.count(), -1)
+        ' En el primer ítem, "izquierda" sale al sidebar (como la web).
+        if m.slidePhase <> 0 then return true
+        if m.items.count() > 1 AND m.activeIndex > 0
+            navigateTo(m.activeIndex - 1, -1)
+            return true
         end if
-        return true
+        return false
     end if
     return false
 end function

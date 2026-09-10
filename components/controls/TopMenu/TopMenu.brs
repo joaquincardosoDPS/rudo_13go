@@ -22,6 +22,7 @@ sub SetLocals()
     m.profileId = ""
     m.lastSelectedMenu = invalid
     m.shouldFallbackToFirstProfile = false
+    m.MyProfileLoginFocused = false
 end sub
 
 sub SetControls()
@@ -33,7 +34,6 @@ sub SetControls()
     m.lMyProfile = m.top.findNode("lMyProfile")
     m.gMyProfile = m.top.findNode("gMyProfile")
     m.bgProfilePopup = m.top.findNode("bgProfilePopup")
-    m.loginButton = m.top.findNode("loginButton")
     m.topMenuGrid = m.top.findNode("topMenuGrid")
     m.lHidden = m.top.findNode("lHidden")
     m.pProfilePopup = m.top.findNode("pProfilePopup")
@@ -97,31 +97,19 @@ sub OnLogoLoadStatusChanged(event as object)
     end if
 end sub
 
-Sub ChangeProfileOnLogin()
+sub ChangeProfileOnLogin()
     if m.scene.isUserLoggedIn = false
         m.gMyProfile.visible = false
-        m.loginButton.visible = true
     end if
 end sub
 
 sub Initlization()
     if m.scene.isUserLoggedIn
-        m.loginButton.visible = false
         m.gMyProfile.visible = true
         LoadProfiles()
     else
         ChangeProfileOnLogin()
     end if
-    btnFields = {
-        focusTextColor: m.theme.white
-        unfocusTextColor: m.theme.white
-        backgroundColor: m.theme.clrSecondary
-        focusBorderImage: m.theme.filledBackGroundImage
-        focusBackgroundColor: m.theme.focPrimary
-        fontSize: "dmSansMedium24"
-        margin: 20
-    }
-    m.loginButton.update(btnFields)
     menuList = m.global.menuList.items
 
     menuIcons = {
@@ -541,19 +529,17 @@ sub UpdateSelectedTopMenu(selectedIndex as integer, isFromMainScene = false as b
 end sub
 
 sub SetFocusOnLoginMyProfile(isSet as boolean)
-    if m.scene.isUserLoggedIn
-        if isSet
-            m.lMyProfile.color = m.theme.focPrimary
-            m.pMyProfileBorder.blendColor = m.theme.focPrimary
-            SetFocus(m.gMyProfile)
-        else
-            m.lMyProfile.color = m.theme.white
-            m.pMyProfileBorder.blendColor = m.theme.white
-        end if
+    if not m.scene.isUserLoggedIn
+        m.MyProfileLoginFocused = false
+        return
+    end if
+    if isSet
+        m.lMyProfile.color = m.theme.focPrimary
+        m.pMyProfileBorder.blendColor = m.theme.focPrimary
+        SetFocus(m.gMyProfile)
     else
-        if isSet
-            SetFocus(m.loginButton)
-        end if
+        m.lMyProfile.color = m.theme.white
+        m.pMyProfileBorder.blendColor = m.theme.white
     end if
     m.MyProfileLoginFocused = isSet
 end sub
@@ -569,7 +555,7 @@ function onKeyEvent(key, press) as Boolean
             end if
             return result
         end if
-        if key = "left" AND (m.MyProfileLoginFocused = true OR (m.loginButton.hasFocus() OR m.loginButton.isInfocusChain())) AND m.gProfilePopup.visible = false
+        if key = "left" AND m.MyProfileLoginFocused = true AND m.gProfilePopup.visible = false
             SetFocusOnLoginMyProfile(false)
             SetFocus(m.topMenuGrid)
             result = true
@@ -586,12 +572,8 @@ function onKeyEvent(key, press) as Boolean
                 end if
                 result = true
             else if (m.MyProfileLoginFocused = true)
-                if m.scene.isUserLoggedIn
-                    ToggleProfilePopup()
-                    UpdatePopupActionFocus()
-                else
-                    m.scene.callFunc("ShowOnboardingPage", false)
-                end if
+                ToggleProfilePopup()
+                UpdatePopupActionFocus()
                 result = true
             end if
         else if key = "down" 

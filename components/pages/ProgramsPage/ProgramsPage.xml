@@ -8,10 +8,8 @@
         <field id="isDestroy" type="boolean" alwaysnotify="true" onChange="onPageDestroy"/>
     </interface>
     <children>
-        <ShortDetailsView id="shortDetailsViewControl" dTranslation="[100,150]" />
-        <RowList id="rlProgramList" itemComponentName="CommonItemComponent" rowTitleComponentName="RowTitleItem" rowItemSize="[[320, 180]]" itemSize="[1920, 250]" rowHeights="[250]" rowSpacings="[30]" itemSpacing="[0, 60]" rowItemSpacing="[[30, 0]]" rowLabelOffset="[[-10, 0]]" focusxOffset="[0]" vertFocusAnimationStyle="fixedFocus" rowFocusAnimationStyle="floatingFocus" showRowLabel="[true]"
-            numRows="3" drawFocusFeedback="true" drawFocusFeedbackOnTop="true" fixedLayout="false" translation="[100, 550]" />
+        <FocusableGroup id="focusableGroup" translation="[106,0]" />
         <PageLoader id="pageLoader" isBackground="false" isCenter="true" visible="false" />
-        <Label id="noData" translation="[0, 540]" text="No hay datos disponibles" horizAlign="center" width="1920" visible="false" />
+        <Label id="noData" translation="[0, 700]" text="No hay datos disponibles" horizAlign="center" width="1920" visible="false" />
     </children>
 </component>

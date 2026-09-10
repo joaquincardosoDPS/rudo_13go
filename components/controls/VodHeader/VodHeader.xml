@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="VodHeader" extends="Group">
+    <script type="text/brightscript" uri="VodHeader.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="componentHeight" type="integer" value="420" />
+        <field id="backgroundImage" type="string" onChange="onBackgroundImageChanged" />
+        <field id="title" type="string" value="On Demand" onChange="onTitleChanged" />
+        <field id="description" type="string" onChange="onDescriptionChanged" />
+    </interface>
+    <children>
+        <!-- El componente vive dentro de un contenedor corrido 106px (margen del
+             sidebar), por eso el fondo full-bleed se contra-desplaza -106 y el
+             texto queda alineado al margen de contenido. -->
+        <Poster id="pHeaderBg" width="1632" height="918" loadWidth="1632" loadHeight="918" loadDisplayMode="scaleToZoom" translation="[182,0]" />
+        <Poster id="pHeaderFadeBottom" uri="pkg:/images/overlay/hero_fade_bottom.png" width="1920" height="560" loadDisplayMode="stretchToFit" translation="[-106,360]" />
+        <Poster id="pHeaderFadeLeft" uri="pkg:/images/overlay/hero_fade_left.png" width="1200" height="918" loadDisplayMode="stretchToFit" translation="[-106,0]" />
+        <LayoutGroup id="lgVodHeader" layoutDirection="vert" itemSpacings="[18]" translation="[100,200]">
+            <Label id="lVodTitle" />
+            <Label id="lVodDesc" width="614" wrap="true" lineSpacing="-3" maxLines="3" />
+        </LayoutGroup>
+    </children>
+</component>

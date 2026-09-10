@@ -17,6 +17,7 @@ sub setControls()
     m.pEventBackground = m.top.findNode("pEventBackground")
     m.pEvent = m.top.findNode("pEvent")
     m.lEventTitle = m.top.findNode("lEventTitle")
+    m.lCircleTitle = m.top.findNode("lCircleTitle")
     m.gCircleClip = m.top.findNode("gCircleClip")
     m.gCircleTrack = m.top.findNode("gCircleTrack")
     m.circleSlideAnim = m.top.findNode("circleSlideAnim")
@@ -55,6 +56,14 @@ end sub
 
 sub onFocusedChild()
     if not m.top.hasFocus() then return
+    setFocusState(true)
+end sub
+
+' El observer focusedChild no se dispara de forma confiable cuando FocusableGroup
+' le da foco al Group (focusedChild no cambia), así que el foco interno se fuerza
+' explícitamente desde FocusableGroup::setNodeFocusState().
+sub setFocusState(focused as boolean)
+    if not focused then return
     if isCircleContent()
         applyCircleFocus()
     else if isValid(m.rowList)
@@ -84,8 +93,23 @@ sub createCircleCarousel()
     m.circleVisibleWidth = 1814
     m.circleLeftInset = 100
     m.circleRightInset = 100
-    h = m.top.componentHeight
+    titleHeight = 0
+    if isValid(m.lCircleTitle)
+        titleText = ""
+        if isValid(m.top.category) AND isValid(m.top.category.title) then titleText = m.top.category.title
+        if isNonEmptyString(titleText)
+            m.lCircleTitle.text = titleText
+            m.lCircleTitle.font = m.fonts.dmSansBold32
+            m.lCircleTitle.color = m.theme.white
+            m.lCircleTitle.visible = true
+            titleHeight = 50
+        else
+            m.lCircleTitle.visible = false
+        end if
+    end if
+    h = m.top.componentHeight - titleHeight
     if h <= 0 then h = 220
+    m.gCircleClip.translation = [0, titleHeight]
     m.gCircleClip.clippingRect = [0, 0, m.circleVisibleWidth, h]
     m.gCircleTrack.removeChildrenIndex(m.gCircleTrack.getChildCount(), 0)
     if isValid(m.top.content) AND m.top.content.getChildCount() > 0
@@ -146,17 +170,21 @@ function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
     if not isCircleContent() then return false
     if key = "left"
+        ' En el primer círculo, "izquierda" debe salir al sidebar (como la web),
+        ' no quedar consumida.
         if m.circleFocusIndex > 0
             m.circleFocusIndex = m.circleFocusIndex - 1
             applyCircleFocus()
+            return true
         end if
-        return true
+        return false
     else if key = "right"
         if m.circleFocusIndex < m.circleItemNodes.count() - 1
             m.circleFocusIndex = m.circleFocusIndex + 1
             applyCircleFocus()
+            return true
         end if
-        return true
+        return false
     else if key = "OK"
         if m.circleFocusIndex >= 0 AND m.circleFocusIndex < m.circleItems.count()
             m.top.itemSelected = {
@@ -184,12 +212,17 @@ function AddSizeFields(childNode as dynamic)
         else if childNode.image_orientation = "portrait"
             if isCatEvent
                 m.rowHeights.push(706)
-            else
+                m.rowItemSize.push([324, 576])
+            else if isValid(childNode.format) AND childNode.format = "ranking"
                 m.rowHeights.push(596)
+                m.rowItemSize.push([324, 576])
+            else
+                ' Tarjetas de categoria_carrusel: 11.6vw x 139% (web) = 224x311
+                m.rowHeights.push(361)
+                m.rowItemSize.push([224, 311])
             end if
-            m.rowItemSize.push([324, 576])
             m.rowSpacings.push(70)
-            m.rowItemSpacing.push([20, 100])
+            m.rowItemSpacing.push([25, 100])
         else if (childNode.image_orientation = "landscape")
             m.rowHeights.push(230)
             m.rowItemSize.push([320, 180])

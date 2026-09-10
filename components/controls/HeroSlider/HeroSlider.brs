@@ -284,21 +284,24 @@ function onKeyEvent(key as string, press as boolean) as boolean
             end if
         end if
     else if key = "right"
-        if m.items.count() > 1
-            m.activeIndex = (m.activeIndex + 1) MOD m.items.count()
+        if m.items.count() > 1 AND m.activeIndex < m.items.count() - 1
+            m.activeIndex = m.activeIndex + 1
             m.currentItem = m.items[m.activeIndex]
             setupPosters()
             updateMeta()
+            return true
         end if
-        return true
+        return false
     else if key = "left"
-        if m.items.count() > 1
-            m.activeIndex = (m.activeIndex - 1 + m.items.count()) MOD m.items.count()
+        ' En el primer ítem, "izquierda" sale al sidebar (como la web).
+        if m.items.count() > 1 AND m.activeIndex > 0
+            m.activeIndex = m.activeIndex - 1
             m.currentItem = m.items[m.activeIndex]
             setupPosters()
             updateMeta()
+            return true
         end if
-        return true
+        return false
     end if
     return false
 end function

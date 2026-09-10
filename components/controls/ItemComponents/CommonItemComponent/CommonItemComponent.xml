@@ -39,13 +39,13 @@
             <Label id="lEDescription" width="320" horizAlign="left" vertAlign="center" wrap="true" maxLines="3" lineSpacing="-3" translation="[0,193]" />
         </Group>
         <Group id="gVerticalCard" translation="[0, 0]" visible="false">
-            <MaskGroup id="mgVBorderMask" maskUri="pkg:/images/card/card_mask_324_576.png" translation="[0,0]">
-                <Poster id="pVCard" width="324" height="576" loadWidth="324" loadHeight="576" loadingBitmapUri="pkg:/images/card/card_324_576.png" failedBitmapUri="pkg:/images/card/card_324_576.png" loadDisplayMode="scaleToFit" visible="true" />
+            <MaskGroup id="mgVBorderMask" maskUri="pkg:/images/card/card_mask_224_311.png" translation="[0,0]">
+                <Poster id="pVCard" width="224" height="311" loadWidth="224" loadHeight="311" loadingBitmapUri="pkg:/images/card/card_224_311.png" failedBitmapUri="pkg:/images/card/card_224_311.png" loadDisplayMode="scaleToZoom" visible="true" />
                 <Rectangle id="rVRightTop" height="28" translation="[0,0]" visible="false">
                     <Label id="lVRightTop" height="28" horizAlign="center" vertAlign="center" translation="[10,0]" />
                 </Rectangle>
-                <Rectangle id="rVBottomTime" width="324" height="34" translation="[0,542]" visible="false">
-                    <Label id="lVBottomTime" width="324" height="34" horizAlign="center" vertAlign="center" translation="[0,0]" />
+                <Rectangle id="rVBottomTime" width="224" height="34" translation="[0,277]" visible="false">
+                    <Label id="lVBottomTime" width="224" height="34" horizAlign="center" vertAlign="center" translation="[0,0]" />
                 </Rectangle>
             </MaskGroup>
         </Group>

@@ -357,7 +357,7 @@ sub OnGetHomeCategoryProgramsAPIResponse(event as dynamic)
                 image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
             })
         end for
-        PushHomeRow(m.pendingRowTitle, items)
+        PushHomeRow(m.pendingRowTitle, items, "default", 361)
     end if
     m.getHomeCategoryTask = invalid
     ProcessNextHomeSection()
@@ -417,7 +417,7 @@ sub OnGetHomeSenalesAPIResponse(event as dynamic)
             type: "senal"
         })
     end for
-    PushHomeRow(m.pendingRowTitle, items, "circle", 220)
+    PushHomeRow(m.pendingRowTitle, items, "circle", 270)
     m.getHomeSenalesTask = invalid
     ProcessNextHomeSection()
 end sub
@@ -445,7 +445,7 @@ sub OnGetHomeRadiosAPIResponse(event as dynamic)
             type: "radio"
         })
     end for
-    PushHomeRow(m.pendingRowTitle, items, "circle", 220)
+    PushHomeRow(m.pendingRowTitle, items, "circle", 270)
     m.getHomeRadiosTask = invalid
     ProcessNextHomeSection()
 end sub
@@ -516,6 +516,7 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
             sliderView.ObserveField("itemSelected", "onRowItemSelected")
             sliderView.ObserveField("itemFocused", "onRowItemFocused")
             sliderView.id = "destacados"
+            sliderView.keepHeroVisible = true
             sliderView.componentHeight = 180 + 50
             catNode = rowListDataParser(catData)
             if isValid(catNode)
