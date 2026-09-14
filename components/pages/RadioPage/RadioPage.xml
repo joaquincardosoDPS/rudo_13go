@@ -14,7 +14,7 @@
             <Audio id="audio" />
             <Poster id="pPlayerCardBg" width="672" height="192" uri="pkg:/images/radio/radio_player_bg.png" loadDisplayMode="scaleToZoom" />
             <Poster id="pPlayerLogoBg" width="192" height="192" uri="pkg:/images/radio/radio_player_logo_bg.png" loadDisplayMode="scaleToZoom" />
-            <Poster id="pPlayerLogo" width="134" height="134" translation="[29,29]" loadWidth="134" loadDisplayMode="scaleToFit" />
+            <Poster id="pPlayerLogo" width="134" height="134" translation="[29,29]" loadDisplayMode="scaleToFit" />
             <Label id="lLive" text="EN VIVO" translation="[230,55]" />
             <Label id="lRadioName" text="" translation="[230,88]" />
             <Poster id="pPlayPause" width="57" height="57" translation="[548,68]" loadDisplayMode="scaleToFit" />
