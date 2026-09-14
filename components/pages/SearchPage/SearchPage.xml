@@ -5,17 +5,19 @@
     <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <interface>
+        <field id="isDestroy" type="boolean" value="false" alwaysNotify="true" onChange="onPageDestroy" />
     </interface>
     <children>
-        <Label id="searchScene" height="50" width="900" translation="[1000,540]" text="El resultado de la búsqueda se mostrará aquí" visible="true" />
-        <Label id="minChar" height="50" width="900" translation="[1045,540]" text="Introduzca un mínimo de 3 caracteres" visible="false" />
-        <Label id="resFail" height="50" width="900" translation="[1075,540]" text="No se encontró ningún resultado" visible="false" />
-        <CustomButton id="bSearchField" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonWidth="1670" buttonHeight="84" isFilledBgOnFocus="true" visible="true" translation="[125,173]">
-            <Label id="searchPlaceholderHintText" text="Ingresa tu búsqueda" width="434" height="84" vertAlign="center" translation="[18,0]" opacity="0.3" />
-            <Label id="searchPlaceholderText" text="|" width="434" height="84" vertAlign="center" translation="[18,0]" />
-        </CustomButton>
-        <Markupgrid id="searchGrid" translation="[765,315]" itemComponentName="CommonItemComponent" numColumns="3" numRows="3" itemSize="[320,180]" itemSpacing="[30,30]" itemClippingRect="[0,0,1200,765]" drawFocusFeedback="true" vertFocusAnimationStyle="floatingFocus" />
-        <MiniKeyboard id="miniKeyboard" translation="[100, 220]" />
-        <Timer id="cursorBlinkTimer" repeat="true" duration="0.5" control="start" />
+        <Rectangle id="rBg" width="1920" height="1080" color="#08090C" />
+        <Group id="gKeyboard" translation="[176,92]" focusable="true">
+            <Poster id="pInputBg" width="322" height="54" uri="pkg:/images/search/input_bg.png" loadDisplayMode="scaleToZoom" />
+            <Label id="lInput" width="282" height="54" translation="[36,0]" vertAlign="center" text="Buscar..." />
+            <Group id="gKeys" translation="[0,79]" />
+        </Group>
+        <Label id="lEmpty" width="1300" height="60" translation="[528,46]" horizAlign="left" vertAlign="center" text="Escribe algo para buscar..." />
+        <Label id="lNoResults" width="1300" height="60" translation="[528,46]" horizAlign="left" vertAlign="center" text="No se encontraron resultados" visible="false" />
+        <Label id="lNoResultsHint" width="1300" height="40" translation="[528,100]" horizAlign="left" vertAlign="center" text="Prueba con otras palabras clave." visible="false" />
+        <SearchResultsGrid id="searchGrid" translation="[528,46]" numColumns="4" numRows="2" itemSize="[333,436]" itemSpacing="[0,0]" itemComponentName="SearchResultItem" drawFocusFeedback="false" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="floatingFocus" visible="false" />
+        <BusySpinner id="bsLoading" translation="[935,490]" visible="false" clockwise="true" spinInterval="0.8" />
     </children>
 </component>

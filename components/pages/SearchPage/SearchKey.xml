@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="SearchKey" extends="Group">
+    <script type="text/brightscript" uri="SearchKey.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="keyChar" type="string" onChange="onKeyCharChanged" />
+        <field id="keyWidth" type="float" onChange="onSizeChanged" />
+        <field id="keyHeight" type="float" onChange="onSizeChanged" />
+        <field id="itemHasFocus" type="boolean" onChange="onFocusChanged" />
+    </interface>
+    <children>
+        <Rectangle id="rBg" color="#101114" />
+        <Label id="lLabel" horizAlign="center" vertAlign="center" />
+        <Poster id="pIcon" width="34" height="24" visible="false" loadDisplayMode="scaleToFit" uri="pkg:/images/search/icon_delete.png" />
+    </children>
+</component>

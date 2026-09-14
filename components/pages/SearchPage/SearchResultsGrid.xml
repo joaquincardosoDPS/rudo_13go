@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="SearchResultsGrid" extends="MarkupGrid">
+    <script type="text/brightscript" uri="SearchResultsGrid.brs" />
+    <interface>
+        <field id="exitToKeyboard" type="boolean" alwaysNotify="true" />
+    </interface>
+</component>

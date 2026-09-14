@@ -1,341 +1,338 @@
 sub init()
-    print "SearchPage init"
-    SetLocals()
-    SetControls()
-    SetupColor()
-    SetupFonts()
-    setupPageLoader()
-    SetObservers()
-    Initialize()
+    setLocals()
+    setControls()
+    setupFonts()
+    setupColors()
+    setObservers()
+    initialize()
 end sub
 
-sub SetLocals()
+sub setLocals()
     m.scene = m.top.GetScene()
-    m.fonts = m.global.Fonts
     m.theme = m.global.appTheme
-    m.isFirstTime = true
-    m.girdTerm = ""
-    m.appConfig = m.global.appConfig
-    m.cursorText = "|"
-    m.cursorVisible = true
+    m.fonts = m.global.Fonts
+    m.allPrograms = []
     m.term = ""
-    m.currentPage = 0
-    m.isPagination = false
-    m.paginationData = {}
-    m.indexValForPagination = 5
+    m.focusArea = "keyboard"
+    m.keyFocus = 0
+    m.keyData = []
+    m.hasResults = false
+    m.maxResults = 50
+    m.numColumns = 4
+    m.loaded = false
+    m.numKeyRows = 7
 end sub
 
-sub SetControls()
-    m.searchScene = m.top.findNode("searchScene")
-    m.minChar = m.top.findNode("minChar")
-    m.resFail = m.top.findNode("resFail")
-    m.searchPlaceholderHintText = m.top.findNode("searchPlaceholderHintText")
-    m.searchPlaceholderText = m.top.findNode("searchPlaceholderText")
+sub setControls()
+    m.gKeyboard = m.top.findNode("gKeyboard")
+    m.gKeys = m.top.findNode("gKeys")
+    m.pInputBg = m.top.findNode("pInputBg")
+    m.lInput = m.top.findNode("lInput")
+    m.lEmpty = m.top.findNode("lEmpty")
+    m.lNoResults = m.top.findNode("lNoResults")
+    m.lNoResultsHint = m.top.findNode("lNoResultsHint")
     m.searchGrid = m.top.findNode("searchGrid")
-    m.miniKeyboard = m.top.findNode("miniKeyboard")
-    m.cursorBlinkTimer = m.top.findNode("cursorBlinkTimer")
-    m.miniKeyboard.textEditBox.visible = false
-    m.bSearchField = m.top.findNode("bSearchField")
-    inputFields = {
-        focusTextColor: m.theme.white
-        unfocusTextColor: m.theme.black 'white
-        backgroundColor: m.theme.clrPrimaryButton
-        focusBorderImage: m.theme.filledBackGroundImage
-        focusBackgroundColor: m.theme.focPrimary
-        margin: 20
-    }
-    m.bSearchField.update(inputFields)
-    if(m.global.designResolution = "720p")
-        m.searchGrid.focusBitmapUri = "pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png"
-    else
-        m.searchGrid.focusBitmapUri = "pkg:/images/focus/R8_T3_50PX_border.9.png"
-    end if
+    m.bsLoading = m.top.findNode("bsLoading")
 end sub
 
-sub SetupColor()
+sub setupFonts()
+    m.lInput.font = m.fonts.dmSansMedium23
+    m.lEmpty.font = m.fonts.dmSansBold36
+    m.lNoResults.font = m.fonts.dmSansBold36
+    m.lNoResultsHint.font = m.fonts.dmSansMedium23
+end sub
+
+sub setupColors()
+    m.lInput.color = "#8C8C8C"
+    m.lEmpty.color = m.theme.white
+    m.lNoResults.color = m.theme.white
+    m.lNoResultsHint.color = m.theme.clrSecondaryText
     m.searchGrid.focusBitmapBlendColor = m.theme.focPrimary
 end sub
 
-sub SetupFonts()
-    m.searchPlaceholderHintText.font = m.fonts.dmSansMedium39
-    m.searchPlaceholderText.font = m.fonts.dmSansMedium39
-    m.searchScene.font = m.fonts.dmSansMedium30
-    m.minChar.font = m.fonts.dmSansMedium30
-    m.resFail.font = m.fonts.dmSansMedium30
-    UpdateSearchFieldText("")
+sub setObservers()
+    m.top.observeField("focusedChild", "onFocusedChild")
+    m.searchGrid.observeField("itemSelected", "onResultSelected")
+    m.searchGrid.observeField("exitToKeyboard", "onExitToKeyboard")
 end sub
 
-sub setupPageLoader()
-    m.pageLoader = CreateObject("roSGNode", "PageLoader")
-    m.pageLoader.id = "pageLoader"
-    m.pageLoader.isCenter = "true"
-    m.pageLoader.loaderWidth = "100"
-    m.pageLoader.pageSpinnerTextTranslation = "[-50,130]" 
-    m.pageLoader.showSpinnerText = "CARGANDO..."
-    m.pageLoader.textFont = m.fonts.dmSansMedium30
-    m.pageLoader.isBackground = "false"
-    m.pageLoader.pageTranslation = [1180, 440]
-    m.pageLoader.visible = "false"
-    m.top.appendChild(m.pageLoader)
+sub initialize()
+    buildKeyboard()
+    updateInputLabel()
+    showLoading(true)
+    getSearchData()
 end sub
 
-sub SetObservers()
-    m.top.observeField("focusedChild", "OnFocusChild")
-    m.top.observeField("visible", "onVisibleChange")
-    m.miniKeyboard.observeField("text", "OnSearchText")
-    m.cursorBlinkTimer.observeField("fire", "OnCursorBlink")
-    m.searchGrid.observeField("itemFocused", "OnItemFocus")
-    m.searchGrid.observeField("itemSelected", "OnItemVideoSelected")
-end sub
-
-sub Initialize()
-    ResetVar()
-    m.currentPage = 1
-    SearchAPICall("")
-end sub
-
-sub onVisibleChange()
-    if not m.top.visible
-        clearTask()
+sub onPageDestroy()
+    if m.top.isDestroy AND isValid(m.searchTask)
+        m.searchTask.control = "stop"
+        m.searchTask = invalid
     end if
 end sub
 
-sub clearTask()
-    if isValid(m.GetSearchProgramsTask)
-        m.GetSearchProgramsTask.control = "stop"
-        m.GetSearchProgramsTask = invalid
-    end if
-end sub
-
-sub OnFocusChild()
-    if m.top.hasFocus()
-        if m.isFirstTime
-            SetFocus(m.miniKeyboard)
-            m.isFirstTime = false
-        else
-            RestoreFocus()
-        end if
-    end if
-end sub
-
-sub ResetVar()
-    m.minChar.visible = false
-    m.searchScene.visible = false
-    m.resFail.visible = false
-    m.currentPage = 0
-    m.isPagination = false
-    m.paginationData = {}
-end sub
-
-sub OnSearchText()
-    m.term = m.miniKeyboard.text
-    m.cursorVisible = true
-    UpdateSearchFieldText(m.term)
-    ClearContentNode()
-    if(m.term <> m.lastterm AND m.term <> "")
-        if (Len(m.term) >= 3)
-            ShowLoading(false)
-            if (m.girdTerm = m.term OR m.resFail.visible = false)
-                ResetVar()
-                m.currentPage = 1
-                SearchAPICall(m.term)
-            end if
-        else if (Len(m.term) >= 1 OR Len(m.term) <= 2)
-            ShowLoading(false)
-            m.searchScene.visible = false
-            m.resFail.visible = false
-            m.minChar.visible = true
-        else
-            ShowLoading(false)
-            m.minChar.visible = false
-            m.searchScene.visible = true
-        end if
-    else
-        ShowLoading(false)
-        m.resFail.visible = false
-        m.minChar.visible = false
-        m.searchScene.visible = true
-        Initialize()
-    end if
-    m.lastterm = m.term
-end sub
-
-sub UpdateSearchFieldText(searchText = "" as string)
-    cursor = ""
-    if m.cursorVisible then cursor = m.cursorText
-    if searchText <> ""
-        m.searchPlaceholderHintText.text = ""
-        m.searchPlaceholderText.text = searchText + cursor
-        m.searchPlaceholderText.color = m.theme.white
-    else
-        m.searchPlaceholderHintText.text = "Ingresa tu búsqueda"
-        m.searchPlaceholderText.text = + cursor
-        m.searchPlaceholderText.color = m.theme.clrSecondaryText
-    end if
-end sub
-
-sub OnCursorBlink()
-    m.cursorVisible = not m.cursorVisible
-    UpdateSearchFieldText(m.term)
-end sub
-
-sub ClearContentNode()
-    if isValid(m.searchGrid) AND hasValidGrid()
-        m.searchGrid.content.removeChildrenIndex(m.searchGrid.content.getChildCount(), 0)
-        m.searchGrid.content = invalid
-    end if
-end sub
-
-sub SearchAPICall(term as string, page = 1)
-    ShowLoading(true)
-    params = {}
-    params["page"] = page
-    if term <> "" then params["search"] = term
-    params["client"] = GlobalGet("appConfig").client
-    params["limit"] = 12
-    m.GetSearchProgramsTask = CreateObject("roSGNode", "ContentAPIAction")
-    m.GetSearchProgramsTask.functionName = "GetSearchPrograms"
-    m.GetSearchProgramsTask.params = params
-    if m.isPagination
-        m.GetSearchProgramsTask.ObserveField("result", "onSearchAPIPaginationDataResponse")
-    else
-        m.GetSearchProgramsTask.ObserveField("result", "onSearchAPIResponse")
-    end if
-    m.GetSearchProgramsTask.control = "RUN"
-end sub
-
-sub onSearchAPIResponse(event as dynamic)
-    response = event.getData()
-    node = event.getRoSGNode()
-    print "onSearchAPIResponse : searchRes : " 'formatjson(response)
-    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND response.data.data.count() > 0
-        programs = response.data.data
-        if (programs.count() > 0)
-            m.paginationData = {}
-            m.paginationData["total_display_records"] = response.data.total_display_records
-            m.paginationData["total_records"] = response.data.total_records
-            m.paginationData["last_page"] = response.data.last_page
-            gridItem = createObject("roSGNode", "contentNode")
-            for each vid in programs
-                vid.image_orientation = "landscape"
-                programItem = gridItem.CreateChild("ProgramItemNode")
-                programItem.setFields(vid)
-            end for
-            m.searchGrid.content = gridItem
-            m.girdTerm = m.term
-        end if
-    else if isInvalid(node.params.search) OR isEmptyString(node.params.search)
-        m.searchScene.visible = true
-        m.minChar.visible = false
-        m.resFail.visible = false
-    else
-        m.searchScene.visible = false
-        m.minChar.visible = false
-        m.resFail.visible = true
-    end if
-    ShowLoading(false)
-    m.isPagination = false
-    clearTask()
-end sub
-
-sub onSearchAPIPaginationDataResponse(event as dynamic)
-    response = event.getData()
-    if (response.ok AND isValid(response.data) AND isValid(response.data.data) AND response.data.data.count() > 0)
-        searchPaginationData = response.data.data
-        m.paginationData = {}
-        if isValid(response.data.total_display_records) then m.paginationData["total_display_records"] = response.data.total_display_records
-        if isValid(response.data.total_records) then m.paginationData["total_records"] = response.data.total_records
-        if isValid(response.data.last_page) then m.paginationData["last_page"] = response.data.last_page
-        paginationData = []
-        for each vid in searchPaginationData
-            vid.image_orientation = "landscape"
-            programItem = CreateObject("roSGNode", "ProgramItemNode")
-            programItem.setFields(vid)
-            paginationData.push(programItem)
+sub buildKeyboard()
+    m.gKeys.removeChildrenIndex(m.gKeys.getChildCount(), 0)
+    m.keyData = []
+    keyW = 47
+    gap = 7
+    keyH = 65
+    rowGap = 5
+    rows = [
+        ["a", "b", "c", "d", "e", "f"],
+        ["g", "h", "i", "j", "k", "l"],
+        ["m", "n", "ñ", "o", "p", "q"],
+        ["r", "s", "t", "u", "v", "w"],
+        ["x", "y", "z", "1", "2", "3"],
+        ["4", "5", "6", "7", "8", "9"],
+        ["0", "SPACE", "DEL"]
+    ]
+    for r = 0 to rows.count() - 1
+        row = rows[r]
+        col = 0
+        for each char in row
+            span = 1
+            if char = "SPACE" then span = 3
+            if char = "DEL" then span = 2
+            keyNode = createObject("roSGNode", "SearchKey")
+            keyNode.keyChar = char
+            keyNode.keyWidth = span * keyW + (span - 1) * gap
+            keyNode.keyHeight = keyH
+            keyNode.itemHasFocus = false
+            keyNode.translation = [col * (keyW + gap), r * (keyH + rowGap)]
+            m.gKeys.appendChild(keyNode)
+            m.keyData.push({ char: char, row: r, col: col, span: span, node: keyNode })
+            col = col + span
         end for
-        if hasValidGrid()
-            m.searchGrid.content.insertChildren(paginationData, m.searchGrid.content.getChildCount())
+    end for
+    m.keyFocus = 0
+    applyKeyFocus()
+end sub
+
+sub getSearchData()
+    m.searchTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.searchTask.functionName = "GetJsonByUrl"
+    m.searchTask.params = { "url": m.global.apiEndPoints.GetSearch }
+    m.searchTask.observeField("result", "OnSearchDataResponse")
+    m.searchTask.control = "RUN"
+end sub
+
+sub OnSearchDataResponse(event as dynamic)
+    apiResponse = event.getData()
+    rawPrograms = getValueFromProps(apiResponse, "data.programs", [])
+    m.allPrograms = []
+    for each raw in rawPrograms
+        if isNonEmptyString(raw.title)
+            m.allPrograms.push({
+                "title": raw.title
+                "image": raw.image
+                "id": raw.id
+                "url": raw.url
+            })
         end if
-    end if
+    end for
+    m.searchTask = invalid
+    m.loaded = true
     showLoading(false)
-    m.isPagination = false
-    clearTask()
+    applyFilter()
+    setFocusToKeyboard()
 end sub
 
-sub OnItemVideoSelected(event as dynamic)
-    data = event.GetData()
-    childNode = m.searchGrid.content.getChild(data)
-    IF (isValid(childNode))
-        data = {}
-        data.itemData = childNode
-        m.scene.callFunc("ShowDetailPage", data, false)
+sub applyFilter()
+    m.lEmpty.visible = false
+    m.lNoResults.visible = false
+    m.lNoResultsHint.visible = false
+    m.searchGrid.visible = false
+    if m.term = ""
+        m.searchGrid.content = invalid
+        m.hasResults = false
+        m.lEmpty.visible = true
+        return
+    end if
+    query = LCase(m.term)
+    content = createObject("roSGNode", "ContentNode")
+    count = 0
+    for each program in m.allPrograms
+        if count >= m.maxResults then exit for
+        if Instr(1, LCase(program.title), query) > 0
+            itemNode = content.createChild("ContentNode")
+            itemNode.setFields({ "title": program.title })
+            itemNode.addFields({ "image": program.image, "key": program.id })
+            count = count + 1
+        end if
+    end for
+    m.hasResults = (count > 0)
+    if count = 0
+        m.searchGrid.content = invalid
+        m.lNoResults.visible = true
+        m.lNoResultsHint.visible = true
+    else
+        m.searchGrid.content = content
+        m.searchGrid.visible = true
+        m.searchGrid.jumpToItem = 0
+    end if
+    if m.focusArea = "results" AND not m.hasResults
+        setFocusToKeyboard()
     end if
 end sub
 
-sub OnItemFocus(event as dynamic)
+sub updateInputLabel()
+    if m.term = ""
+        m.lInput.text = "Buscar..."
+        m.lInput.color = "#8C8C8C"
+    else
+        m.lInput.text = m.term
+        m.lInput.color = m.theme.white
+    end if
+end sub
+
+sub handleKeyPress(char as string)
+    if char = "DEL"
+        if Len(m.term) > 0 then m.term = Left(m.term, Len(m.term) - 1)
+    else if char = "SPACE"
+        m.term = m.term + " "
+    else
+        m.term = m.term + char
+    end if
+    updateInputLabel()
+    applyFilter()
+end sub
+
+sub showLoading(flag as boolean)
+    m.bsLoading.visible = flag
+end sub
+
+sub applyKeyFocus()
+    for i = 0 to m.keyData.count() - 1
+        m.keyData[i].node.itemHasFocus = (i = m.keyFocus)
+    end for
+end sub
+
+sub setFocusToKeyboard()
+    m.focusArea = "keyboard"
+    m.gKeyboard.setFocus(true)
+    applyKeyFocus()
+end sub
+
+sub setFocusToResults()
+    if not m.hasResults then return
+    m.focusArea = "results"
+    m.searchGrid.setFocus(true)
+end sub
+
+sub onFocusedChild()
+    if not m.loaded then return
+    if m.top.hasFocus() AND m.top.isInFocusChain()
+        if m.focusArea = "results" AND m.hasResults
+            m.searchGrid.setFocus(true)
+        else
+            setFocusToKeyboard()
+        end if
+    else if not m.top.isInFocusChain()
+        clearKeyFocus()
+    end if
+end sub
+
+sub clearKeyFocus()
+    for i = 0 to m.keyData.count() - 1
+        m.keyData[i].node.itemHasFocus = false
+    end for
+end sub
+
+sub onExitToKeyboard()
+    setFocusToKeyboard()
+end sub
+
+sub onResultSelected(event as dynamic)
     index = event.getData()
-    if isValid(index) AND hasValidGrid()
-        gridCount = m.searchGrid.content.getChildCount()
-        if m.isPagination = false AND isValid(m.paginationData) AND m.paginationData.count() > 0 AND m.paginationData.total_records > 0 AND m.paginationData.total_display_records > 0
-            if gridCount - index <= m.indexValForPagination AND m.currentPage <= m.paginationData.last_page AND m.searchGrid.content.getChildCount() < m.paginationData.total_records
-                m.isPagination = true
-                m.currentPage++
-                SearchAPICall(m.term, m.currentPage)
+    if isValid(m.searchGrid.content) AND index >= 0 AND index < m.searchGrid.content.getChildCount()
+        childNode = m.searchGrid.content.getChild(index)
+        data = { "itemData": childNode }
+        m.scene.callFunc("showDetailPage", data, false)
+    end if
+end sub
+
+function findKeyInRow(row as integer, col as integer) as integer
+    for i = 0 to m.keyData.count() - 1
+        k = m.keyData[i]
+        if k.row = row AND col >= k.col AND col < k.col + k.span then return i
+    end for
+    return -1
+end function
+
+function findNearestInRow(row as integer, center as float) as integer
+    best = -1
+    bestDist = 999
+    for i = 0 to m.keyData.count() - 1
+        k = m.keyData[i]
+        if k.row = row
+            kc = k.col + Int((k.span - 1) / 2)
+            d = Abs(kc - center)
+            if d < bestDist
+                bestDist = d
+                best = i
             end if
         end if
+    end for
+    return best
+end function
+
+function moveKeyLeft() as boolean
+    k = m.keyData[m.keyFocus]
+    if k.col = 0 then return false
+    idx = findKeyInRow(k.row, k.col - 1)
+    if idx >= 0
+        m.keyFocus = idx
+        applyKeyFocus()
     end if
-end sub
-
-sub ShowLoading(flag as boolean)
-    m.pageLoader.visible = flag
-end sub
-
-function hasValidGrid()
-    return isValid(m.searchGrid) AND isValid(m.searchGrid.content) AND m.searchGrid.content.getChildCount() > 0
+    return true
 end function
 
-function hasFocusOnMGGrid() as boolean
-    return hasValidGrid() AND (m.searchGrid.hasFocus() OR m.searchGrid.isInFocusChain())
-end function
-
-function RightKeyEvent()
-    result = false
-    if (m.miniKeyboard.hasFocus() OR m.miniKeyboard.isInFocusChain())
-        SetFocus(m.searchGrid)
-        result = true
+function moveKeyRight() as boolean
+    k = m.keyData[m.keyFocus]
+    endCol = k.col + k.span
+    if endCol >= 6
+        if m.hasResults then setFocusToResults()
+        return true
     end if
-    return result
-end function
-
-function LeftKeyEvent()
-    result = false
-    if hasFocusOnMGGrid()
-        SetFocus(m.miniKeyboard)
-        result = true
+    idx = findKeyInRow(k.row, endCol)
+    if idx >= 0
+        m.keyFocus = idx
+        applyKeyFocus()
     end if
-    return result
+    return true
 end function
 
-function BackKeyEvent()
-    result = false
-    if hasFocusOnMGGrid()
-        SetFocus(m.miniKeyboard)
-        result = true
+function moveKeyVertical(direction as integer) as boolean
+    k = m.keyData[m.keyFocus]
+    targetRow = k.row + direction
+    if targetRow < 0 OR targetRow >= m.numKeyRows then return true
+    center = k.col + (k.span - 1) / 2
+    idx = findKeyInRow(targetRow, Int(center))
+    if idx < 0 then idx = findNearestInRow(targetRow, center)
+    if idx >= 0
+        m.keyFocus = idx
+        applyKeyFocus()
     end if
-    return result
+    return true
 end function
 
-function OnkeyEvent(key as string, press as boolean) as boolean
-    print "SearchPage :onKeyEvent : key" key "press" press
-    result = false
-    if press
-        if key = "right"
-            result = RightKeyEvent()
-        else if key = "left"
-            result = LeftKeyEvent()
-        else if key = "back"
-            result = BackKeyEvent()
+function onKeyEvent(key as string, press as boolean) as boolean
+    if not press then return false
+    if not m.loaded then return false
+    if m.focusArea = "results" then return false
+    if key = "OK"
+        if m.keyFocus >= 0 AND m.keyFocus < m.keyData.count()
+            handleKeyPress(m.keyData[m.keyFocus].char)
         end if
+        return true
+    else if key = "left"
+        return moveKeyLeft()
+    else if key = "right"
+        return moveKeyRight()
+    else if key = "up"
+        return moveKeyVertical(-1)
+    else if key = "down"
+        return moveKeyVertical(1)
     end if
-    return result
+    return false
 end function

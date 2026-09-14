@@ -450,6 +450,7 @@ sub onTopMenuItemSelected(event as dynamic)
         if isValid(m.LivePage) then m.LivePage.isDestroy = true
         if isValid(m.MyListPage) then m.MyListPage.isDestroy = true
         if isValid(m.RadioPage) then m.RadioPage.isDestroy = true
+        if isValid(m.SearchPage) then m.SearchPage.isDestroy = true
         if pageName = "Portada"
             ShowHomePage(true)
         else if pageName = "Búsqueda"
