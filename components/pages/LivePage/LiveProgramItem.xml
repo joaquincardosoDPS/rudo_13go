@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="LiveProgramItem" extends="Group">
+    <script type="text/brightscript" uri="LiveProgramItem.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="itemWidth" type="float" onChange="onResize" />
+        <field id="itemHeight" type="float" onChange="onResize" />
+        <field id="title" type="string" onChange="onTitleChanged" />
+        <field id="timeText" type="string" onChange="onContentChanged" />
+        <field id="isLive" type="boolean" onChange="onContentChanged" />
+        <field id="isFirstRowItem" type="boolean" onChange="onTitleChanged" />
+        <field id="isLastRowItem" type="boolean" onChange="onTitleChanged" />
+        <field id="itemHasFocus" type="boolean" onChange="onFocusChanged" />
+    </interface>
+    <children>
+        <Rectangle id="rBg" color="#1C1D28" />
+        <Label id="lTitle" vertAlign="center" wrap="false" maxLines="1" />
+        <Label id="lTime" horizAlign="right" vertAlign="center" visible="false" />
+        <Poster id="pLive" width="13" height="13" uri="pkg:/images/live/dot_red.png" visible="false" />
+        <Poster id="pCornerTL" width="10" height="10" uri="pkg:/images/live/corner_tl.png" blendColor="#08090C" visible="false" />
+        <Poster id="pCornerTR" width="10" height="10" uri="pkg:/images/live/corner_tr.png" blendColor="#08090C" visible="false" />
+        <Poster id="pCornerBL" width="10" height="10" uri="pkg:/images/live/corner_bl.png" blendColor="#08090C" visible="false" />
+        <Poster id="pCornerBR" width="10" height="10" uri="pkg:/images/live/corner_br.png" blendColor="#08090C" visible="false" />
+        <Poster id="pFocus" uri="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" loadDisplayMode="scaleToZoom" visible="false" />
+    </children>
+</component>

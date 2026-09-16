@@ -23,6 +23,7 @@ function ContentAPI__New()
 
     this.GetCategoryPrograms = ContentAPI__GetCategoryPrograms
     this.GetJsonByUrl = ContentAPI__GetJsonByUrl
+    this.GetTextByUrl = ContentAPI__GetTextByUrl
     this.GetSearchPrograms = ContentAPI__GetSearchPrograms
     this.GetMyListPrograms = ContentAPI__GetMyListPrograms
     this.GetPrograms = ContentAPI__GetPrograms
@@ -155,6 +156,20 @@ function ContentAPI__GetJsonByUrl(requestParams as object)
     data = {}
     response = getRequest(path, data, headers)
     return handleApiResponse(response)
+end function
+
+' A diferencia de GetJsonByUrl, no intenta parsear la respuesta como JSON.
+' Se usa para traer texto plano (ej: un manifest .m3u8 de HLS).
+function ContentAPI__GetTextByUrl(requestParams as object)
+    path = requestParams.url
+    headers = {}
+    data = {}
+    response = getRequest(path, data, headers)
+    if response.isSuccess
+        return ok(response.response)
+    else
+        return error(getErrorReason(response))
+    end if
 end function
 
 function ContentAPI__GetSearchPrograms(params as object)

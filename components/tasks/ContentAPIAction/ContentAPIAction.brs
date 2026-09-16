@@ -11,6 +11,11 @@ function GetJsonByUrl() as void
     m.top.result = response
 end function
 
+function GetTextByUrl() as void
+    response = ContentAPI().GetTextByUrl(m.top.params)
+    m.top.result = response
+end function
+
 sub GetSearchPrograms()
     response = ContentAPI().GetSearchPrograms(m.top.params)
     if(isValid(response))

@@ -1,7 +1,6 @@
-sub Init()
+﻿sub init()
     setLocals()
     setControls()
-    setupPageLoader()
     setupFonts()
     setupColors()
     setObservers()
@@ -12,785 +11,591 @@ sub setLocals()
     m.scene = m.top.GetScene()
     m.theme = m.global.appTheme
     m.fonts = m.global.Fonts
-    initVar()
+    m.playlist = []
+    m.programation = []
+    m.loadedPlaylist = false
+    m.loadedEpg = false
+    m.channels = []
+    m.rowNodes = []
+    m.selectedIndex = 0
+    m.overlayShown = false
+    m.focusArea = "grid"
+    m.controlIndex = 0
+    m.gridRow = 0
+    m.gridItem = 0
+    m.scrollY = 0
+    m.isPaused = false
+    m.loaded = false
+    m.rowHeight = 117
+    m.rowGap = 5
+    m.clipHeight = 441
+    m.gridWidth = 1721
 end sub
 
 sub setControls()
-    m.epgGrid = m.top.findNode("epgGrid")
-    m.noData = m.top.findNode("noData")
-    m.lNow = m.top.findNode("lNow")
-    m.lComing = m.top.findNode("lComing")
-    m.lgDetailSection = m.top.findNode("lgDetailSection")
-    m.refreshSchedule = m.top.findNode("refreshSchedule")
-    m.gridColTitle = m.top.findNode("gridColTitle")
-    m.epgSection = m.top.findNode("epgSection")
-    m.lDay = m.top.findNode("lDay")
-    m.vLivePlayer = m.top.findNode("vLivePlayer")
-    m.bigLivePlayer = m.top.findNode("bigLivePlayer")
-    m.smallLivePlayer = m.top.findNode("smallLivePlayer")
-    m.bsLoader = m.top.findNode("bsLoader")
-
-    m.vLivePlayer.enableTrickPlay = false
-    m.vLivePlayer.enableUI = false
+    m.vLive = m.top.findNode("vLive")
+    m.gOverlay = m.top.findNode("gOverlay")
+    m.pFadeBottom = m.top.findNode("pFadeBottom")
+    m.pPill = m.top.findNode("pPill")
+    m.lEnvivo = m.top.findNode("lEnvivo")
+    m.lChannelName = m.top.findNode("lChannelName")
+    m.lProgramTitle = m.top.findNode("lProgramTitle")
+    m.gControls = m.top.findNode("gControls")
+    m.bPause = m.top.findNode("bPause")
+    m.pPauseBg = m.top.findNode("pPauseBg")
+    m.pPauseIcon = m.top.findNode("pPauseIcon")
+    m.pPauseFocus = m.top.findNode("pPauseFocus")
+    m.bQuality = m.top.findNode("bQuality")
+    m.pQualBg = m.top.findNode("pQualBg")
+    m.pQualFocus = m.top.findNode("pQualFocus")
+    m.lQualLabel = m.top.findNode("lQualLabel")
+    m.lQualValue = m.top.findNode("lQualValue")
+    m.gGridClip = m.top.findNode("gGridClip")
+    m.gGridTrack = m.top.findNode("gGridTrack")
+    m.tHide = m.top.findNode("tHide")
+    m.bsLoading = m.top.findNode("bsLoading")
 end sub
 
 sub setupFonts()
-    m.noData.font = m.fonts.dmSansBold32
-    m.lNow.font = m.fonts.dmSansMedium30
-    m.lComing.font = m.fonts.dmSansMedium30
-    m.lDay.font = m.fonts.dmSansMedium30
-end sub
-
-sub setupPageLoader()
-    m.bsLoader.poster.uri = "pkg:/images/loader/loader_image.png"
-    m.bsLoader.poster.width = 100
-    m.bsLoader.poster.height = 100
-    m.bsLoader.poster.loadwidth = 100
-    m.bsLoader.poster.loadheight = 100
-    m.bsLoader.poster.blendColor = m.theme.focPrimary
-    m.bsLoader.poster.loadDisplayMode = "scaleToFit"
+    m.lEnvivo.font = m.fonts.dmSansBold18
+    m.lChannelName.font = m.fonts.dmSansBold48
+    m.lProgramTitle.font = m.fonts.dmSansMedium23
+    m.lQualLabel.font = m.fonts.dmSansMedium20
+    m.lQualValue.font = m.fonts.dmSansMedium20
 end sub
 
 sub setupColors()
-    m.noData.color = m.theme.white
-    m.lNow.color = m.theme.focPrimary
-    m.lComing.color = m.theme.focPrimary
-    m.lDay.color = m.theme.focPrimary
+    m.pPill.blendColor = "#FF0000"
+    m.pPauseBg.blendColor = "#1C1D28"
+    m.pQualBg.blendColor = "#1C1D28"
+    m.pPauseFocus.blendColor = m.theme.focPrimary
+    m.pQualFocus.blendColor = m.theme.focPrimary
+    m.pPauseIcon.blendColor = "#FFFFFF"
+    m.lProgramTitle.color = m.theme.white
 end sub
 
 sub setObservers()
     m.top.observeField("focusedChild", "onFocusedChild")
-    m.epgGrid.observeField("itemFocused", "onItemFocused")
-    m.epgGrid.observeField("itemSelected", "onItemSelected")
-    m.epgGrid.observeField("jumpToMenu", "onJumpToMenu")
-    m.refreshSchedule.observeField("fire", "onRefreshSchedules")
     m.top.observeField("visible", "onVisibleChange")
-    m.vLivePlayer.observeField("bufferingStatus", "handleBufferingStatus")
-end sub
-
-sub initVar()
-    m.isbigLivePlayerAnimation = false
-    m.liveVideoStatus = ""
-    m.lastPlayedChannel = ""
-    m.focusedChildNode = invalid
-    m.isRAFAdsPlaying = false
-
-    m.isFirstTime = true
-    m.lastFocusIndex = 1
-    m.networkErrorWhenLoadingData = false
-    m.hasDataLoadedOnce = false
-    m.isDataAvailable = false
-end sub
-
-sub onPageDestroy()
-    if m.top.isDestroy
-        initVar()
-        m.refreshSchedule.control = "stop"
-        if isValid(m.vLivePlayer)
-            m.vLivePlayer.control = "stop"
-            m.vLivePlayer.content = invalid
-        end if
-        if isValid(m.getEPGDataTask)
-            m.getEPGDataTask.control = "stop"
-            m.getEPGDataTask = invalid
-        end if
-        if isValid(m.getEPGProgramDataTask)
-            m.getEPGProgramDataTask.control = "stop"
-            m.getEPGProgramDataTask = invalid
-        end if
-        allPlayerAndTaskReset()
-        if isValid(m.epgGrid) AND isValid(m.epgGrid.content)
-            m.epgGrid.content.RemoveChildrenIndex(m.epgGrid.content.GetChildCount(), 0)
-        end if
-        m.epgGrid.content = invalid
-    end if
+    m.tHide.observeField("fire", "onHideTimer")
+    m.vLive.observeField("state", "onVideoState")
 end sub
 
 sub onVisibleChange(event as dynamic)
-    visible = event.GetData()
-    if not visible
-        if isValid(m.vLivePlayer)
-            m.vLivePlayer.control = "stop"
-            m.vLivePlayer.content = invalid
+    if not event.getData()
+        if isValid(m.vLive)
+            m.vLive.control = "stop"
+            m.vLive.content = invalid
         end if
-    end if
-end sub
-
-sub OnVideoPlayerStatusChange(event as dynamic)
-    videoStatus = event.GetData()
-    node = event.getRoSGNode()
-    m.liveVideoStatus = videoStatus
-    if videoStatus = "playing"
-        showHidePageLoader(false)
-    else if videoStatus = "finished"
-        if isValid(node) AND isNonEmptyString(node.id) AND node.id = "PlayerTask"
-            showHidePageLoader(true, false)
-            m.vLivePlayer.control = "play"
-        else
-            allPlayerAndTaskReset()
-        end if
-        SetFocus(m.epgGrid)
-    end if
-end sub
-
-sub OnVideoPositionChanged(event as dynamic)
-    videoPosition = event.GetData()
-    if videoPosition \ 1 = 30
-        print "OnVideoPositionChanged : "videoPosition
-    end if
-end sub
-
-sub handleBufferingStatus(event as dynamic)
-    bufferingStatus = event.getData()
-    if bufferingStatus <> invalid
-        if not m.isbigLivePlayerAnimation then showHidePageLoader(true, false)
-        m.loadingPercentage = bufferingStatus.percentage
-        if m.loadingPercentage = 100
-            showHidePageLoader(false)
-        end if
+        setMenuVisible(true)
     end if
 end sub
 
 sub initialize()
-    ' todayDate = CreateObject("roDateTime")
-    m.lDay.text = "Hoy" 'todayDate.GetWeekday()
-    m.lNow.text = "Ahora"
-    m.lComing.text = "A continuación" 
-    createEPGView()
+    m.pPauseIcon.uri = "pkg:/images/PlayerOverlayIcon/pause.png"
+    showLoading(true)
+    setMenuVisible(false)
+    getPlaylist()
+    getEpg()
 end sub
 
-sub showHidePageLoader(visible as boolean, isCenter = true as boolean)
-    if visible = m.bsLoader.visible then return
-    m.bsLoader.visible = visible
-    if isCenter
-        m.bsLoader.translation = "[910,490]"
-    else
-        m.bsLoader.translation = "[511, 387.5]"
+sub setMenuVisible(flag as boolean)
+    if isValid(m.scene)
+        m.scene.callFunc("ShowHideMenu", flag)
     end if
 end sub
 
-sub onRefreshPage()
-    if m.networkErrorWhenLoadingData AND m.isDataAvailable'only refresh data if network error has occurred while loading the data
-        m.networkErrorWhenLoadingData = false
-        refreshData() 
-        'TODO: need to check the case where partial data is loaded and partial is failed due to network error
-        ' this case is might no be possible as we are setting translation once all the data is loaded. in checkAppendNodes. but verify.
-    end if
-    restoreFocus()
-end sub
-
-sub refreshData()
-    m.noData.visible = false
-    m.isRefreshing = true
-    ' proccessPageComponents()
-end sub
-
-' sub onPageComponents(event as object)
-'     pageComponents = event.getData()
-'     components = getValueFromProps(pageComponents, "components", [])
-'     if (components.count() > 0)
-'         componentsArray = getValueFromProps(components, "0.components", [])
-'         if (componentsArray.count() > 0)
-'             m.isDataAvailable = true
-'             m.EPGComponents = componentsArray
-'             proccessPageComponents()
-'         end if
-'     end if
-'     if not m.isDataAvailable
-'         m.scene.callFunc("showHideLoader", false)
-'         showNoData()
-'     end if
-' end sub
-
-sub proccessPageComponents()
-    createEPGView()
-end sub
-
-sub showNoData()
-    m.epgSection.visible = false
-    m.noData.text = "No hay datos disponibles"
-    m.noData.visible = true
-    setFocus(m.noData)
-end sub
-
-sub createEPGView()
-    m.epgSection.visible = false
-    getEPGData()
-end sub
-
-sub getEPGPrograms()
-    showHidePageLoader(true)
-    m.getEPGProgramDataTask = CreateObject("roSGNode", "ContentAPIAction")
-    m.getEPGProgramDataTask.functionName = "GetEPGPrograms"
-    m.getEPGProgramDataTask.observeField("result", "OnGetEPGProgramsAPIResponse")
-    m.getEPGProgramDataTask.control = "RUN"
-end sub
-
-sub OnGetEPGProgramsAPIResponse(event as dynamic)
-    response = event.getData()
-    print "OnGetEPGProgramsAPIResponse : response : " 'formatjson(response)
-    if isValid(response) AND isValid(response.data) AND isValid(response.data) AND response.data.count() > 0
-        m.epgData = makeEPGChannelWiseData(response.data)
-        m.hasDataLoadedOnce = true
-        mainContent = createObject("roSGNode", "contentNode")
-        gridIndex = 0
-        for each liveItem in m.epgData
-            contentNode = createObject("roSGNode", "EPGItemData")
-            contentNode.addFields({ colIndex: 0, index: gridIndex })
-            contentNode.setFields(liveItem)
-            mainContent.appendChild(contentNode)
-            gridIndex++
-            if isValid(liveItem.events) then liveItem.events.SortBy("beginTime")
-            isLiveAdded = false
-            isUpNextAdded = false
-            for i = 0 to 1 step 1
-                schedule = liveItem.events[i]
-                if (isValid(schedule))
-                    schedule.preview_m3u8 = liveItem.preview_m3u8
-                    schedule.m3u8 = liveItem.m3u8
-                    schedule.live = liveItem.live
-                    schedule.background_image = liveItem.background_image
-                    schedule.logo = liveItem.logo
-                    schedule.vast = liveItem.vast
-                    schedule.active_item_data = liveItem.active_item_data
-                    schedule.DPSDAIAssetKey = liveItem.DPSDAIAssetKey
-                    schedule.assetKey = liveItem.assetKey
-                    startDt = CreateObject("roDateTime")
-                    startDt.fromISO8601String(schedule.beginTime)
-                    endDt = CreateObject("roDateTime")
-                    endDt.fromISO8601String(schedule.endTime)
-                    currentTime = CreateObject("roDateTime")
-                    currentTime.ToISOString()
-                    schedule.duration_seg = endDt.asSeconds() - startDt.asSeconds()
-                    if (currentTime.asSeconds() < endDt.asSeconds())
-                        if (currentTime.asSeconds() >= startDt.asSeconds() AND currentTime.asSeconds() <= endDt.asSeconds() AND not isLiveAdded)
-                            contentNode = createObject("roSGNode", "ScheduleItemData")
-                            contentNode.addFields({ colIndex: 1, index: gridIndex })
-                            contentNode.setField("isLive", true)
-                            contentNode.setFields(schedule)
-                            mainContent.appendChild(contentNode)
-                            gridIndex++
-                            isLiveAdded = true
-                        else if (currentTime.asSeconds() < startDt.asSeconds() AND not isUpNextAdded AND currentTime.GetDayOfMonth() = startDt.GetDayOfMonth())
-                            if (not isLiveAdded)
-                                contentNode = createObject("roSGNode", "ScheduleItemData")
-                                contentNode.addFields({ colIndex: 1, index: gridIndex })
-                                contentNode.setField("name_live", "no_transmission")
-                                contentNode.setField("title", liveItem.name_live)
-                                mainContent.appendChild(contentNode)
-                                gridIndex++
-                                isLiveAdded = true
-                            end if
-                            contentNode = createObject("roSGNode", "ScheduleItemData")
-                            contentNode.addFields({ colIndex: 2, index: gridIndex })
-                            contentNode.setFields(schedule)
-                            mainContent.appendChild(contentNode)
-                            gridIndex++
-                            isUpNextAdded = true
-                            exit for
-                        else if not isUpNextAdded AND i = 1
-                            if (not isLiveAdded)
-                                contentNode = createObject("roSGNode", "ScheduleItemData")
-                                contentNode.addFields({ colIndex: 1, index: gridIndex })
-                                contentNode.setField("name_live", "no_transmission")
-                                contentNode.setField("title", liveItem.name_live)
-                                mainContent.appendChild(contentNode)
-                                isLiveAdded = true
-                                gridIndex++
-                            end if
-                            contentNode = createObject("roSGNode", "ScheduleItemData")
-                            contentNode.addFields({ colIndex: 2, index: gridIndex })
-                            contentNode.setField("name_live", "no_transmission")
-                            contentNode.setField("title", liveItem.name_live)
-                            mainContent.appendChild(contentNode)
-                            gridIndex++
-                        else if i = 1
-                            contentNode = createObject("roSGNode", "ScheduleItemData")
-                            contentNode.addFields({ colIndex: i + 1, index: gridIndex })
-                            contentNode.setField("name_live", "no_transmission")
-                            contentNode.setField("title", liveItem.name_live)
-                            mainContent.appendChild(contentNode)
-                            gridIndex++
-                        end if
-                    else
-                        contentNode = createObject("roSGNode", "ScheduleItemData")
-                        contentNode.addFields({ colIndex: i + 1, index: gridIndex })
-                        contentNode.setField("name_live", "no_transmission")
-                        contentNode.setField("title", liveItem.name_live)
-                        mainContent.appendChild(contentNode)
-                        gridIndex++
-                    end if
-                else
-                    contentNode = createObject("roSGNode", "ScheduleItemData")
-                    contentNode.addFields({ colIndex: i + 1, index: gridIndex })
-                    schedule = {}
-                    schedule.preview_m3u8 = liveItem.preview_m3u8
-                    schedule.m3u8 = liveItem.m3u8
-                    schedule.background_image = liveItem.background_image
-                    schedule.logo = liveItem.logo
-                    schedule.vast = liveItem.vast
-                    schedule.active_item_data = liveItem.active_item_data
-                    contentNode.setFields(schedule)
-                    contentNode.setField("name_live", "no_transmission")
-                    contentNode.setField("title", liveItem.name_live)
-                    mainContent.appendChild(contentNode)
-                    gridIndex++
-                end if
-            end for
-        end for
-        m.epgGrid.content = mainContent
-        if (m.epgGrid.content.getChildCount() > 0)
-            m.epgSection.visible = true
+sub onPageDestroy()
+    if m.top.isDestroy
+        if isValid(m.vLive)
+            m.vLive.control = "stop"
+            m.vLive.content = invalid
         end if
-        setFocus(m.epgGrid)
-        m.epgGrid.jumpToItem = m.lastFocusIndex
-        ' m.refreshSchedule.control = "start"
-    else
-        showNoData()
+        m.tHide.control = "stop"
+        setMenuVisible(true)
+        if isValid(m.getPlaylistTask) then m.getPlaylistTask.control = "stop"
+        if isValid(m.getEpgTask) then m.getEpgTask.control = "stop"
+        if isValid(m.getQualitiesTask) then m.getQualitiesTask.control = "stop"
     end if
-    m.getEPGProgramDataTask = invalid
 end sub
 
-function makeEPGChannelWiseData(epgPrograms as dynamic) as dynamic
-    newData = []
-    for each item in m.epgData
-        for each program in epgPrograms
-            if program.key_live = item.key_live
-                for each key in program
-                    item[key] = program[key]
+sub showLoading(flag as boolean)
+    m.bsLoading.visible = flag
+end sub
+
+'===> Data
+sub getPlaylist()
+    m.getPlaylistTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.getPlaylistTask.functionName = "GetJsonByUrl"
+    m.getPlaylistTask.params = { "url": m.global.apiEndPoints.GetPlaylistPremium }
+    m.getPlaylistTask.observeField("result", "onPlaylistResponse")
+    m.getPlaylistTask.control = "RUN"
+end sub
+
+sub onPlaylistResponse(event as dynamic)
+    apiResponse = event.getData()
+    items = getValueFromProps(apiResponse, "data.data", [])
+    m.playlist = items
+    m.loadedPlaylist = true
+    m.getPlaylistTask = invalid
+    tryBuildChannels()
+end sub
+
+sub getEpg()
+    m.getEpgTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.getEpgTask.functionName = "GetJsonByUrl"
+    m.getEpgTask.params = { "url": m.global.apiEndPoints.GetEPGPrograms }
+    m.getEpgTask.observeField("result", "onEpgResponse")
+    m.getEpgTask.control = "RUN"
+end sub
+
+sub onEpgResponse(event as dynamic)
+    apiResponse = event.getData()
+    items = getValueFromProps(apiResponse, "data", [])
+    m.programation = items
+    m.loadedEpg = true
+    m.getEpgTask = invalid
+    tryBuildChannels()
+end sub
+
+sub tryBuildChannels()
+    if not (m.loadedPlaylist AND m.loadedEpg) then return
+    buildChannels()
+    if m.channels.count() = 0
+        showLoading(false)
+        return
+    end if
+    buildRows()
+    m.loaded = true
+    showLoading(false)
+    selectChannel(0)
+end sub
+
+function nowEpoch() as integer
+    nd = CreateObject("roDateTime")
+    nd.Mark()
+    return nd.AsSeconds()
+end function
+
+' ISO 8601 UTC (YYYY-MM-DDTHH:MM:SS...) -> epoch (segundos). No depende de
+' fromISO8601String (que en algunos equipos/emulador no parsea el offset).
+function isoToEpoch(iso as string) as integer
+    if Len(iso) < 19 then return 0
+    y = Val(Mid(iso, 1, 4))
+    mo = Val(Mid(iso, 6, 2))
+    d = Val(Mid(iso, 9, 2))
+    h = Val(Mid(iso, 12, 2))
+    mi = Val(Mid(iso, 15, 2))
+    s = Val(Mid(iso, 18, 2))
+    yy = y
+    mm = mo
+    if mm <= 2
+        yy = yy - 1
+        mm = mm + 12
+    end if
+    era = Int(yy / 400)
+    yoe = yy - era * 400
+    doy = Int((153 * (mm - 3) + 2) / 5) + d - 1
+    doe = yoe * 365 + Int(yoe / 4) - Int(yoe / 100) + doy
+    days = era * 146097 + doe - 719468
+    return days * 86400 + h * 3600 + mi * 60 + s
+end function
+
+function epochToLocalHHMM(epoch as integer) as string
+    nd = CreateObject("roDateTime")
+    nd.fromSeconds(epoch)
+    nd.toLocalTime()
+    h = nd.GetHours()
+    mi = nd.GetMinutes()
+    hs = h.ToStr()
+    ms = mi.ToStr()
+    if h < 10 then hs = "0" + hs
+    if mi < 10 then ms = "0" + ms
+    return hs + ":" + ms
+end function
+
+sub buildChannels()
+    m.channels = []
+    nowE = nowEpoch()
+    for each item in m.playlist
+        active = getValueFromProps(item, "active", false)
+        if not active then continue for
+        keyLive = getValueFromProps(item, "key_live", "")
+        programs = []
+        for each epgItem in m.programation
+            if getValueFromProps(epgItem, "key_live", "") = keyLive
+                events = getValueFromProps(epgItem, "events", [])
+                for each ev in events
+                    endE = isoToEpoch(getValueFromProps(ev, "endTime", ""))
+                    if endE > nowE
+                        if programs.count() >= 5 then exit for
+                        beginE = isoToEpoch(getValueFromProps(ev, "beginTime", ""))
+                        programs.push({
+                            "title": getValueFromProps(ev, "title", "")
+                            "timeText": epochToLocalHHMM(beginE)
+                            "isLive": (nowE >= beginE AND nowE <= endE)
+                        })
+                    end if
                 end for
                 exit for
             end if
         end for
-        if NOT item.DoesExist("events") then item.events = []
-        newData.push(item)
+        restriction = getValueFromProps(item, "restriction", "0")
+        m.channels.push({
+            "key_live": keyLive
+            "name_live": getValueFromProps(item, "name_live", "")
+            "logo": getValueFromProps(item, "logo", "")
+            "color": getValueFromProps(item, "color", "")
+            "preview_m3u8": getValueFromProps(item, "preview_m3u8", "")
+            "m3u8": getValueFromProps(item, "m3u8", "")
+            "blocked": (restriction <> "0")
+            "programs": programs
+        })
     end for
-    return newData
-end function
-
-sub getEPGData()
-    showHidePageLoader(true)
-    m.getEPGDataTask = CreateObject("roSGNode", "ContentAPIAction")
-    m.getEPGDataTask.functionName = "GetEPGData"
-    m.getEPGDataTask.observeField("result", "OnGetEPGDataAPIResponse")
-    m.getEPGDataTask.control = "RUN"
 end sub
 
-sub OnGetEPGDataAPIResponse(event as dynamic)
-    response = event.getData()
-    print "OnGetEPGDataAPIResponse : response : " 'formatjson(response)
-    getEPGPrograms()
-    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND response.data.data.count() > 0
-        m.epgData = response.data.data
+sub buildRows()
+    m.gGridTrack.removeChildrenIndex(m.gGridTrack.getChildCount(), 0)
+    m.rowNodes = []
+    pitch = m.rowHeight + m.rowGap
+    for i = 0 to m.channels.count() - 1
+        ch = m.channels[i]
+        row = CreateObject("roSGNode", "LiveChannelRow")
+        row.rowWidth = m.gridWidth
+        row.rowHeight = m.rowHeight
+        row.logo = ch.logo
+        row.channelName = ch.name_live
+        row.ringColor = ch.color
+        row.blocked = ch.blocked
+        row.programs = ch.programs
+        row.focusedItemIndex = -1
+        row.translation = [0, i * pitch]
+        m.gGridTrack.appendChild(row)
+        m.rowNodes.push(row)
+    end for
+end sub
+
+'===> Player
+sub selectChannel(index as integer)
+    if index < 0 OR index >= m.channels.count() then return
+    ch = m.channels[index]
+    if ch.blocked then return
+    m.selectedIndex = index
+    updateHeader(ch)
+    playUrl(ch.preview_m3u8, ch.m3u8)
+    hideOverlay()
+end sub
+
+sub updateHeader(ch as dynamic)
+    m.lChannelName.text = ch.name_live
+    if ch.programs.count() > 0
+        m.lProgramTitle.text = ch.programs[0].title
     else
-        showNoData()
+        m.lProgramTitle.text = ""
     end if
-    showHidePageLoader(false)
-    m.getEPGDataTask = invalid
 end sub
 
-sub onGetRefreshLivesEpgeResponse(event as object)
+sub playUrl(previewUrl as string, fallbackUrl as string)
+    url = previewUrl
+    if not isNonEmptyString(url) then url = fallbackUrl
+    if not isNonEmptyString(url) then return
+    m.masterPlaylistUrl = url
+    m.availableQualities = [{ "label": "Auto", "url": url }]
+    m.qualityIndex = 0
+    m.lQualValue.text = "Auto"
+    startPlayback(url)
+    fetchQualities(url)
+end sub
+
+sub startPlayback(url as string)
+    content = CreateObject("roSGNode", "ContentNode")
+    content.url = url
+    content.streamformat = "hls"
+    content.live = true
+    m.isPaused = false
+    updatePauseIcon()
+    m.vLive.content = content
+    m.vLive.control = "play"
+end sub
+
+'===> Calidad (parseo del manifest HLS para listar las variantes reales)
+sub fetchQualities(url as string)
+    if isValid(m.getQualitiesTask) then m.getQualitiesTask.control = "stop"
+    m.getQualitiesTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.getQualitiesTask.functionName = "GetTextByUrl"
+    m.getQualitiesTask.params = { "url": url }
+    m.getQualitiesTask.observeField("result", "onQualitiesResponse")
+    m.getQualitiesTask.control = "RUN"
+end sub
+
+sub onQualitiesResponse(event as dynamic)
     response = event.getData()
-    if (response.ok AND isValid(response.data) AND response.data.Count() > 0)
-        '     getLives = getValueFromProps(response, "data.data.getLives", invalid)
-        '     oldContent = m.epgGrid.content
-        '     totalContent = oldContent.getChildCount()
-        '     for i = 0 to totalContent - 1 step 3
-        '         itemNode = oldContent.getChild(i)
-        '         channelIndex = itemNode.index
-        '         for each liveItem in getLives
-        '             if liveItem._id = itemNode._id
-        '                 liveItem.schedules.SortBy("beginTime")
-        '                 schedules = []
-        '                 isLiveAdded = false
-        '                 isUpNextAdded = false
-        '                 nextIndex = channelIndex
-        '                 for j = 0 to 1 step 1
-        '                     schedule = liveItem.schedules[j]
-        '                     if (isValid(schedule))
-        '                         startDt = CreateObject("roDateTime")
-        '                         startDt.asSeconds()
-        '                         startDt.fromISO8601String(schedule.beginTime)
-        '                         endDt = CreateObject("roDateTime")
-        '                         endDt.asSeconds()
-        '                         endDt.fromISO8601String(schedule.endTime)
-        '                         currentTime = CreateObject("roDateTime")
-        '                         currentTime.asSeconds()
-        '                         currentTime.ToISOString()
-        '                         if (currentTime.asSeconds() < endDt.asSeconds())
-        '                             if (currentTime.asSeconds() >= startDt.asSeconds() AND currentTime.asSeconds() <= endDt.asSeconds() AND not isLiveAdded)
-        '                                 contentNode = createObject("roSGNode", "ScheduleItemData")
-        '                                 contentNode.addFields({ colIndex: 1 })
-        '                                 contentNode.setField("isLive", true)
-        '                                 contentNode.setFields(schedule)
-        '                                 nextIndex++
-        '                                 oldContent.replaceChild(contentNode, nextIndex)
-        '                                 isLiveAdded = true
-        '                             else if (currentTime.asSeconds() < startDt.asSeconds() AND not isUpNextAdded AND currentTime.GetDayOfMonth() = startDt.GetDayOfMonth())
-        '                                 if (not isLiveAdded)
-        '                                     contentNode = createObject("roSGNode", "ScheduleItemData")
-        '                                     contentNode.addFields({ "colIndex": 1 })
-        '                                     contentNode.setField("name_live", "no_transmission")
-        '                                     nextIndex++
-        '                                     oldContent.replaceChild(contentNode, nextIndex)
-        '                                 end if
-        '                                 contentNode = createObject("roSGNode", "ScheduleItemData")
-        '                                 contentNode.addFields({ "colIndex": 2 })
-        '                                 contentNode.setFields(schedule)
-        '                                 nextIndex++
-        '                                 oldContent.replaceChild(contentNode, nextIndex)
-        '                                 isUpNextAdded = true
-        '                                 exit for
-        '                             else if not isUpNextAdded
-        '                                 contentNode = createObject("roSGNode", "ScheduleItemData")
-        '                                 contentNode.addFields({ "colIndex": 2 })
-        '                                 contentNode.setField("name_live", "no_transmission")
-        '                                 nextIndex++
-        '                                 oldContent.replaceChild(contentNode, nextIndex)
-        '                             else
-        '                                 contentNode = createObject("roSGNode", "ScheduleItemData")
-        '                                 contentNode.addFields({ "colIndex": j + 1 })
-        '                                 contentNode.setField("name_live", "no_transmission")
-        '                                 nextIndex++
-        '                                 oldContent.replaceChild(contentNode, nextIndex)
-        '                             end if
-        '                         else
-        '                             contentNode = createObject("roSGNode", "ScheduleItemData")
-        '                             contentNode.addFields({ "colIndex": j + 1 })
-        '                             contentNode.setField("name_live", "no_transmission")
-        '                             nextIndex++
-        '                             oldContent.replaceChild(contentNode, nextIndex)
-        '                         end if
-        '                     else
-        '                         contentNode = createObject("roSGNode", "ScheduleItemData")
-        '                         contentNode.addFields({ "colIndex": j + 1 })
-        '                         contentNode.setField("name_live", "no_transmission")
-        '                         nextIndex++
-        '                         oldContent.replaceChild(contentNode, nextIndex)
-        '                     end if
-        '                 end for
-        '             end if
-        '         end for
-        '     end for
-        '     m.epgGrid.content = oldContent
-        '     setFocus(m.epgGrid)
-        '     m.epgGrid.jumpToItem = m.lastFocusIndex
-    end if
+    m.getQualitiesTask = invalid
+    if not isValid(response) OR not response.ok then return
+    variants = parseHlsVariants(response.data)
+    if variants.count() = 0 then return
+    qualities = [{ "label": "Auto", "url": m.masterPlaylistUrl }]
+    for each v in variants
+        qualities.push({ "label": v.label, "url": v.url })
+    end for
+    m.availableQualities = qualities
+    m.qualityIndex = 0
 end sub
 
-sub onRefreshSchedules()
-    getEPGPrograms()
-end sub
-
-sub onItemFocused(event as dynamic)
-    index = event.getData()
-    if isValid(index) AND index > 0
-        m.lastFocusIndex = index
-        m.focusedChildNode = m.epgGrid.content.getChild(index)
-        if isValid(m.focusedChildNode)
-            CreateMetaData()
-            if isValid(m.focusedChildNode.m3u8) AND isNonEmptyString(m.focusedChildNode.m3u8) AND (m.lastPlayedChannel = invalid OR m.lastPlayedChannel <> m.focusedChildNode.m3u8)
-                allPlayerAndTaskReset()
-                if isValid(m.vLivePlayer)
-                    m.vLivePlayer.control = "STOP"
-                    m.vLivePlayer.content = invalid
-                end if
-                m.vLivePlayer.observeField("state", "OnVideoPlayerStatusChange")
-                m.vLivePlayer.observeField("position", "OnVideoPositionChanged")
-                if (isNonEmptyString(m.focusedChildNode.DPSDAIAssetKey) OR isNonEmptyString(m.focusedChildNode.assetKey))
-                    DAIPlayerTask()
-                    showHidePageLoader(true, false)
-                else if isValid(m.focusedChildNode) AND isValid(m.focusedChildNode.vast) AND m.focusedChildNode.vast <> ""
-                    PlayVideo(m.focusedChildNode.m3u8, m.focusedChildNode.vast)
-                    PlayerTask()
-                else
-                    showHidePageLoader(true, false)
-                    PlayVideo(m.focusedChildNode.m3u8, "")
-                    m.vLivePlayer.control = "play"
-                end if
-                m.lastPlayedChannel = m.focusedChildNode.m3u8
-                m.vLivePlayer.visible = true
+' Extrae las variantes (#EXT-X-STREAM-INF) de un manifest maestro HLS, ordenadas
+' de mayor a menor calidad.
+function parseHlsVariants(playlistText as string) as object
+    variants = []
+    regexCR = CreateObject("roRegex", chr(13), "")
+    lines = regexCR.ReplaceAll(playlistText, "").Split(chr(10))
+    n = lines.count()
+    regexInf = CreateObject("roRegex", "^#EXT-X-STREAM-INF:", "i")
+    regexRes = CreateObject("roRegex", "RESOLUTION=(\d+)x(\d+)", "i")
+    regexBw = CreateObject("roRegex", "BANDWIDTH=(\d+)", "i")
+    i = 0
+    while i < n
+        line = lines[i].Trim()
+        if regexInf.IsMatch(line)
+            bandwidth = 0
+            label = ""
+            bwMatch = regexBw.Match(line)
+            if bwMatch.count() > 1 then bandwidth = Val(bwMatch[1])
+            resMatch = regexRes.Match(line)
+            if resMatch.count() > 2
+                label = resMatch[2] + "p"
+            else if bandwidth > 0
+                label = Str(Int(bandwidth / 1000)).Trim() + " kbps"
             end if
+            j = i + 1
+            while j < n AND (lines[j].Trim() = "" OR Left(lines[j].Trim(), 1) = "#")
+                j = j + 1
+            end while
+            if j < n AND isNonEmptyString(label)
+                variants.push({ "label": label, "url": lines[j].Trim(), "bandwidth": bandwidth })
+            end if
+            i = j
+        else
+            i = i + 1
         end if
-    end if
-end sub
-
-function PlayVideo(url, vastURL)
-    videoContent = createObject("RoSGNode", "ContentNode")
-    videoContent.url = url
-    videoContent.addFields({ "ad_url": vastURL, "length": 0 })
-    videoContent.streamformat = "auto"
-    m.vLivePlayer.enableTrickPlay = false
-    m.vLivePlayer.enableUI = false
-    m.vLivePlayer.content = videoContent
+    end while
+    for a = 0 to variants.count() - 2
+        for b = 0 to variants.count() - 2 - a
+            if variants[b].bandwidth < variants[b + 1].bandwidth
+                tmp = variants[b]
+                variants[b] = variants[b + 1]
+                variants[b + 1] = tmp
+            end if
+        end for
+    end for
+    return variants
 end function
 
-sub allPlayerAndTaskReset()
-    m.vLivePlayer.unobserveField("state")
-    m.vLivePlayer.unobserveField("position")
-    if m.PlayerTask <> invalid
-        m.PlayerTask.control = "stop"
-        m.PlayerTask.unobserveField("state")
-        m.PlayerTask.unobserveField("isAdplaying")
-        m.PlayerTask.unobserveField("currentState")
-        m.PlayerTask.unobserveField("currentPosition")
-        m.PlayerTask = invalid
-    end if
-    if isValid(m.DAIPlayerTask)
-        m.DAIPlayerTask.control = "STOP"
-        m.DAIPlayerTask.unobserveField("sdkLoaded")
-        m.DAIPlayerTask.unobserveField("errors")
-        m.DAIPlayerTask.unobserveField("adPlaying")
-        m.DAIPlayerTask.unobserveField("urlData")
-        m.DAIPlayerTask = invalid
-    end if
-    m.vLivePlayer.enableTrickPlay = false
-    m.vLivePlayer.enableUI = false
+sub cycleQuality()
+    if not isValid(m.availableQualities) OR m.availableQualities.count() <= 1 then return
+    m.qualityIndex = (m.qualityIndex + 1) mod m.availableQualities.count()
+    q = m.availableQualities[m.qualityIndex]
+    m.lQualValue.text = q.label
+    startPlayback(q.url)
 end sub
 
-sub PlayerTask()
-    m.PlayerTask = CreateObject("roSGNode", "PlayerTask")
-    m.PlayerTask.observeField("state", "taskStateChanged")
-    m.PlayerTask.observeField("currentState", "OnVideoPlayerStatusChange")
-    m.PlayerTask.observeField("currentPosition", "OnVideoPositionChanged")
-    m.PlayerTask.observeField("isAdplaying", "onAdsPlaying")
-    m.PlayerTask.isLivePlayer = true
-    m.PlayerTask.video = m.vLivePlayer
-    m.PlayerTask.functionName = "playContentWithAds"
-    m.PlayerTask.control = "RUN"
+sub togglePause()
+    if m.isPaused
+        m.vLive.control = "play"
+        m.isPaused = false
+    else
+        m.vLive.control = "pause"
+        m.isPaused = true
+    end if
+    updatePauseIcon()
 end sub
 
-sub onAdsPlaying(event as dynamic)
-    m.isRAFAdsPlaying = event.getData()
-    if m.isRAFAdsPlaying then showHidePageLoader(false)
-    if not m.isbigLivePlayerAnimation
-        SetFocus(m.epgGrid)
+sub updatePauseIcon()
+    if m.isPaused
+        m.pPauseIcon.uri = "pkg:/images/PlayerOverlayIcon/play.png"
+    else
+        m.pPauseIcon.uri = "pkg:/images/PlayerOverlayIcon/pause.png"
     end if
 end sub
 
-sub taskStateChanged(event as Object)
-    print "Player: taskStateChanged(), id = "; event.getNode(); ", "; event.getField(); " = "; event.getData()
-    state = event.GetData()
-    if state = "done"
-        allPlayerAndTaskReset()
-    end if
+sub onVideoState(event as dynamic)
 end sub
 
-sub CreateMetaData()
-    m.lgDetailSection.removeChildrenIndex(m.lgDetailSection.getChildCount(), 0)
-    if isValid(m.pLogo)
-        m.pLogo.unObserveField("loadStatus")
-        m.pLogo = invalid
-    end if
-    if isValid(m.focusedChildNode)
-        pRating = createObject("roSGNode", "Poster")
-        pRating.id = "pRating"
-        pRating.width = 157
-        pRating.loadWidth = 157
-        pRating.height = 32
-        pRating.loadHeight = 32
-        pRating.loadDisplayMode = "scaleTozoom"
-        pRating.uri = "pkg:/images/details/livenow_back.png"
-        pRating.blendColor = m.theme.focTertiary
-        m.lgDetailSection.appendChild(pRating)
-
-        lRating = createObject("roSGNode", "Label")
-        lRating.id = "lRating"
-        lRating.width = 157
-        lRating.height = 32
-        lRating.font = m.fonts.dmSansMedium18
-        lRating.color = m.theme.black
-        lRating.horizAlign = "center"
-        lRating.vertAlign = "center"
-        lRating.text = "EN VIVO AHORA"
-        pRating.appendChild(lRating)
-
-        imageURL = ""
-        if isValid(m.focusedChildNode.active_item_data) AND isValid(m.focusedChildNode.active_item_data.image) AND isNonEmptyString(m.focusedChildNode.active_item_data.image)
-            imageURL = m.focusedChildNode.active_item_data.image
-        else if isValid(m.focusedChildNode.background_image) AND isNonEmptyString(m.focusedChildNode.background_image)
-            imageURL = m.focusedChildNode.background_image
-        else if isValid(m.focusedChildNode.logo) AND isNonEmptyString(m.focusedChildNode.logo)
-            imageURL = m.focusedChildNode.logo
-        end if
-        if imageURL <> invalid AND imageURL <> ""
-            m.pLogo = createObject("roSGNode", "Poster")
-            m.pLogo.id = "pLogo"
-            m.pLogo.height = 308
-            m.pLogo.loadHeight = 308
-            m.pLogo.loadDisplayMode = "scaleToFit"
-            m.pLogo.observeField("loadStatus", "onImageLoadStatusChange")
-            m.pLogo.uri = imageURL
-            m.lgDetailSection.appendChild(m.pLogo)
-        end if
-
-        if (isValid(m.focusedChildNode.title))
-            lTitle = createObject("roSGNode", "Label")
-            lTitle.id = "lTitle"
-            lTitle.width = 549
-            lTitle.wrap = true
-            lTitle.lineSpacing = 0
-            lTitle.maxlines = 2
-            lTitle.horizAlign = "left"
-            lTitle.font = m.fonts.dmSansBold32
-            lTitle.text = m.focusedChildNode.title
-            lTitle.color = m.theme.white
-            m.lgDetailSection.appendChild(lTitle)
-        end if
-        m.lgDetailSection.translation = [1130, 160]
-    end if
+'===> Overlay / focus
+sub showOverlay()
+    if m.overlayShown then return
+    m.overlayShown = true
+    m.gOverlay.visible = true
+    setMenuVisible(true)
+    m.pFadeBottom.visible = true
+    m.vLive.translation = [672, 0]
+    m.vLive.width = 1248
+    m.vLive.height = 702
+    m.focusArea = "grid"
+    applyGridFocus()
+    updateScroll()
+    updateFocusVisuals()
+    resetHideTimer()
 end sub
 
-sub onImageLoadStatusChange(event as dynamic)
-    status = event.getData()
-    node = event.getRoSGNode()
-    if status = "ready"
-        imageWidth = node.bitmapWidth
-        imageHeight = node.bitmapHeight
-        node.width = imageWidth * (node.height / imageHeight)
-    else if status = "failed"
-        print "Image failed to load"
-    end if
+sub hideOverlay()
+    if not m.overlayShown then return
+    m.overlayShown = false
+    m.gOverlay.visible = false
+    setMenuVisible(false)
+    m.pFadeBottom.visible = false
+    m.vLive.translation = [0, 0]
+    m.vLive.width = 1920
+    m.vLive.height = 1080
+    m.tHide.control = "stop"
 end sub
 
-sub onItemSelected(event as dynamic)
-    index = event.getData()
-    selectItemNode = m.epgGrid.content.getChild(index)
-    if (isValid(selectItemNode) AND isValid(selectItemNode.isLive))
-    end if
+sub resetHideTimer()
+    m.tHide.control = "stop"
+    m.tHide.control = "start"
 end sub
 
-function DAIPlayerTask() as void
-    m.DAIPlayerTask = createObject("roSGNode", "DAIPlayerTask")
-    m.DAIPlayerTask.observeField("sdkLoaded", "onDAISdkLoaded")
-    m.DAIPlayerTask.observeField("errors", "onDAISdkLoadedError")
-    m.DAIPlayerTask.observeField("adPlaying", "onAdPlayingUpdated")
-    m.DAIPlayerTask.observeField("urlData", "urlLoadRequested")
+sub onHideTimer()
+    hideOverlay()
+end sub
 
-    assetKey = ""
-    if isNonEmptyString(m.focusedChildNode.DPSDAIAssetKey) then assetKey = m.focusedChildNode.DPSDAIAssetKey
-    if (assetKey = "" AND isNonEmptyString(m.focusedChildNode.assetKey)) then assetKey = m.focusedChildNode.assetKey
-
-    streamDAIData = {
-        title: m.focusedChildNode.title,
-        assetKey: assetKey,
-        networkCode: "",
-        apiKey: "",
-        type: "live"
-    }
-
-    m.DAIPlayerTask.deviceRida = createObject("roDeviceInfo").GetRIDA()
-    m.DAIPlayerTask.streamData = streamDAIData
-    m.DAIPlayerTask.setAdsDebugOutput = false
-    m.DAIPlayerTask.setAdMeasurements = true
-    m.DAIPlayerTask.nielsenAppId = "chvtv"
-    m.DAIPlayerTask.nielsenProgramId = ""
-    m.DAIPlayerTask.contentGenres = ""
-    m.DAIPlayerTask.setJITPods = false
-    m.DAIPlayerTask.enableNielsenDAR = true
-    m.DAIPlayerTask.video = m.vLivePlayer
-    m.DAIPlayerTask.mediaInfo = m.focusedChildNode.getFields()
-    ' Setting control to run starts the task thread.
-    m.DAIPlayerTask.control = "RUN"
+function programCount(row as integer) as integer
+    if row < 0 OR row >= m.channels.count() then return 0
+    return m.channels[row].programs.count()
 end function
 
-sub urlLoadRequested(message as object)
-    data = message.getData()
-    format = "auto"
-    if isValid(data.format) AND isNonEmptyString(data.format) then format = data.format
-    googleStreamId = data.streamid
-    videoContent = createObject("RoSGNode", "ContentNode")
-    videoContent.streamformat = format
-    videoContent.id = m.focusedChildNode.name_live
-    videoContent.title = m.focusedChildNode.title
-    finalUrl = ""
-    if (isValid(data.manifest) AND isNonEmptyString(data.manifest))
-        finalUrl = data.manifest
-    else if m.focusedChildNode.m3u8 <> invalid
-        finalUrl = m.focusedChildNode.m3u8
+sub clampGridItem()
+    count = programCount(m.gridRow)
+    if count <= 0
+        m.gridItem = 0
+    else if m.gridItem > count - 1
+        m.gridItem = count - 1
     end if
-    videoContent.url = finalUrl
-    videoContent.Live = true
-    m.vLivePlayer.content = videoContent
-    m.vLivePlayer.visible = true
-    m.vLivePlayer.control = "play"
-    ' m.vLivePlayer.EnableCookies()
 end sub
 
-sub onDAISdkLoaded(message as object)
-    print "onDAISdkLoaded : message : " message
+sub applyGridFocus()
+    for i = 0 to m.rowNodes.count() - 1
+        if i = m.gridRow
+            m.rowNodes[i].focusedItemIndex = m.gridItem
+        else
+            m.rowNodes[i].focusedItemIndex = -1
+        end if
+    end for
 end sub
 
-sub onDAISdkLoadedError(message as object)
-    print "onDAISdkLoadedError : message : " message
+sub clearGridFocus()
+    for i = 0 to m.rowNodes.count() - 1
+        m.rowNodes[i].focusedItemIndex = -1
+    end for
 end sub
 
-sub clearView()
-    m.top.unObserveField("focusedChild")
+sub updateFocusVisuals()
+    inControls = (m.focusArea = "controls")
+    m.pPauseFocus.visible = (inControls AND m.controlIndex = 0)
+    m.pQualFocus.visible = (inControls AND m.controlIndex = 1)
+end sub
+
+sub updateScroll()
+    pitch = m.rowHeight + m.rowGap
+    y = m.gridRow * pitch
+    if y < m.scrollY then m.scrollY = y
+    if y + pitch > m.scrollY + m.clipHeight then m.scrollY = y + pitch - m.clipHeight
+    total = m.rowNodes.count() * pitch - m.rowGap
+    maxScroll = total - m.clipHeight
+    if maxScroll < 0 then maxScroll = 0
+    if m.scrollY < 0 then m.scrollY = 0
+    if m.scrollY > maxScroll then m.scrollY = maxScroll
+    m.gGridTrack.translation = [0, -m.scrollY]
 end sub
 
 sub onFocusedChild()
-    if(m.top.hasFocus())
-        if m.top.IsInFocusChain()
-            if restoreFocus()
-                ' m.refreshSchedule.control = "start"
-            end if
-        end if
-    else if (not m.top.hasFocus() AND not m.top.IsInFocusChain())
-        m.refreshSchedule.control = "stop"
-    end if
-end sub
-
-sub onJumpToMenu()
-    m.scene.callFunc("setFocusSidebar")
-end sub
-
-sub showbigLivePlayerAnimation(isBig = true as boolean)
-    if isBig
-        if m.liveVideoStatus = "playing" OR m.liveVideoStatus = "paused"
-            m.vLivePlayer.enableTrickPlay = true
-            m.vLivePlayer.enableUI = true
-            m.isbigLivePlayerAnimation = true
-            SetFocus(m.vLivePlayer)
-            m.bigLivePlayer.control = "start"
-            m.scene.callFunc("ShowHideMenu", false)
-        end if
-    else
-        if m.vLivePlayer.state = "paused" then m.vLivePlayer.control = "play"
-        m.vLivePlayer.enableTrickPlay = false
-        m.vLivePlayer.enableUI = false
-        m.isbigLivePlayerAnimation = false
-        SetFocus(m.epgGrid)
-        m.smallLivePlayer.control = "start"
-        m.scene.callFunc("ShowHideMenu", true)
-    end if
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean
-    result = false
-    if(press)
-        if key = "OK"
-            if not m.isbigLivePlayerAnimation
-                showbigLivePlayerAnimation()
-            end if
-            result = true
-        else if key = "down"
-            result = true
-        else if key = "up"
-            if not m.isbigLivePlayerAnimation AND isValid(m.epgGrid) AND isValid(m.epgGrid.content) AND (m.epgGrid.hasFocus() OR m.epgGrid.IsInFocusChain())
-                result = false
-            end if
-        else if(key = "back")
-            if m.isRAFAdsPlaying AND m.PlayerTask <> invalid
-                allPlayerAndTaskReset()
-                SetFocus(m.epgGrid)
-            end if
-            if m.isbigLivePlayerAnimation
-                showbigLivePlayerAnimation(false)
-                result = true
-            end if
-        end if
-        if m.isbigLivePlayerAnimation then result = true
+    if not press then return false
+    if not m.loaded then return false
+
+    if not m.overlayShown
+        if key = "OK" then togglePause()
+        showOverlay()
+        return true
     end if
-    return result
+
+    resetHideTimer()
+
+    if m.focusArea = "controls"
+        if key = "OK"
+            if m.controlIndex = 0
+                togglePause()
+            else
+                cycleQuality()
+            end if
+            return true
+        else if key = "left"
+            if m.controlIndex > 0
+                m.controlIndex = m.controlIndex - 1
+                updateFocusVisuals()
+                return true
+            end if
+            return false
+        else if key = "right"
+            if m.controlIndex < 1
+                m.controlIndex = m.controlIndex + 1
+                updateFocusVisuals()
+                return true
+            end if
+            return false
+        else if key = "down"
+            m.focusArea = "grid"
+            m.gridRow = 0
+            m.gridItem = 0
+            applyGridFocus()
+            updateScroll()
+            updateFocusVisuals()
+            return true
+        end if
+        return false
+    end if
+
+    ' focusArea = "grid"
+    if key = "OK"
+        selectChannel(m.gridRow)
+        return true
+    else if key = "left"
+        if m.gridItem > 0
+            m.gridItem = m.gridItem - 1
+            applyGridFocus()
+            return true
+        end if
+        return false
+    else if key = "right"
+        count = programCount(m.gridRow)
+        if m.gridItem < count - 1
+            m.gridItem = m.gridItem + 1
+            applyGridFocus()
+        end if
+        return true
+    else if key = "up"
+        if m.gridRow > 0
+            m.gridRow = m.gridRow - 1
+            clampGridItem()
+            applyGridFocus()
+            updateScroll()
+            return true
+        end if
+        m.focusArea = "controls"
+        m.controlIndex = 0
+        clearGridFocus()
+        updateFocusVisuals()
+        return true
+    else if key = "down"
+        if m.gridRow < m.rowNodes.count() - 1
+            m.gridRow = m.gridRow + 1
+            clampGridItem()
+            applyGridFocus()
+            updateScroll()
+        end if
+        return true
+    end if
+    return false
 end function
+

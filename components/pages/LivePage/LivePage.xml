@@ -4,41 +4,38 @@
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
-    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
     <interface>
-        <field id="clearView" type="boolean" alwaysNotify="true" onChange="clearView" />
-        <field id="isDestroy" type="boolean" alwaysnotify="true" onChange="onPageDestroy"/>
+        <field id="isDestroy" type="boolean" value="false" alwaysNotify="true" onChange="onPageDestroy" />
     </interface>
-
     <children>
-        <Group id="gMain" translation="[0, 0]">
-            <Group id="epgSection" visible="false">
-                <LayoutGroup id="lgDetailSection" addItemSpacingAfterChild="false" layoutDirection="vert" horizAlignment="Left" itemSpacings="[20,70]" translation="[1176, 160]" />
-                <Group id="gridColTitle" translation="[56, 745]">
-                    <Label id="lDay" width="112" horizAlign="center" translation="[0,0]" />
-                    <Label id="lNow" width="780" horizAlign="center" text="On Now" translation="[112, 0]" />
-                    <Label id="lComing" width="780" horizAlign="center" text="Coming Up Next" translation="[968, 0]" />
+        <Rectangle id="rBg" width="1920" height="1080" color="#000000" />
+        <Video id="vLive" width="1920" height="1080" translation="[0,0]" enableUI="false" enableTrickPlay="false" />
+        <Group id="gOverlay" visible="false">
+            <Poster id="pFadeBottom" width="1248" height="351" uri="pkg:/images/overlay/hero_fade_bottom.png" loadDisplayMode="stretchToFit" translation="[672,351]" visible="false" />
+            <Poster id="pPill" width="108" height="28" uri="pkg:/images/focus/R5Filled_30px.9.png" loadDisplayMode="scaleToZoom" translation="[153,209]" />
+            <Poster id="pPillDot" width="11" height="11" uri="pkg:/images/live/dot_white.png" translation="[163,218]" />
+            <Label id="lEnvivo" text="EN VIVO" translation="[181,209]" height="28" vertAlign="center" color="#FFFFFF" />
+            <Label id="lChannelName" text="" translation="[153,256]" width="860" height="60" vertAlign="center" color="#FFFFFF" />
+            <Label id="lProgramTitle" text="" translation="[153,339]" width="860" height="30" vertAlign="center" color="#FFFFFF" />
+            <Group id="gControls" translation="[1570,545]">
+                <Group id="bPause" translation="[0,0]">
+                    <Poster id="pPauseBg" width="64" height="64" uri="pkg:/images/focus/R5Filled_30px.9.png" loadDisplayMode="scaleToZoom" />
+                    <Poster id="pPauseIcon" width="28" height="28" translation="[18,18]" loadDisplayMode="scaleToFit" />
+                    <Poster id="pPauseFocus" width="64" height="64" uri="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" loadDisplayMode="scaleToZoom" visible="false" />
+                </Group>
+                <Group id="bQuality" translation="[84,0]">
+                    <Poster id="pQualBg" width="220" height="64" uri="pkg:/images/focus/R5Filled_30px.9.png" loadDisplayMode="scaleToZoom" />
+                    <Poster id="pQualIcon" width="28" height="28" translation="[22,18]" loadDisplayMode="scaleToFit" uri="pkg:/images/PlayerOverlayIcon/settings.png" />
+                    <Label id="lQualLabel" text="Calidad" translation="[62,0]" width="90" height="64" vertAlign="center" color="#FFFFFF" />
+                    <Label id="lQualValue" text="Auto" translation="[150,0]" width="60" height="64" vertAlign="center" color="#8A8A8A" horizAlign="right" />
+                    <Poster id="pQualFocus" width="220" height="64" uri="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" loadDisplayMode="scaleToZoom" visible="false" />
                 </Group>
             </Group>
-            <CustomMarkupGrid id="epgGrid" translation="[ 56, 800 ]" itemComponentName="EPGGridItem" vertFocusAnimationStyle="FixedFocus" numColumns="3" numRows="3" itemSize="[ 112, 112 ]" itemSpacing="[ 8, 8 ]" columnWidths="[112, 780, 780]" columnSpacings="[8, 8]" drawFocusFeedback="false" />
-            <Timer id="refreshSchedule" repeat="true" duration="60" />
+            <Group id="gGridClip" translation="[153,639]" clippingRect="[0,0,1721,441]">
+                <Group id="gGridTrack" translation="[0,0]" />
+            </Group>
         </Group>
-        <Group id="gLivePlayer" translation="[56, 150]" scale="[0.532292,0.532292]">
-            <Video id="vLivePlayer" width="1920" height="1080" visible="false" />
-        </Group>
-        <ParallelAnimation id="bigLivePlayer">
-            <Animation id="bigLivePlayerAnimation" duration="0.5" control="none" easeFunction="linear">
-                <Vector2DFieldInterpolator id=" bigLivePlayerTranslation" key="[0,1]" keyValue="[[56, 150], [0,0]]" fieldToInterp="gLivePlayer.translation" />
-                <Vector2DFieldInterpolator id=" bigLivePlayerScale" key="[0,1]" keyValue="[[0.532292,0.532292], [1,1]]" fieldToInterp="gLivePlayer.scale" />
-            </Animation>
-        </ParallelAnimation>
-        <ParallelAnimation id="smallLivePlayer">
-            <Animation id="smallLivePlayerAnimation" duration="0.5" control="none" easeFunction="linear">
-                <Vector2DFieldInterpolator id=" smallLivePlayerTranslation" key=" [0,1]" keyValue=" [[0,0], [56, 150]]" fieldToInterp="gLivePlayer.translation" />
-                <Vector2DFieldInterpolator id=" smallLivePlayerScale" key=" [0,1]" keyValue=" [[1,1], [0.532292,0.532292]]" fieldToInterp="gLivePlayer.scale" />
-            </Animation>
-        </ParallelAnimation>
-        <Label id="noData" text="DiscoverPage" vertAlign="center" horizAlign="center" width="1920" height="1080" visible="false" />
-        <BusySpinner id="bsLoader" translation="[910,490]" clockwise="true" spinInterval="0.8" />
+        <Timer id="tHide" duration="10" repeat="false" />
+        <BusySpinner id="bsLoading" translation="[935,490]" visible="false" clockwise="true" spinInterval="0.8" />
     </children>
 </component>

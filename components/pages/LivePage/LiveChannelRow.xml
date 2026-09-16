@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="LiveChannelRow" extends="Group">
+    <script type="text/brightscript" uri="LiveChannelRow.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="rowWidth" type="float" value="1721" onChange="onLayoutChanged" />
+        <field id="rowHeight" type="float" value="117" onChange="onLayoutChanged" />
+        <field id="logo" type="string" onChange="onLayoutChanged" />
+        <field id="channelName" type="string" onChange="onProgramsChanged" />
+        <field id="ringColor" type="string" onChange="onRingColorChanged" />
+        <field id="blocked" type="boolean" onChange="onContentChanged" />
+        <field id="programs" type="array" onChange="onProgramsChanged" />
+        <field id="focusedItemIndex" type="integer" value="-1" onChange="onFocusChanged" />
+        <function name="setFocusedItem" />
+    </interface>
+    <children>
+        <Group id="gLogo" translation="[0,0]">
+            <Poster id="pCircleBg" width="117" height="117" uri="pkg:/images/masks/circle_bg.png" loadDisplayMode="scaleToZoom" />
+            <Poster id="pLogo" width="82" height="82" loadWidth="82" loadHeight="82" translation="[17.5,17.5]" loadDisplayMode="scaleToFit" />
+            <Poster id="pRing" width="117" height="117" uri="pkg:/images/masks/circle_ring_thin.png" loadDisplayMode="scaleToZoom" />
+            <Poster id="pLockOverlay" width="117" height="117" uri="pkg:/images/masks/circle_bg.png" loadDisplayMode="scaleToZoom" blendColor="#000000" opacity="0.46" visible="false" />
+            <Poster id="pLock" width="44" height="44" translation="[36.5,36.5]" uri="pkg:/images/live/lock.png" visible="false" />
+        </Group>
+        <Group id="gItems" translation="[0,0]" />
+    </children>
+</component>
