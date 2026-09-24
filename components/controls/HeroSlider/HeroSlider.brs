@@ -216,7 +216,13 @@ sub updateMeta()
             setupWatchNowButton()
             m.buttonStyled = true
         end if
-        SetFocus(m.bWatchNow)
+        ' Este componente sigue actualizando su contenido en segundo plano
+        ' mientras el Home carga secciones, aunque el usuario ya haya navegado
+        ' a otra pantalla (ej. "¿Quién anda ahí?" justo despues de vincular).
+        ' Sin este chequeo, cada actualizacion le robaba el foco de vuelta al
+        ' boton "Ver ahora" aunque la pantalla activa fuera otra (mismo tipo de
+        ' bug que HomePage.brs::manageFocus() - ver esa nota tambien).
+        if m.top.isInFocusChain() then SetFocus(m.bWatchNow)
     end if
     m.pLogo.uri = ""
     m.title.text = ""

@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Vinculacion de TV: calcada pixel a pixel de c13_reloaded/src/pages/Auth/ConnectView.tsx
+     (".main.sincronizacion"), medido en vivo contra localhost:3000 a 1920x1080:
+     - todo el bloque (logo+titulo+acciones) centrado verticalmente en pantalla.
+     - logo (config.logo_invertido, la caja naranja) mas titulo, centrados horizontalmente.
+     - debajo, grid de 2 columnas con una LINEA VERTICAL naranja divisoria en el medio
+       (border color-1 en la columna izquierda) - ambos elementos que faltaban
+       en el intento anterior. -->
 <component name="DeviceLinkPage" extends="Group">
     <script type="text/brightscript" uri="DeviceLinkPage.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
-    <script type="text/brightscript" uri="pkg:/source/managers/FontManager.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
 
@@ -12,31 +18,34 @@
 
     <children>
         <Rectangle id="rBackground" width="1920" height="1080" />
-        <Poster id="pBackground" width="1056" height="1080" loadWidth="1056" loadHeight="1080" uri="" loadDisplayMode="scaleToFit" translation="[864,0]" />
-        <Poster id="topGradient" width="1060" height="1080" uri="pkg:/images/overlay/topGradient.png" />
-        <Poster id="logo" height="96" translation="[120,30]" loadDisplayMode="scaleToFit" />
 
-        <Group id="contentGroup" translation="[120,216]">
-            <Label id="DeviceLinkTitleText" text="Para iniciar sesion, debes vincular su televisor" width="1100" lineSpacing="-2" wrap="true" />
-            <Poster id="stepOneBadge" uri="pkg:/images/focus/circleDot.png" width="56" height="56" translation="[0,100]" loadDisplayMode="scaleToFit" />
-            <Label id="stepOneNumber" width="56" height="56" horizAlign="center" vertAlign="center" translation="[0,100]" />
-            <Label id="stepOneText" text="Visita www.michilevision.cl/tv o Escanee el siguiente codigo QR usando su movil." width="550" lineSpacing="4" wrap="true" translation="[84,94]" />
-            <Group id="qrCard" translation="[84,256]">
-                <Poster id="qrCardBackground" uri="pkg:/images/other/qrCard.png" width="220" height="220" loadDisplayMode="scaleToFit" />
-                <Poster id="qrCode" width="156" height="156" translation="[32,32]" loadDisplayMode="scaleToFit" />
-            </Group>
-            <Poster id="stepTwoBadge" uri="pkg:/images/focus/circleDot.png" width="56" height="56" translation="[0,520]" loadDisplayMode="scaleToFit" />
-            <Label id="stepTwoNumber" width="56" height="56" horizAlign="center" vertAlign="center" translation="[0,520]" />
-            <Label id="stepTwoText" width="550" lineSpacing="2" text="Ingresa el siguiente código" wrap="true" translation="[84,528]" />
-            <Group id="codeGroup" translation="[84,596]">
-                <Poster id="codeBackground" uri="pkg:/images/focus/filled_r6.9.png" width="345" height="72" loadDisplayMode="scaleToFit" />
-                <Label id="codeValueText" width="345" height="72" horizAlign="center" vertAlign="center" />
-                <BusySpinner id="deviceLinkPreloader" control="start" clockwise="true" spinInterval="0.8" visible="false" />
-            </Group>
-            <Label id="emailText" text="O ingresa con tu correo electronico" width="700" wrap="true" translation="[0,742]" />
+        <!-- Logo + titulo, centrados horizontalmente -->
+        <Poster id="logo" width="115" height="115" loadWidth="115" loadHeight="115" loadDisplayMode="scaleToFit" translation="[902,174]" />
+        <Label id="DeviceLinkTitleText" width="1400" horizAlign="center" translation="[260,289]" text="Para iniciar sesión, vincula tu televisor" />
+
+        <!-- Grid de 2 columnas (acciones): 912px cada una, linea divisoria naranja en el medio -->
+        <Rectangle id="rDivider" width="4" height="497" color="#FA6428" translation="[958,409]" />
+
+        <!-- Columna izquierda: QR -->
+        <MultiStyleLabel id="QrHintText" width="909" horizAlign="center" lineSpacing="6" translation="[48,432]" />
+        <Group id="qrCard" translation="[330,554]">
+            <Poster id="qrCardBackground" uri="pkg:/images/other/qr_card_square_bg.png" width="346" height="346" loadWidth="346" loadHeight="346" loadDisplayMode="scaleToFit" />
+            <Poster id="qrCode" width="307" height="307" translation="[19,19]" loadWidth="307" loadHeight="307" loadDisplayMode="scaleToFit" />
         </Group>
-        <Timer id="deviceLinkTimer" repeat="true" duration="10" control="start" />
-        <Timer id="codeExpiryTimer" repeat="true"/>
+
+        <!-- Columna derecha: codigo de sincronizacion -->
+        <Label id="CodeHintText" width="912" horizAlign="center" lineSpacing="6" wrap="true" translation="[960,453]" text="Ingresa el siguiente código de sincronización" />
+        <Group id="codeGroup" translation="[960,536]">
+            <Label id="codeValueText" width="912" height="350" horizAlign="center" vertAlign="center" />
+            <BusySpinner id="deviceLinkPreloader" control="start" clockwise="true" spinInterval="0.8" visible="false" />
+        </Group>
+
+        <Label id="ErrorText" width="1920" height="40" horizAlign="center" vertAlign="center" translation="[0,970]" visible="false" />
+
+        <!-- duration real = "interval" que devuelve el gateway (5s por defecto) -->
+        <Timer id="devicePollTimer" repeat="true" duration="5" />
+        <!-- se dispara al expirar el codigo para pedir uno nuevo -->
+        <Timer id="codeExpiryTimer" repeat="false" />
     </children>
 
 </component>

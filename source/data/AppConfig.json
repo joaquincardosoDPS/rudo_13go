@@ -7,5 +7,7 @@
     "rudoApiUrl": "https://api.rudo.video/api/api2/",
     "rudoAccessToken": "b89b476711db90d823fb5fb6aa55616e1da5fd18c87c71d80fd6b9b22d592af3",
     "qrLink": "https://api.qrserver.com/v1/create-qr-code/?size=156x156&data=",
+    "tvLinkUrl": "https://www.13go.cl/tv",
+    "signUpUrl": "https://www.13go.cl",
     "pageSize": "15"
 }

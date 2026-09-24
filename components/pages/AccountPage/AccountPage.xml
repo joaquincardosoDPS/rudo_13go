@@ -1,28 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- "Mi Cuenta": equivalente a c13_reloaded/src/pages/Account/AccountView.tsx
+     (.main.regular.mi-cuenta). Se abre desde el item "Mi cuenta" del sidebar
+     con sesion iniciada, con el sidebar visible. Medidas de panels_new.css a
+     1920px (1vw = 19.2px); los bloques header / perfiles / footer se reparten
+     en el alto con "justify-content: space-around". -->
 <component name="AccountPage" extends="Group">
     <script type="text/brightscript" uri="pkg:/components/pages/AccountPage/AccountPage.brs" />
-    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
-    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
     <interface>
+        <function name="ReloadData" />
     </interface>
     <children>
-        <Rectangle id="backgroundPanel" width="1920" height="1080" />
-        <Poster id="brandLogo" translation="[86, 38]"  height="88" loadDisplayMode="scaleToFit" />
-        <CustomButton id="backButton" margin="20" posterImage="pkg:/images/focus/back_button_image.png" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonText="Volver" buttonWidth="194" buttonHeight="70" isFilledBgOnFocus="true" translation="[1532,72]" />
-        <Label id="titleLabel" translation="[0, 188]" width="1920" height="44" text="Cuenta" horizAlign="center" vertAlign="center" />
-        <Poster id="bgPoster" uri="pkg:/images/other/profile_mask.png" loadWidth="188" loadHeight="188" loadDisplayMode="scaleToFit => Fill  => or Zoom" width="188" height="188" translation="[866, 290]"/>
-        <MaskGroup id="borderMask" maskUri="pkg:/images/other/profile_mask.png" translation="[866, 290]">
-            <Poster id="poster" uri="pkg:/images/Group 872.png" loadWidth="188" loadHeight="188" loadDisplayMode="scaleToFit => Fill  => or Zoom" width="188" height="188" />
-        </MaskGroup>
-        <LayoutGroup id="accountLayout" horizAlignment="center" layoutDirection="vert" itemSpacings="[15]" translation="[960,530]">
-            <Label id="lProfileName" text="" horizAlign="center"/>
-            <Label id="lEmail" text="" horizAlign="center"/>
-            <Label id="lName" text="" horizAlign="center"/>
-            <Label id="lGender" text="" horizAlign="center"/>
-            <Label id="lBirthdate" text="" horizAlign="center"/>
-        </LayoutGroup>
-        <CustomButton id="logoutButton" margin="20" backGroundImage="pkg:/images/focus/filled_r6.9.png" buttonText="CERRAR SESIÓN" buttonWidth="270" buttonHeight="70" isFilledBgOnFocus="true"/>
+        <!-- background: url(bg-micuenta.png) bottom right no-repeat (1005x701). -->
+        <Poster id="bgPoster" uri="pkg:/images/account/bg_micuenta.png" width="1005" height="701" translation="[915,379]" />
+        <Group id="gContent" visible="false">
+            <Label id="lTitle" text="Mi Cuenta" translation="[206,97]" />
+            <LayoutGroup id="lgPersonal" layoutDirection="vert" itemSpacings="[12,6]" translation="[206,190]">
+                <Label id="lPersonalHeader" text="Datos personales:" />
+                <Label id="lName" />
+                <Label id="lEmail" />
+            </LayoutGroup>
+            <LayoutGroup id="lgSubscription" layoutDirection="vert" itemSpacings="[12,6]" translation="[1066,190]">
+                <Label id="lSubscriptionHeader" text="Datos de suscripción:" />
+                <Label id="lStatus" />
+                <Label id="lSubscriptionContent" width="700" wrap="true" maxLines="3" />
+            </LayoutGroup>
+            <Label id="lProfilesTitle" text="Tus perfiles" translation="[206,441]" />
+            <!-- Recibe el foco "virtual" de perfiles/editar: la raiz de la
+                 pagina no puede recuperar el foco desde el boton hijo (mismo
+                 caso que gKeyboard en SearchPage). -->
+            <Group id="gProfiles" focusable="true" translation="[206,508]" />
+            <CustomButton id="logoutButton" buttonText="Cerrar Sesión" buttonWidth="250" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" translation="[206,928]" />
+        </Group>
     </children>
 </component>

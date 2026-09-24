@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Pantalla de bienvenida: calcada pixel a pixel de c13_reloaded/src/pages/Auth/LoginView.tsx
+     (".main.bienvenida"), medido en vivo contra localhost:3000 a 1920x1080:
+     - fondo full-bleed = config.fondo_corporativo, con degrade izquierdo (55% ancho) y
+       degrade inferior (61% alto), ambos negro->transparente, opacity 0.6 en la web.
+     - bloque de texto abajo-izquierda (padding 170px = 8.855vw), bloque de QR abajo-derecha.
+     - logo = config.logo_invertido (caja naranja), NO el logo_blanco que usa el sidebar. -->
 <component name="OnboardingPage" extends="Group">
     <script type="text/brightscript" uri="OnboardingPage.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
@@ -10,20 +16,28 @@
 
     <children>
         <Rectangle id="rBackground" width="1920" height="1080" />
-        <Poster id="pBackground" width="1056" height="1080" loadWidth="1056" loadHeight="1080" uri="" loadDisplayMode="scaleToFit" translation="[864,0]" />
-        <Poster id="topGradient" width="1060" height="1080" uri="pkg:/images/overlay/topGradient.png" />
-        <Group id="gOnboarding">
-            <Poster id="logo" loadDisplayMode="scaleToFit" height="257" translation="[120,210]" />
-            <LayoutGroup id="lgOnboarding" layoutDirection="vert" itemSpacings="[30,85,10,30]" translation="[350, 200]">
-                <Label id="WelcomeTitleText" width="560" lineSpacing="-2" text="Accede ahora a nuestra app y disfruta de nuestro contenido 24/7" wrap="true" />
-                <CustomButton id="LoginButton" backGroundImage="pkg:/images/focus/R5Filled_30px.9.png" buttonWidth="256" buttonHeight="70" buttonText="Iniciar sesiòn" isFilledBgOnFocus="true" visible="true" />
-                <MultiStyleLabel id="DonthaveAccountText" width="560" lineSpacing="-2" wrap="true" />
-                <Label id="RegisterText" width="560" lineSpacing="-2" wrap="true" />
-                <Group id="qrCard" translation="[570,146]" visible="false">
-                    <Poster id="qrCardBackground" uri="pkg:/images/other/qrCard.png" width="248" height="248" loadDisplayMode="scaleToFit" />
-                    <Poster id="qrCode" width="184" height="184" translation="[32,32]" loadDisplayMode="scaleToFit" />
-                </Group>
-            </LayoutGroup>
+        <Poster id="pBackground" width="1920" height="1080" loadWidth="1920" loadHeight="1080" loadDisplayMode="scaleToZoom" />
+        <Poster id="pFadeLeft" uri="pkg:/images/overlay/hero_fade_left.png" width="1056" height="1080" loadDisplayMode="stretchToFit" translation="[0,0]" />
+        <Poster id="pFadeBottom" uri="pkg:/images/overlay/hero_fade_bottom.png" width="1920" height="659" loadDisplayMode="stretchToFit" translation="[0,421]" />
+
+        <!-- Columna izquierda: logo + titulo + bajada + "Iniciar sesion" -->
+        <Poster id="logo" width="154" height="154" loadWidth="154" loadHeight="154" loadDisplayMode="scaleToFit" translation="[170,325]" />
+        <MultiStyleLabel id="WelcomeTitleText" width="560" lineSpacing="4" translation="[362,325]" />
+        <Label id="WelcomeBodyText" width="698" wrap="true" translation="[170,517]" text="La aplicación en la que podrás entretenerte, viajar, emocionarte y mucho más a través de sus señales temáticas las 24 horas del día, los 7 días de la semana." />
+        <Label id="HaveAccountText" width="698" translation="[170,703]" text="¿Ya tienes cuenta?" />
+        <!-- posterImage/posterImageSize/padding calcados de NextEpisodeComponent (el unico
+             CustomButton con icono ya probado y ajustado en este proyecto) - con el icono
+             chico real de la web (15px) el espacio fijo que deja CustomButton entre el
+             icono y el texto (+50px, ver SetTranslations en CustomButton.brs) se ve
+             desproporcionado; a este tamaño de icono/padding se ve bien. -->
+        <CustomButton id="LoginButton" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" focusBorderImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" posterImage="pkg:/images/focus/btnplay.png" posterImageSize="24" padding="20" buttonWidth="260" buttonHeight="58" buttonText="Iniciar sesión" isFilledBgOnFocus="false" translation="[170,756]" visible="true" />
+
+        <!-- Columna derecha: tarjeta de QR -->
+        <Group id="gQr" translation="[1462,533]">
+            <Poster id="pQrCard" uri="pkg:/images/other/qr_card_bg.png" width="288" height="328" loadWidth="288" loadHeight="328" loadDisplayMode="scaleToFit" />
+            <Label id="lQrTitle" width="288" height="30" horizAlign="center" translation="[0,18]" text="Regístrate aquí" />
+            <Poster id="pQrCode" uri="pkg:/images/other/qr_registro.png" width="269" height="269" loadWidth="269" loadHeight="269" loadDisplayMode="scaleToFit" translation="[10,49]" />
+            <MultiStyleLabel id="RegisterFooterText" width="288" horizAlign="center" translation="[0,347]" />
         </Group>
     </children>
 

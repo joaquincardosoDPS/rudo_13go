@@ -13,77 +13,65 @@ sub SetLocals()
     m.fonts = m.global.fonts
     m.config = m.global.appConfig
     m.theme = m.global.appTheme
-    m.isFull = false
-    m.response = invalid
     m.scene.callFunc("ShowHideLoader", false)
-    m.link = GlobalGet("urlTVVincular")
+    ' m.global.homeConfig guarda la respuesta completa de /feed/configuracion
+    ' (ver MainScene::OnGetConfigAPIResponse) - de ahi salen los campos que
+    ' usa especificamente esta pantalla en c13_reloaded (LoginView.tsx):
+    ' fondo_corporativo (fondo) y logo_invertido (la caja naranja, distinta
+    ' del logo_blanco que usa el sidebar).
+    m.homeConfig = m.global.homeConfig
 end sub
 
 sub SetControls()
     m.rBackground = m.top.findNode("rBackground")
     m.pBackground = m.top.findNode("pBackground")
+    m.pFadeLeft = m.top.findNode("pFadeLeft")
+    m.pFadeBottom = m.top.findNode("pFadeBottom")
     m.logo = m.top.findNode("logo")
     m.welcomeTitleText = m.top.findNode("WelcomeTitleText")
+    m.welcomeBodyText = m.top.findNode("WelcomeBodyText")
+    m.haveAccountText = m.top.findNode("HaveAccountText")
     m.loginButton = m.top.findNode("LoginButton")
-    m.donthaveAccountText = m.top.findNode("DonthaveAccountText")
-    m.registerText = m.top.findNode("RegisterText")
-    m.qrCode = m.top.findNode("qrCode")
-    m.gOnboarding = m.top.findNode("gOnboarding")
-    backgroundImage = GlobalGet("backgroundImage")
-    if isNonEmptyString(backgroundImage)
-        m.pBackground.uri = backgroundImage
+    m.lQrTitle = m.top.findNode("lQrTitle")
+    m.registerFooterText = m.top.findNode("RegisterFooterText")
+
+    backgroundImage = getValueFromProps(m.homeConfig, "fondo_corporativo", "")
+    if not isNonEmptyString(backgroundImage) then backgroundImage = GlobalGet("backgroundImage")
+    if isNonEmptyString(backgroundImage) then m.pBackground.uri = backgroundImage
+
+    logoImage = getValueFromProps(m.homeConfig, "logo_invertido", "")
+    if isNonEmptyString(logoImage)
+        m.logo.uri = logoImage
+    else
+        m.logo.uri = "pkg:/images/brand/logo_bienvenida.png"
     end if
+
     btnFields = {
         focusTextColor: m.theme.white
         unfocusTextColor: m.theme.white
-        backgroundColor: m.theme.focPrimary
-        focusBorderImage: m.theme.filledBackGroundImage
+        backgroundColor: "#8C8C8C"
         focusBackgroundColor: m.theme.focPrimary
-        fontSize: "dmSansMedium24"
+        fontSize: "dmSansBold23"
         margin: 20
     }
     m.LoginButton.update(btnFields)
 end sub
 
 sub SetupFonts()
-    m.welcomeTitleText.font = m.fonts.dmSansMedium29
-    m.registerText.font = m.fonts.dmSansMedium26
+    m.welcomeBodyText.font = m.fonts.dmSansBold23
+    m.haveAccountText.font = m.fonts.dmSansBold23
+    m.lQrTitle.font = m.fonts.dmSansBold23
 end sub
 
 sub SetupColor()
     m.rBackground.color = m.theme.clrPrimary
-    m.welcomeTitleText.color = m.theme.white
-    m.registerText.color = m.theme.white
+    m.welcomeBodyText.color = m.theme.white
+    m.haveAccountText.color = m.theme.white
+    m.lQrTitle.color = m.theme.black
 end sub
 
 sub SetObservers()
     m.top.observeField("focusedChild", "OnFocusedChild")
-    m.pBackground.observeField("loadStatus", "OnLoadStatusChanged")
-    m.logo.observeField("loadStatus", "OnLogoLoadStatusChanged")
-    logoImage = GlobalGet("logo")
-    if isNonEmptyString(logoImage)
-        m.logo.uri = logoImage
-    end if
-end sub
-
-sub OnLogoLoadStatusChanged(event as object)
-    status = event.GetData()
-    node = event.getRoSGNode()
-    if status = "ready"
-        imageWidth = node.bitmapWidth
-        imageHeight = node.bitmapHeight
-        node.width = imageWidth * (node.height / imageHeight)
-    end if
-end sub
-
-sub OnLoadStatusChanged(event as object)
-    status = event.GetData()
-    if status = "ready"
-        m.pBackground.width = m.pBackground.bitmapWidth
-        newWidth = (m.pBackground.bitmapWidth * m.pBackground.height) / m.pBackground.bitmapHeight
-        xPos = (1920 - newWidth)
-        m.pBackground.translation = [xPos, 0]
-    end if
 end sub
 
 sub OnFocusedChild()
@@ -96,40 +84,51 @@ sub OnFocusedChild()
 end sub
 
 sub Initialize()
-    fontStyle = {
+    ' Titulo con la segunda linea destacada en naranjo, igual que el
+    ' <span class="highlight"> de LoginView.tsx.
+    titleStyles = {
         "Normal": {
-            "fontUri": "pkg:/fonts/DMSans-Medium.ttf"
-            "fontSize": 24
+            "fontUri": "pkg:/fonts/DMSans-Bold.ttf"
+            "fontSize": 46
             "color": m.theme.white
         }
         "Link": {
-            "fontUri": "pkg:/fonts/DMSans-Medium.ttf"
-            "fontSize": 24
+            "fontUri": "pkg:/fonts/DMSans-Bold.ttf"
+            "fontSize": 46
             "color": m.theme.focPrimary
         }
     }
-    m.donthaveAccountText.drawingStyles = fontStyle
-    multiStyleMakersText = "<Normal>¿No tienes una cuenta? </Normal>" + chr(10) + "<Normal>Regístrate en </Normal>" + "<Link>" + m.link + "</Link>" '+ chr(10) + "<Normal> o escanéa el código QR</Normal>"
-    m.donthaveAccountText.text = multiStyleMakersText
-    m.qrCode.uri = m.config.qrLink + m.link
+    m.welcomeTitleText.drawingStyles = titleStyles
+    m.welcomeTitleText.text = "<Normal>Regístrate y</Normal>" + chr(10) + "<Link>descubre 13Go</Link>"
+
+    footerStyles = {
+        "Normal": {
+            "fontUri": "pkg:/fonts/DMSans-Bold.ttf"
+            "fontSize": 23
+            "color": m.theme.white
+        }
+        "Link": {
+            "fontUri": "pkg:/fonts/DMSans-Bold.ttf"
+            "fontSize": 23
+            "color": m.theme.focPrimary
+        }
+    }
+    m.registerFooterText.drawingStyles = footerStyles
+    m.registerFooterText.text = "<Normal>o entrando a </Normal><Link>13go.cl</Link>"
+
     SetFocus(m.LoginButton)
-    bound = m.gOnboarding.boundingRect()
-    yPos = (1080 - bound.height) / 2
-    m.gOnboarding.translation = [0, yPos - 40]
 end sub
 
 Function onKeyEvent(key as String, press as Boolean) as Boolean
     print " Page : OnboardingPage : onKeyEvent : key = " key " press = " press
-    handled = true
+    handled = false
     if press
         if key = "OK"
             if m.LoginButton.hasFocus()
-                m.scene.callFunc("showLoginPage", false)
+                m.scene.callFunc("ShowDeviceLinkPage", true)
                 handled = true
             end if
-        else if key = "back"
-            handled = false
         end if
-        return handled
     end if
+    return handled
 End Function

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Editar perfil": equivalente a c13_reloaded/src/pages/Account/EditProfileView.tsx
+     (.main.regular.editar-perfil). Se abre desde el lapiz de un perfil en
+     "Mi Cuenta", con el sidebar visible. Medidas del grid de panels_new.css a
+     1920px (1vw = 19.2px): columna izquierda de 21vw (vista previa + nombre +
+     teclado) y la grilla de avatares en la columna 7 del grid (x=837: las
+     columnas implicitas vacias 3-6 no ocupan ancho pero si sus gaps de 2vw). -->
+<component name="EditProfilePage" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/pages/EditProfilePage/EditProfilePage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="profileId" type="string" onChange="OnProfileIdSet" />
+    </interface>
+    <children>
+        <Poster id="bgPoster" uri="pkg:/images/account/bg_micuenta.png" width="1005" height="701" translation="[915,379]" />
+        <Group id="gContent" visible="false">
+            <!-- .header.center: el titulo ocupa todo el ancho del grid, centrado. -->
+            <Label id="lTitle" text="Editar perfil" width="1446" horizAlign="center" translation="[206,46]" />
+            <Poster id="pPreview" width="154" height="154" loadWidth="154" loadHeight="154" loadDisplayMode="scaleToZoom" translation="[330,121]" />
+            <Poster id="pPreviewFrame" uri="pkg:/images/account/avatar_frame_154.png" width="154" height="154" loadWidth="154" loadHeight="154" translation="[330,121]" visible="false" />
+            <Label id="lNameTitle" text="Nombre:" width="403" horizAlign="center" translation="[206,294]" />
+            <Poster id="pInput" uri="pkg:/images/account/input_pill.png" width="380" height="52" translation="[217,352]" />
+            <Label id="lInput" width="340" height="52" horizAlign="center" vertAlign="center" translation="[237,352]" />
+            <!-- Recibe el foco "virtual" de nombre/teclado/avatares (la raiz de la
+                 pagina no puede recuperarlo desde el boton hijo). -->
+            <Group id="gKeyboard" focusable="true" translation="[206,424]" />
+            <Label id="lAvatarTitle" text="Avatar:" width="815" horizAlign="center" translation="[837,121]" />
+            <!-- .avatar-items: 5 columnas, max-height 37vw (710px) con overflow oculto. -->
+            <Group id="gAvatarClip" translation="[837,204]" clippingRect="[0,0,815,710]">
+                <Group id="gAvatars" />
+            </Group>
+            <CustomButton id="saveButton" buttonText="Guardar cambios" buttonWidth="290" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" translation="[1099,914]" />
+        </Group>
+    </children>
+</component>

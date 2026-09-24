@@ -8,7 +8,8 @@
         <field id="height" type="float" />
         <field id="focusPercent" type="float" onChange="focusPercentChanged" />
         <field id="index" type="integer" />
-        <field id="gridHasFocus" type="bool" onChange="focusPercentChanged" />
+        <field id="itemHasFocus" type="boolean" onChange="itemHasFocusChanged" />
+        <field id="gridHasFocus" type="bool" onChange="gridHasFocusChanged" />
     </interface>
     <children>
         <MaskGroup id="borderMask" maskUri="pkg:/images/other/profile_mask.png" translation="[6.5, 51.5]">

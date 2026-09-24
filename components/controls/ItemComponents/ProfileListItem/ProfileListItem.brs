@@ -54,18 +54,42 @@ sub itemContentChanged(event as dynamic)
     end if
 end sub
 
-sub focusPercentChanged()
-    if m.top.gridHasFocus AND m.top.focusPercent > 0.5
-        if isValid(m.itemContent)
-            m.poster.opacity = 1
-            m.title.color = m.theme.focPrimary
-            m.roundedTransparent_Poster.blendColor = m.theme.focPrimary
-        end if
+' MarkupGrid maneja el foco entre estos tres campos en conjunto (focusPercent,
+' itemHasFocus, gridHasFocus) - hay que reaccionar a los tres, no solo a uno,
+' igual que el patrón ya probado en TopMenu/MenuContentItem.brs. Con un solo
+' handler (el original) el foco nunca se distinguía visualmente en un Roku real.
+sub focusPercentChanged(event as dynamic)
+    value = event.GetData()
+    if m.top.gridHasFocus
+        ChangeFocus(value)
     else
-        if isValid(m.itemContent)
-            m.poster.opacity = 0.6
-            m.title.color = m.theme.white
-            m.roundedTransparent_Poster.blendColor = m.theme.white
-        end if
+        ChangeFocus(0)
+    end if
+end sub
+
+sub itemHasFocusChanged(event as dynamic)
+    value = event.GetData()
+    if value then ChangeFocus(1)
+end sub
+
+sub gridHasFocusChanged()
+    if m.top.gridHasFocus AND (m.top.itemHasFocus OR m.top.focusPercent = 1)
+        ChangeFocus(1)
+    else
+        ChangeFocus(0)
+    end if
+end sub
+
+sub ChangeFocus(focusPercent as float)
+    isFocused = focusPercent > 0.5
+    if not isValid(m.itemContent) then return
+    if isFocused
+        m.poster.opacity = 1
+        m.title.color = m.theme.focPrimary
+        m.roundedTransparent_Poster.blendColor = m.theme.focPrimary
+    else
+        m.poster.opacity = 0.6
+        m.title.color = m.theme.white
+        m.roundedTransparent_Poster.blendColor = m.theme.white
     end if
 end sub

@@ -622,6 +622,13 @@ sub checkRefreshNodes(compNode as dynamic, mainContent as dynamic)
 end sub
 
 sub manageFocus()
+    ' El Home sigue cargando secciones en segundo plano aunque ya no sea la
+    ' pantalla activa (ej. StartApp() + ShowEditorProfilesPage() justo despues
+    ' de vincular). Sin este chequeo, cada seccion que termina de cargar le
+    ' robaba el foco de vuelta al Home aunque el usuario ya estuviera en otra
+    ' pantalla encima (bug real: ViewStackManager pone m.top.visible=false al
+    ' pasar a otra pantalla, hay que respetarlo).
+    if not m.top.visible then return
     m.noData.visible = false
     if (m.focusableGroup.callFunc("getContainerChildCount") > 0)
         setFocus(m.focusableGroup)

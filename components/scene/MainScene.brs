@@ -25,6 +25,7 @@ sub SetLocals()
     m.exitCalled = false
     m.exitDialogMode = "exit"
     m.lastProfileId = ""
+    m.skipProfilePickerIfSaved = false
 end sub
 
 sub SetControls()
@@ -282,49 +283,162 @@ sub OnGetConfigAPIResponse(event as dynamic)
     GlobalSet("logo", logo)
     GlobalSet("backgroundImage", background_image)
     m.getConfigTask = invalid
-    CheckValidToken()
+    RestoreSession()
 end sub
 
-sub CheckValidToken()
-    userToken = m.registryManager.GetToken()
-    if isNonEmptyString(userToken)
-        if isValid(m.checkValidTokenTask) Then
-            m.checkValidTokenTask.control = "stop"
-        end if
-        m.checkValidTokenTask = CreateObject("roSGNode", "AuthAPIAction")
-        m.checkValidTokenTask.functionName = "CheckValidToken"
-        m.checkValidTokenTask.params = { "token": userToken }
-        m.checkValidTokenTask.ObserveField("result", "OnCheckValidTokenAPIResponse")
-        m.checkValidTokenTask.control = "RUN"
+' ===================================================================
+' Sesion (equivalente a checkUserSession() del AuthProvider de c13_reloaded)
+' -------------------------------------------------------------------
+' Al arrancar: si hay sesion guardada se valida el access token (JWT.exp);
+' si venció se renueva con el refresh token, y recien despues se piden
+' /userProfile y /userInfo. Sin sesion, el canal arranca igual como
+' invitado en la Portada (el login se entra desde "Mi cuenta" del sidebar).
+' ===================================================================
+sub RestoreSession()
+    authData = m.registryManager.GetAuthData()
+    accessToken = getValueFromProps(authData, "accessToken", "")
+    if not isNonEmptyString(accessToken)
+        StartAsGuest()
+        sendAppLaunchCompleteBeacon()
+        return
+    end if
+    m.authData = authData
+    if IsJwtValid(accessToken)
+        ApplySession(m.authData)
+        ' Relanzamiento de la app con una sesion ya existente: si ya habia un
+        ' perfil elegido, se respeta y se salta "¿Quién anda ahí?" (igual que
+        ' currentProfile en el localStorage de la web). Distinto del flujo de
+        ' vinculacion recien completada (OnDeviceLinked), que en c13_reloaded
+        ' SIEMPRE muestra WhosThere (ConnectView.tsx navega ahi sin condicion).
+        m.skipProfilePickerIfSaved = true
+        LoadUserData()
     else
-        ShowHideLoader(false)
-        StartApp()
+        print "MainScene : access token vencido, renovando con el refresh token"
+        RefreshSessionToken()
     end if
     sendAppLaunchCompleteBeacon()
 end sub
 
-sub OnCheckValidTokenAPIResponse(event as dynamic)
-    response = event.getData()
-    print "Mainscene : OnCheckValidTokenAPIResponse " 'FormatJson(response)
-    hasValidToken = false
-    response = getValueFromProps(response.data, "data", {})
-    If isValid(response) AND isValid(response.user) AND isValid(response.user.token) AND response.user.token <> ""
-        m.registryManager.SaveUserData(response.user)
-        GlobalSet("UserData", response.user)
-        m.registryManager.SaveToken(response.user.token)
-        GlobalSet("token", response.user.token)
-        hasValidToken = true
-    end if
+sub StartAsGuest()
+    m.authData = invalid
     ShowHideLoader(false)
-    if (hasValidToken = true)
-        print "Valid User ................. "
-        m.top.isUserLoggedIn = true
-        ShowEditorProfilesPage(true)
+    StartApp()
+end sub
+
+sub RefreshSessionToken()
+    if isValid(m.refreshTokenTask) then m.refreshTokenTask.control = "stop"
+    m.refreshTokenTask = CreateObject("roSGNode", "AuthAPIAction")
+    m.refreshTokenTask.functionName = "RefreshToken"
+    m.refreshTokenTask.params = { "refreshToken": getValueFromProps(m.authData, "refreshToken", "") }
+    m.refreshTokenTask.ObserveField("result", "OnRefreshTokenAPIResponse")
+    m.refreshTokenTask.control = "RUN"
+end sub
+
+sub OnRefreshTokenAPIResponse(event as dynamic)
+    response = event.getData()
+    m.refreshTokenTask = invalid
+    tokenData = getValueFromProps(response, "data.data", invalid)
+    if isValid(tokenData) AND isNonEmptyString(getValueFromProps(tokenData, "access_token", ""))
+        m.authData = BuildAuthDataFromGateway(tokenData, getValueFromProps(m.authData, "deviceId", ""))
+        m.registryManager.SaveAuthData(m.authData)
+        ApplySession(m.authData)
+        ' Esto solo se llama desde RestoreSession() (relanzamiento) - ver nota ahi.
+        m.skipProfilePickerIfSaved = true
+        LoadUserData()
     else
-        print "Not Valid User"
-        StartApp()
+        ' El refresh token tambien vencio: se descarta la sesion y se sigue como invitado.
+        print "MainScene : no se pudo renovar la sesion, se cierra"
+        m.registryManager.ClearAuthData()
+        ClearSession()
+        StartAsGuest()
     end if
-    m.checkValidTokenTask = invalid
+end sub
+
+sub ApplySession(authData as object)
+    GlobalSet("token", getValueFromProps(authData, "accessToken", ""))
+    GlobalSet("userId", getValueFromProps(authData, "userId", ""))
+end sub
+
+sub ClearSession()
+    GlobalSet("token", "")
+    GlobalSet("userId", "")
+    GlobalSet("UserData", {})
+    GlobalSet("selectedProfileID", "")
+    m.authData = invalid
+    m.lastProfileId = ""
+end sub
+
+' /userProfile trae los datos personales y /userInfo el estado de la
+' suscripcion. Se piden en secuencia (el segundo arranca al volver el primero).
+sub LoadUserData()
+    print "MainScene : LoadUserData : userId=" getValueFromProps(m.authData, "userId", "") " token=" Left(getValueFromProps(m.authData, "accessToken", ""), 12) "..."
+    if isValid(m.userProfileTask) then m.userProfileTask.control = "stop"
+    m.userProfileTask = CreateObject("roSGNode", "AuthAPIAction")
+    m.userProfileTask.functionName = "GetUserProfile"
+    m.userProfileTask.ObserveField("result", "OnGetUserProfileAPIResponse")
+    m.userProfileTask.control = "RUN"
+end sub
+
+sub OnGetUserProfileAPIResponse(event as dynamic)
+    response = event.getData()
+    print "MainScene : OnGetUserProfileAPIResponse : " FormatJson(response)
+    m.userProfileTask = invalid
+    fields = getValueFromProps(response, "data.data", {})
+    m.userData = {
+        id: getValueFromProps(m.authData, "userId", "")
+        name: FirestoreString(fields, "name")
+        gender: FirestoreString(fields, "gender")
+        birthYear: FirestoreString(fields, "birthYear")
+        birthMonth: FirestoreString(fields, "birthMonth")
+        birthDay: FirestoreString(fields, "birthDay")
+    }
+    print "MainScene : OnGetUserProfileAPIResponse : pidiendo GetUserInfo"
+    if isValid(m.userInfoTask) then m.userInfoTask.control = "stop"
+    m.userInfoTask = CreateObject("roSGNode", "AuthAPIAction")
+    m.userInfoTask.functionName = "GetUserInfo"
+    m.userInfoTask.ObserveField("result", "OnGetUserInfoAPIResponse")
+    m.userInfoTask.control = "RUN"
+end sub
+
+sub OnGetUserInfoAPIResponse(event as dynamic)
+    response = event.getData()
+    print "MainScene : OnGetUserInfoAPIResponse : " FormatJson(response)
+    m.userInfoTask = invalid
+    gateway = getValueFromProps(response, "data", {})
+    fields = getValueFromProps(gateway, "data", {})
+    status = FirestoreString(fields, "subscriptionStatus")
+    m.userData.suscription = {
+        active: isNonEmptyString(status) AND status <> "pending"
+        status: status
+        subStatus: FirestoreString(fields, "subscriptionSubStatus")
+        title: getValueFromProps(gateway, "title", "")
+        content: getValueFromProps(gateway, "content", "")
+        plans: FirestoreArray(fields, "plans")
+        products: FirestoreArray(fields, "products")
+    }
+    m.userData.adsFreeType = FirestoreString(fields, "ads_free", "default")
+    GlobalSet("UserData", m.userData)
+    ' En la web el anillo "Premium" del sidebar depende de este estado.
+    GlobalSet("isPremiumUser", status = "success" OR status = "light")
+    print "MainScene : OnGetUserInfoAPIResponse : ocultando loader, isUserLoggedIn=true"
+    ShowHideLoader(false)
+    m.top.isUserLoggedIn = true
+    ' Si esto es un relanzamiento de la app (RestoreSession) y ya habia un
+    ' perfil elegido, se respeta y se salta el picker (como el "currentProfile"
+    ' del localStorage de la web). Recien vinculado (OnDeviceLinked) siempre
+    ' muestra "¿Quién anda ahí?" - ver notas en RestoreSession()/OnDeviceLinked().
+    savedProfile = m.registryManager.GetSelectedProfile()
+    hasSavedProfile = isValid(savedProfile) AND isNonEmptyString(getValueFromProps(savedProfile, "profileId", ""))
+    if m.skipProfilePickerIfSaved AND hasSavedProfile
+        print "MainScene : OnGetUserInfoAPIResponse : relanzamiento con perfil guardado, StartApp directo"
+        GlobalSet("selectedProfileID", savedProfile.profileId)
+        m.top.ProfileData = savedProfile
+        StartApp()
+    else
+        print "MainScene : OnGetUserInfoAPIResponse : mostrando selector de perfiles (skipIfSaved=" m.skipProfilePickerIfSaved " hasSavedProfile=" hasSavedProfile ")"
+        StartApp()
+        ShowEditorProfilesPage(false)
+    end if
 end sub
 
 sub OnUserLoggedIn()
@@ -353,7 +467,7 @@ sub RefreshVisiblePageForProfile()
     topNode = m.ViewStackManager.GetTop()
     if not isValid(topNode) then return
     pageId = topNode.id
-    if pageId = "EditorProfilesPage" OR pageId = "OnboardingPage" OR pageId = "LoginPage" OR pageId = "SignUpPage" OR pageId = "DeviceLinkPage"
+    if pageId = "EditorProfilesPage" OR pageId = "OnboardingPage" OR pageId = "DeviceLinkPage"
         return
     end if
     if pageId = "HomePage"
@@ -427,6 +541,19 @@ sub onTopMenuItemSelected(event as dynamic)
 
     pageName = menuItem.title
     print "MainScene : onTopMenuItemSelected : pageName = " pageName
+    ' "Editar perfil" esta apilada sobre "Mi Cuenta": al ir a otra seccion se
+    ' cierra primero, para que el reemplazo de pagina actue sobre la seccion
+    ' real. Con "Mi cuenta" se queda: la grilla puede disparar itemSelected del
+    ' item enfocado solo con entrar al riel (ver "Bug real #4" en CLAUDE.md).
+    topNode = m.ViewStackManager.GetTop()
+    if isValid(topNode) AND topNode.id = "EditProfilePage"
+        if pageName = "Mi cuenta" then return
+        CloseEditProfilePage(false)
+    end if
+    if pageName = "Mi cuenta"
+        ShowMyAccount()
+        return
+    end if
     if isValid(pageName)
         targetPageId = ""
         if pageName = "Portada"
@@ -475,13 +602,49 @@ end function
 '===> End Top Menu Objects
 
 sub OnLogoutUser()
-    m.registryManager.ClearAllSettings()
-    GlobalSet("UserData", {})
-    GlobalSet("token", "")
+    m.registryManager.ClearAuthData()
+    ClearSession()
     m.top.isUserLoggedIn = false
+    m.top.ProfileData = {
+        profileName: m.defaultProfileName
+        profileUri: m.defaultProfileUri
+    }
     m.viewStackManager.HideAll()
-    UpdateSelectedTopMenu(0)
+    UpdateSelectedTopMenu(1)
     showHomePage(true)
+end sub
+
+' Destino del item "Mi cuenta" del sidebar: con sesion abierta es una seccion
+' mas (/mi-cuenta -> AccountView en la web, con el sidebar visible); sin
+' sesion arranca el flujo de vinculacion de TV (bienvenida -> codigo QR),
+' igual que LoginView -> ConnectView en la web.
+sub ShowMyAccount()
+    if m.top.isUserLoggedIn
+        topNode = m.ViewStackManager.GetTop()
+        if isValid(topNode) AND topNode.id = "AccountPage" then return
+        if isValid(m.HomePage) then m.HomePage.isDestroy = true
+        if isValid(m.LivePage) then m.LivePage.isDestroy = true
+        if isValid(m.MyListPage) then m.MyListPage.isDestroy = true
+        if isValid(m.RadioPage) then m.RadioPage.isDestroy = true
+        if isValid(m.SearchPage) then m.SearchPage.isDestroy = true
+        ShowAccountPage(true)
+        m.TopMenu.callFunc("UpdateSelectedTopMenu", 0, true)
+    else
+        ShowOnboardingPage(false)
+    end if
+end sub
+
+' La DeviceLinkPage ya guardo la sesion en el registry; desde aca se completa
+' igual que checkUserSession() en la web: datos de usuario y suscripcion.
+sub OnDeviceLinked()
+    print "MainScene : OnDeviceLinked"
+    m.authData = m.registryManager.GetAuthData()
+    print "MainScene : OnDeviceLinked : authData leido del registry : " FormatJson(m.authData)
+    ' Vinculacion recien completada: en c13_reloaded, ConnectView.tsx navega a
+    ' /whosthere SIEMPRE al autenticarse, sin importar si ya habia un perfil
+    ' elegido antes - a diferencia de un relanzamiento de la app (RestoreSession).
+    m.skipProfilePickerIfSaved = false
+    LoadUserData()
 end sub
 
 sub ShowOnboardingPage(isReplace = false as boolean)
@@ -507,44 +670,6 @@ function GetOnboardingPageObject(isReplace as boolean) as object
     end if
     m.gPageContainer.appendChild(m.OnboardingPage)
     return m.OnboardingPage
-end function
-
-sub ShowLoginPage(isReplace = false as boolean)
-    LoginPage = GetLoginPageObject(isReplace)
-    if (isReplace = true)
-        m.ViewStackManager.ReplaceScreen(LoginPage)
-    else
-        m.ViewStackManager.ShowScreen(LoginPage)
-    end if
-    setFocus(LoginPage)
-end sub
-
-function GetLoginPageObject(isReplace as boolean) as object
-    LoginPage = createObject("roSGNode", "LoginPage")
-    LoginPage.visible = true
-    LoginPage.id = "LoginPage"
-    ShowHideMenu(false)
-    m.gPageContainer.appendChild(LoginPage)
-    return LoginPage
-end function
-
-sub ShowSignUpPage(isReplace = false as boolean)
-    SignUpPage = GetSignUpPageObject(isReplace)
-    if (isReplace = true)
-        m.ViewStackManager.ReplaceScreen(SignUpPage)
-    else
-        m.ViewStackManager.ShowScreen(SignUpPage)
-    end if
-    ShowHideMenu(false)
-    setFocus(SignUpPage)
-end sub
-
-function GetSignUpPageObject(isReplace as boolean) as object
-    SignUpPage = createObject("roSGNode", "SignUpPage")
-    SignUpPage.visible = true
-    SignUpPage.id = "SignUpPage"
-    m.gPageContainer.appendChild(SignUpPage)
-    return SignUpPage
 end function
 
 sub ShowDeviceLinkPage(isReplace = false as boolean)
@@ -604,8 +729,48 @@ sub ShowAccountPage(isReplace = false as boolean)
     else
         m.ViewStackManager.ShowScreen(m.AccountPage)
     end if
-    ShowHideMenu(false)
+    ShowHideMenu(true)
     setFocus(m.AccountPage)
+end sub
+
+' /edit-perfil/:profileId: se apila encima de "Mi Cuenta" (back vuelve a la
+' cuenta, como el navigate(-1) de MainLayout.tsx) con el sidebar visible.
+sub ShowEditProfilePage(profileId as string)
+    m.EditProfilePage = createObject("roSGNode", "EditProfilePage")
+    m.EditProfilePage.id = "EditProfilePage"
+    m.EditProfilePage.visible = true
+    m.gPageContainer.appendChild(m.EditProfilePage)
+    m.ViewStackManager.ShowScreen(m.EditProfilePage)
+    ShowHideMenu(true)
+    m.EditProfilePage.profileId = profileId
+    setFocus(m.EditProfilePage)
+end sub
+
+' Si el perfil editado es el que esta en uso, el avatar/nombre nuevos se
+' reflejan en el sidebar (TopMenu observa ProfileData) y en el perfil guardado
+' en el registry. El profileId no cambia, asi que no recarga la pagina.
+sub UpdateCurrentProfile(profile as object)
+    current = m.top.ProfileData
+    currentId = getValueFromProps(current, "profileId", "")
+    if not isNonEmptyString(currentId) OR currentId <> getValueFromProps(profile, "profileId", "") then return
+    updated = {
+        profileId: currentId
+        profileName: getValueFromProps(profile, "profileName", "")
+        profileUri: getValueFromProps(profile, "profileUri", "")
+    }
+    m.registryManager.SaveSelectedProfile(updated)
+    m.top.ProfileData = updated
+end sub
+
+' Tras guardar, la web navega a /mi-cuenta (que vuelve a pedir los datos).
+sub CloseEditProfilePage(saved as boolean)
+    topNode = m.ViewStackManager.GetTop()
+    if isValid(topNode) AND topNode.id = "EditProfilePage"
+        m.ViewStackManager.HideTop()
+        m.gPageContainer.removeChild(topNode)
+    end if
+    m.EditProfilePage = invalid
+    if saved AND isValid(m.AccountPage) then m.AccountPage.callFunc("ReloadData")
 end sub
 
 function GetAccountPageObject(isReplace as boolean) as object

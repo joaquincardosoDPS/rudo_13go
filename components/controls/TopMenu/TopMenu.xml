@@ -1,41 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Riel lateral: equivalente a c13_reloaded/src/layout/components/Sidebar.tsx.
+     El primer item es "Mi cuenta" y muestra el avatar del perfil activo. -->
 <component name="TopMenu" extends="Group">
     <script type="text/brightscript" uri="TopMenu.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
-    <script type="text/brightscript" uri="pkg:/source/helpers/ProfileAvatarUtils.brs" />
     <interface>
-        <field id="selectedItem" type="node" />
+        <field id="selectedItem" type="node" alwaysNotify="true" />
         <function name="UpdateSelectedTopMenu" />
     </interface>
     <children>
         <Poster id="pExpandGradient" width="1728" height="1080" uri="pkg:/images/overlay/hero_fade_left.png" loadDisplayMode="stretchToFit" translation="[0,0]" visible="false" />
-        <Poster id="bgProfilePopup" uri="pkg:/images/overlay/preference_gradient.png" height="1080" width="1920" visible="false" translation="[0,0]"/>
-        <Poster id="pLogoImage" height="77" loadHeight="77" loadDisplayMode="scaleToFit" translation="[100,30]" />
-        <Group id="gMyProfile" visible="false">
-            <Label id="lMyProfile" text="" width="300" height="75" horizAlign="right" vertAlign="center" translation="[1450,33]" />
-            <MaskGroup id="mgMyProfile" maskUri="pkg:/images/other/profile_mask.png" maskSize="[64,64]" translation="[1770,38.5]">
-                <Poster id="pMyProfile" uri="pkg:/images/focus/add_profile_img_unfocus.png" width="64" height="64" loadWidth="64" loadHeight="64" loadDisplayMode="scaleToFit => Fill  => or Zoom" />
-            </MaskGroup>
-            <Poster id="pMyProfileBorder" uri="pkg:/images/focus/MyProfile_focus_border.png" width="64" height="64" translation="[1770,38.5]" visible="true" />
-        </Group>
-        <MarkupGrid id="topMenuGrid" itemComponentName="MenuContentItem" numColumns="1" numRows="5" itemSize="[260,90]" itemSpacing="[0,40]" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="floatingFocus" drawFocusFeedback="false" translation="[25,220]" />
+        <!-- Mas padding desde el borde izquierdo (25->45): en una TV real,
+             el overscan corta unos px del borde y el contenido quedaba muy
+             pegado a la izquierda (ya pasó lo mismo del lado derecho con las
+             tarjetas del Home - ver esa nota mas abajo en el historial). -->
+        <Poster id="pLogoImage" height="77" loadHeight="77" loadDisplayMode="scaleToFit" translation="[120,30]" />
+        <MarkupGrid id="topMenuGrid" itemComponentName="MenuContentItem" numColumns="1" numRows="6" itemSize="[260,90]" itemSpacing="[0,30]" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="floatingFocus" drawFocusFeedback="false" translation="[45,200]" />
         <Label id="lHidden" visible="false" />
-        <Group id="gProfilePopup" visible="false" translation="[1505,108]">
-            <Poster id="pProfilePopup" uri="pkg:/images/focus/R5Filled_30px.9.png" width="340" height="385"/>
-            <MarkupGrid id="profilePopupGrid" itemComponentName="TopProfilePopupItem" numColumns="1" numRows="3" itemSize="[290,70]" itemSpacing="[0,8]" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="floatingFocus" drawFocusFeedback="false" translation="[30,17]" />
-            <LayoutGroup id="lgProfileActions" translation="[30,250]" layoutDirection="vert" itemSpacings="[0,0]">
-                <Group id="gEditProfileAction">
-                    <Label id="lEditProfileAction" width="304" height="40" vertAlign="center" text="Editar perfiles" />
-                </Group>
-                <Group id="gAccountAction">
-                    <Label id="lAccountAction" width="304" height="40" vertAlign="center" text="Cuenta" />
-                </Group>
-                <Group id="gLogoutAction">
-                    <Label id="lLogoutAction" width="304" height="40" vertAlign="center" text="Cerrar sesión" />
-                </Group>
-            </LayoutGroup>
-        </Group>
-        <AddEditProfilePopup id="addEditProfilePopup" visible="false" />
     </children>
 </component>

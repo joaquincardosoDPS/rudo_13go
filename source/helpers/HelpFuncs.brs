@@ -496,3 +496,121 @@ function decodeHtmlEntities(value as dynamic) as string
     text = text.Replace("&amp;", "&")
     return text
 end function
+
+' ===================================================================
+' Sesion del gateway de 13go (JWT + valores de Firestore)
+' ===================================================================
+
+' Decodifica el payload de un JWT (la parte del medio, base64url).
+' Equivale a jwtDecode() de c13_reloaded/src/features/auth/context/utils.ts.
+function DecodeJwtPayload(token as dynamic) as dynamic
+    if not isNonEmptyString(token) then return invalid
+    parts = token.Split(".")
+    if parts.Count() < 2 then return invalid
+    payload = parts[1]
+    ' base64url -> base64, y padding a multiplo de 4
+    payload = payload.Replace("-", "+").Replace("_", "/")
+    remainder = Len(payload) MOD 4
+    if remainder = 2
+        payload = payload + "=="
+    else if remainder = 3
+        payload = payload + "="
+    else if remainder = 1
+        return invalid
+    end if
+    bytes = CreateObject("roByteArray")
+    bytes.FromBase64String(payload)
+    return ParseJson(bytes.ToAsciiString())
+end function
+
+' true si el access token existe y todavia no expiro (campo "exp" del JWT).
+function IsJwtValid(token as dynamic) as boolean
+    payload = DecodeJwtPayload(token)
+    if not isValid(payload) OR not isValid(payload.exp) then return false
+    return convertToNumber(payload.exp) > CreateObject("roDateTime").AsSeconds()
+end function
+
+' Convierte "2026-09-16T14:41:56.855Z" a epoch UTC sin usar
+' roDateTime.FromISO8601String (que no parsea el offset de forma
+' confiable en todos los equipos, ya nos paso en LivePage).
+function IsoUtcToEpoch(iso as dynamic) as integer
+    if not isNonEmptyString(iso) OR Len(iso) < 19 then return 0
+    y = Val(Mid(iso, 1, 4))
+    mo = Val(Mid(iso, 6, 2))
+    d = Val(Mid(iso, 9, 2))
+    h = Val(Mid(iso, 12, 2))
+    mi = Val(Mid(iso, 15, 2))
+    s = Val(Mid(iso, 18, 2))
+    yy = y
+    mm = mo
+    if mm <= 2
+        yy = yy - 1
+        mm = mm + 12
+    end if
+    era = Int(yy / 400)
+    yoe = yy - era * 400
+    doy = Int((153 * (mm - 3) + 2) / 5) + d - 1
+    doe = yoe * 365 + Int(yoe / 4) - Int(yoe / 100) + doy
+    days = era * 146097 + doe - 719468
+    return days * 86400 + h * 3600 + mi * 60 + s
+end function
+
+' Firestore devuelve cada campo envuelto por tipo:
+'   { "name": { "stringValue": "Joaquin" }, "order": { "integerValue": "0" } }
+function FirestoreString(fields as dynamic, key as string, fallback = "" as string) as string
+    value = getValueFromProps(fields, key + ".stringValue", invalid)
+    if isNonEmptyString(value) then return value
+    value = getValueFromProps(fields, key + ".integerValue", invalid)
+    if isValid(value) then return value.ToStr()
+    return fallback
+end function
+
+function FirestoreArray(fields as dynamic, key as string) as object
+    values = getValueFromProps(fields, key + ".arrayValue.values", invalid)
+    result = []
+    if not isNotEmptyArray(values) then return result
+    for each entry in values
+        text = getValueFromProps(entry, "stringValue", invalid)
+        if isNonEmptyString(text) then result.Push(text)
+    end for
+    return result
+end function
+
+' Normaliza la respuesta de token del gateway (action=deviceToken o
+' action=refreshToken) al shape que guardamos en el registry.
+function BuildAuthDataFromGateway(tokenData as object, deviceId = "" as string) as object
+    return {
+        userId: getValueFromProps(tokenData, "user_id", "")
+        accessToken: getValueFromProps(tokenData, "access_token", "")
+        refreshToken: getValueFromProps(tokenData, "refresh_token", "")
+        tokenType: getValueFromProps(tokenData, "token_type", "")
+        expiresIn: convertToNumber(getValueFromProps(tokenData, "expires_in", 0))
+        deviceId: deviceId
+    }
+end function
+
+' validateRestriction del AuthProvider (true = bloqueado): "0" libre, "2"
+' requiere sesion, "1" requiere que algun pack del contenido este entre los
+' planes/productos de la suscripcion del usuario.
+function ValidateRestriction(restriction as dynamic, packs as dynamic) as boolean
+    if not isNonEmptyString(restriction) OR restriction = "0" then return false
+    loggedIn = m.top.GetScene().isUserLoggedIn = true
+    if restriction = "2" then return not loggedIn
+    if restriction = "1"
+        if not loggedIn then return true
+        subscription = getValueFromProps(GlobalGet("UserData"), "suscription", {})
+        userPacks = {}
+        for each list in [getValueFromProps(subscription, "plans", []), getValueFromProps(subscription, "products", [])]
+            for each pack in list
+                userPacks[pack] = true
+            end for
+        end for
+        if isNotEmptyArray(packs)
+            for each pack in packs
+                if userPacks.DoesExist(pack) then return false
+            end for
+        end if
+        return true
+    end if
+    return true
+end function

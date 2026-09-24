@@ -1,17 +1,41 @@
+' Persistencia local entre lanzamientos del canal (roRegistrySection).
+' Guarda la sesion del gateway de 13go (el equivalente al localStorage
+' "@auth_session" de c13_reloaded) y el perfil elegido ("currentProfile").
 Function CreateRegistryManager() as Object
     this = {
-        SaveUserData: Sub(data as Object)
-            reg = CreateObject("roRegistrySection", "TVCHVAppAuth")
-            formatData = FormatJson(data)
-            reg.Write("userData", formatData)
+        SECTION: "Canal13GoAuth",
+
+        ' authData = { userId, accessToken, refreshToken, expiresIn, tokenType, deviceId }
+        SaveAuthData: Sub(data as Object)
+            reg = CreateObject("roRegistrySection", m.SECTION)
+            reg.Write("authData", FormatJson(data))
             reg.Flush()
         End Sub,
 
-        GetUserData: Function() as Object
-            reg = CreateObject("roRegistrySection", "TVCHVAppAuth")
-            readValues = reg.Read("userData")
-            auth = ParseJSON(readValues)
-            Return auth
+        GetAuthData: Function() as Object
+            reg = CreateObject("roRegistrySection", m.SECTION)
+            if not reg.Exists("authData") then return invalid
+            return ParseJSON(reg.Read("authData"))
+        End Function,
+
+        ClearAuthData: Sub()
+            reg = CreateObject("roRegistrySection", m.SECTION)
+            reg.Delete("authData")
+            reg.Delete("currentProfile")
+            reg.Flush()
+        End Sub,
+
+        ' currentProfile = { profileId, profileName, profileUri }
+        SaveSelectedProfile: Sub(profile as Object)
+            reg = CreateObject("roRegistrySection", m.SECTION)
+            reg.Write("currentProfile", FormatJson(profile))
+            reg.Flush()
+        End Sub,
+
+        GetSelectedProfile: Function() as Object
+            reg = CreateObject("roRegistrySection", m.SECTION)
+            if not reg.Exists("currentProfile") then return invalid
+            return ParseJSON(reg.Read("currentProfile"))
         End Function,
 
         ClearAllSettings: Sub()
@@ -19,27 +43,12 @@ Function CreateRegistryManager() as Object
             For each section in Registry.GetSectionList()
                 RegistrySection = CreateObject("roRegistrySection", section)
                 For each key in RegistrySection.GetKeyList()
-                    Print "RegistryManager : ClearAllSettings : Deleting : Section : " + section + "Key : " key
+                    Print "RegistryManager : ClearAllSettings : Deleting : Section : " + section + " Key : " key
                     RegistrySection.Delete(key)
                 End For
                 RegistrySection.Flush()
             End For
         End Sub
-        SaveToken: sub(token as String)
-            reg = CreateObject("roRegistrySection", "TVCHVAppAuth")
-            reg.Write("Usertoken", token)
-            reg.Flush()
-        end sub,
-        GetToken: function() as String
-            reg = CreateObject("roRegistrySection", "TVCHVAppAuth")
-            readValues = reg.Read("Usertoken")
-            return readValues
-        end function,
-        ClearToken: sub()
-            reg = CreateObject("roRegistrySection", "TVCHVAppAuth")
-            reg.Delete("Usertoken")
-            reg.Flush()
-        end sub,
     }
 
     Return this

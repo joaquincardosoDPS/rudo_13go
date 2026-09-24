@@ -12,45 +12,37 @@ sub SetLocals()
     m.scene = m.top.GetScene()
     m.fonts = m.global.fonts
     m.theme = m.global.appTheme
-    m.selectedAccountOption = ""
-    m.rawProfileItems = []
+    m.registryManager = CreateRegistryManager()
+    m.rawProfileItems = invalid
+    m.avatarBaseUrl = ""
     m.profileItems = []
-    m.avatarImagesById = {}
-    m.avatarInfoById = {}
-    m.avatarListItems = []
     m.defaultProfileUri = "pkg:/images/other/default_user.png"
-    m.addProfileUri = "pkg:/images/other/addProfile.png"
     m.maxVisibleProfileColumns = 4
-    m.isEditMode = false
+    m.pendingRequests = 0
 end sub
 
 sub SetControls()
     m.backgroundPanel = m.top.findNode("backgroundPanel")
     m.brandLogo = m.top.findNode("brandLogo")
-    m.editProfilesButton = m.top.findNode("editProfilesButton")
+    m.logoutButton = m.top.findNode("logoutButton")
     m.screenTitle = m.top.findNode("screenTitle")
-    m.screenSubtitle = m.top.findNode("screenSubtitle")
     m.profilesMarkup = m.top.findNode("profilesMarkup")
-    m.arrowleft = m.top.findNode("arrowleft")
-    m.arrowright = m.top.findNode("arrowright")
-    m.addEditProfilePopup = m.top.findNode("addEditProfilePopup")
+    m.emptyStateText = m.top.findNode("emptyStateText")
 end sub
 
 sub SetupFonts()
-    m.screenTitle.font = m.fonts.dmSansMedium29
-    m.screenSubtitle.font = m.fonts.dmSansMedium24
+    m.screenTitle.font = m.fonts.dmSansBold48
+    m.emptyStateText.font = m.fonts.dmSansMedium24
 end sub
 
 sub SetupColor()
     m.backgroundPanel.color = m.theme.clrPrimary
     m.screenTitle.color = m.theme.white
-    m.screenSubtitle.color = m.theme.clrSecondaryText
+    m.emptyStateText.color = m.theme.clrSecondaryText
 end sub
 
 sub SetObservers()
-    m.profilesMarkup.observeField("itemFocused", "onProfilesFocused")
     m.profilesMarkup.observeField("itemSelected", "onProfilesSelected")
-    m.addEditProfilePopup.observeField("closeRequested", "OnAddEditProfilePopupCloseRequested")
     m.top.observeField("visible", "OnVisibleChange")
     m.top.observeField("focusedChild", "OnFocusedChild")
     m.brandLogo.observeField("loadStatus", "OnLogoLoadStatusChanged")
@@ -64,16 +56,13 @@ sub OnLogoLoadStatusChanged(event as object)
     status = event.GetData()
     node = event.getRoSGNode()
     if status = "ready"
-        imageWidth = node.bitmapWidth
-        imageHeight = node.bitmapHeight
-        node.width = imageWidth * (node.height / imageHeight)
+        node.width = node.bitmapWidth * (node.height / node.bitmapHeight)
+        node.translation = [(1920 - node.width) / 2, node.translation[1]]
     end if
 end sub
 
 sub OnVisibleChange()
-    if m.top.visible
-        SetFocus(m.profilesMarkup)
-    end if
+    if m.top.visible then SetFocus(m.profilesMarkup)
 end sub
 
 sub OnFocusedChild()
@@ -86,39 +75,38 @@ sub OnFocusedChild()
 end sub
 
 sub Initialize()
+    m.scene.callFunc("ShowHideMenu", false)
     m.scene.callFunc("ShowHideLoader", true)
-    btnFields = {
+    m.logoutButton.update({
         focusTextColor: m.theme.white
-        unfocusTextColor: m.theme.white
-        backgroundColor: m.theme.clrSecondary
-        focusBorderImage: m.theme.filledBackGroundImage
+        unfocusTextColor: m.theme.clrSecondaryText
+        backgroundColor: m.theme.clrSecondaryText
+        focusBorderImage: "pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png"
         focusBackgroundColor: m.theme.focPrimary
         fontSize: "dmSansMedium24"
         margin: 20
-    }
-    m.editProfilesButton.update(btnFields)
-    CallGetAvatarAPI()
+    })
+    ' Las dos llamadas salen juntas (como el Promise.all de WhosThere.tsx);
+    ' la grilla se arma recien cuando vuelven las dos.
+    m.pendingRequests = 2
+    CallGetAvatarBaseUrlAPI()
     CallGetProfilesAPI()
     SetFocus(m.profilesMarkup)
 end sub
 
-sub CallGetAvatarAPI()
+sub CallGetAvatarBaseUrlAPI()
     m.GetAvatarAPI = CreateObject("roSGNode", "AuthAPIAction")
-    m.GetAvatarAPI.functionName = "GetAllAvatar"
-    m.GetAvatarAPI.ObserveField("result", "OnGetAvatarAPIResponse")
+    m.GetAvatarAPI.functionName = "GetAvatarBaseUrl"
+    m.GetAvatarAPI.ObserveField("result", "OnGetAvatarBaseUrlAPIResponse")
     m.GetAvatarAPI.control = "RUN"
 end sub
 
-sub OnGetAvatarAPIResponse(event as dynamic)
+sub OnGetAvatarBaseUrlAPIResponse(event as dynamic)
     response = event.getData()
-    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND isValid(response.data.data.data)
-        avatarGroups = response.data.data.data
-        avatarData = BuildAvatarData(avatarGroups)
-        m.avatarImagesById = avatarData.avatarImagesById
-        m.avatarInfoById = avatarData.avatarInfoById
-        m.avatarListItems = avatarData.avatarListItems
-        RebuildProfileItems()
-    end if
+    print "EditorProfilesPage : OnGetAvatarBaseUrlAPIResponse : " FormatJson(response)
+    m.GetAvatarAPI = invalid
+    m.avatarBaseUrl = getValueFromProps(response, "data.data.url.stringValue", "")
+    OnRequestFinished()
 end sub
 
 sub CallGetProfilesAPI()
@@ -130,44 +118,59 @@ end sub
 
 sub OnGetProfilesAPIResponse(event as dynamic)
     response = event.getData()
-    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND isValid(response.data.data.data)
-        m.rawProfileItems = response.data.data.data
-    end if
+    print "EditorProfilesPage : OnGetProfilesAPIResponse : " FormatJson(response)
+    m.GetProfilesAPI = invalid
+    m.rawProfileItems = getValueFromProps(response, "data.data", invalid)
+    OnRequestFinished()
+end sub
+
+sub OnRequestFinished()
+    m.pendingRequests = m.pendingRequests - 1
+    print "EditorProfilesPage : OnRequestFinished : pendingRequests=" m.pendingRequests
+    if m.pendingRequests > 0 then return
     m.scene.callFunc("ShowHideLoader", false)
-    RebuildProfileItems()
+    BuildProfileItems()
+    RefreshProfilesMarkup()
 end sub
 
-sub RebuildProfileItems(focusIndex = invalid as dynamic)
+' Cada perfil llega como documento de Firestore:
+'   { fields: { order: {integerValue}, name: {stringValue}, avatar: {stringValue} } }
+' y la imagen se arma como <urlBase><avatar>.jpg (igual que WhosThere.tsx).
+sub BuildProfileItems()
     m.profileItems = []
-    if isValid(m.rawProfileItems)
-        for each itemAA in m.rawProfileItems
-            m.profileItems.Push(NormalizeProfileData(itemAA))
-        end for
-    end if
-    RefreshProfilesMarkup(focusIndex)
+    if not isNotEmptyArray(m.rawProfileItems) then return
+    for each document in m.rawProfileItems
+        fields = getValueFromProps(document, "fields", invalid)
+        if not isValid(fields) then continue for
+        order = FirestoreString(fields, "order", "0")
+        avatarId = FirestoreString(fields, "avatar")
+        profileName = FirestoreString(fields, "name")
+        if profileName = "" then profileName = "Mi perfil"
+        profileUri = m.defaultProfileUri
+        if isNonEmptyString(m.avatarBaseUrl) AND isNonEmptyString(avatarId)
+            profileUri = m.avatarBaseUrl + avatarId + ".jpg"
+        end if
+        m.profileItems.Push({
+            id: order
+            avatarId: avatarId
+            profileName: profileName
+            profileUri: profileUri
+        })
+    end for
 end sub
 
-sub UpdateEditModeUI()
-    if m.isEditMode
-        m.editProfilesButton.update({
-            buttonText: "Listo"
-        })
-        m.screenTitle.text = "Editar perfiles"
-        m.screenTitle.translation = [0, 240]
-        m.screenSubtitle.text = "Elige un perfil para editar"
-        m.screenSubtitle.visible = true
-        m.arrowleft.translation = "[315, 513]"
-        m.arrowright.translation = "[1531, 513]"
-    else
-        m.editProfilesButton.update({
-            buttonText: "Editar perfiles"
-        })
-        m.screenTitle.text = "Quien anda ahi?"
-        m.screenTitle.translation = [0, 280]
-        m.screenSubtitle.visible = false
-        m.arrowleft.translation = "[315, 473]"
-        m.arrowright.translation = "[1531, 473]"
-    end if
+sub RefreshProfilesMarkup()
+    profileContent = CreateObject("RoSGNode", "ContentNode")
+    for each itemAA in m.profileItems
+        itemContent = CreateObject("RoSGNode", "ContentNode")
+        itemContent.id = itemAA.id
+        itemContent.AddFields(itemAA)
+        profileContent.appendChild(itemContent)
+    end for
+    m.profilesMarkup.content = profileContent
+    totalItems = profileContent.getChildCount()
+    m.emptyStateText.visible = (totalItems = 0)
+    ApplyProfilesMarkupLayout(totalItems)
 end sub
 
 sub ApplyProfilesMarkupLayout(totalItems as Integer)
@@ -181,225 +184,53 @@ sub ApplyProfilesMarkupLayout(totalItems as Integer)
     itemSpacing = m.profilesMarkup.itemSpacing
     gridWidth = (columnCount * itemSize[0]) + ((columnCount - 1) * itemSpacing[0])
     m.profilesMarkup.numColumns = columnCount
-    gridY = 370
-    if m.isEditMode
-        gridY = 410
-    end if
-    m.profilesMarkup.translation = [Int((1920 - gridWidth) / 2), gridY]
+    m.profilesMarkup.translation = [Int((1920 - gridWidth) / 2), 470]
 end sub
 
-sub RefreshProfilesMarkup(focusIndex = invalid as dynamic)
-    profileContent = BuildProfileContent()
-    m.profilesMarkup.content = profileContent
-    totalItems = profileContent.getChildCount()
-    showNavigationArrows = totalItems > m.maxVisibleProfileColumns
-    m.arrowleft.visible = showNavigationArrows
-    m.arrowright.visible = showNavigationArrows
-    if showNavigationArrows
-        m.arrowleft.opacity = "0.6"
-        m.arrowright.opacity = "1"
-    end if
-    ApplyProfilesMarkupLayout(totalItems)
-    if focusIndex <> invalid AND focusIndex >= 0 AND focusIndex < totalItems
-        m.profilesMarkup.jumpToItem = focusIndex
-    else
-        UpdateArrowState()
-    end if
-    AutoSelectDefaultProfileForDeepLink()
-end sub
-
-function BuildProfileContent() as Object
-    profileContent = CreateObject("RoSGNode", "ContentNode")
-    for each itemAA in m.profileItems
-        itemData = {}
-        itemData.Append(itemAA)
-        itemData.showEditBadge = m.isEditMode
-        profileContent.appendChild(CreateProfileNode(itemData))
-    end for
-    if m.profileItems.Count() < 4
-        profileContent.appendChild(CreateProfileNode({
-            id: "Agregar perfil"
-            profileUri: m.addProfileUri
-            profileName: "Agregar perfil"
-            isAddProfile: true
-            showEditBadge: m.isEditMode
-        }))
-    end if
-    return profileContent
-end function
-
-function CreateProfileNode(itemData as Object) as Object
-    itemContent = CreateObject("RoSGNode", "ContentNode")
-    itemContent.id = itemData.id
-    itemContent.AddFields(itemData)
-    return itemContent
-end function
-
-function NormalizeProfileData(itemAA as Object) as Object
-    normalizedItem = {}
-    if isValid(itemAA) then normalizedItem.Append(itemAA)
-    profileName = ""
-    if normalizedItem.DoesExist("name_perfil") AND normalizedItem.name_perfil <> invalid then profileName = normalizedItem.name_perfil
-    if profileName.Trim() = "" then profileName = "Nuevo perfil"
-    profileUri = ""
-    if normalizedItem.DoesExist("profileUri") AND normalizedItem.profileUri <> invalid then profileUri = normalizedItem.profileUri
-    profileImages = invalid
-    if profileUri.Trim() = "" AND normalizedItem.DoesExist("images") AND Type(normalizedItem.images) = "roAssociativeArray"
-        profileImages = normalizedItem.images
-    else if profileUri.Trim() = "" AND normalizedItem.DoesExist("avatar") AND normalizedItem.avatar <> invalid
-        avatarId = normalizedItem.avatar
-        normalizedItem.avatarId = avatarId
-        if m.avatarImagesById.DoesExist(avatarId) then profileImages = m.avatarImagesById[avatarId]
-        if m.avatarInfoById.DoesExist(avatarId) then normalizedItem.avatarType = m.avatarInfoById[avatarId].avatarType
-    end if
-    if profileUri.Trim() = ""
-        profileUri = GetAvatarImageUri(profileImages)
-        if profileUri = invalid then profileUri = ""
-    end if
-    if profileUri.Trim() = "" then profileUri = m.defaultProfileUri
-    normalizedItem.profileName = profileName
-    normalizedItem.profileUri = profileUri
-    if not normalizedItem.DoesExist("avatarId") AND normalizedItem.DoesExist("avatar") AND normalizedItem.avatar <> invalid
-        normalizedItem.avatarId = normalizedItem.avatar
-    end if
-    normalizedItem.Delete("isAddProfile")
-    return normalizedItem
-end function
-
-function onProfilesFocused()
-    UpdateArrowState()
-end function
-
-sub UpdateArrowState()
-    if not m.arrowleft.visible OR not isValid(m.profilesMarkup.content)
-        return
-    end if
-
-    focusedIndex = m.profilesMarkup.itemFocused
-    lastIndex = m.profilesMarkup.content.getChildCount() - 1
-    if focusedIndex <= 0
-        m.arrowleft.opacity = "0.6"
-    else
-        m.arrowleft.opacity = "1"
-    end if
-
-    if focusedIndex >= lastIndex
-        m.arrowright.opacity = "0.6"
-    else
-        m.arrowright.opacity = "1"
-    end if
-end sub
-
-function onProfilesSelected(event as dynamic)
+sub onProfilesSelected(event as dynamic)
     selectedIndex = event.getData()
-    m.selectedItem = m.profilesMarkup.content.getChild(selectedIndex)
-    print "ProfilesPage : onProfilesSelected : selectedItem : " m.selectedItem
-    if isValid(m.selectedItem)
-        isAddProfile = false
-        if m.selectedItem.hasField("isAddProfile")
-            isAddProfile = m.selectedItem.isAddProfile
-        end if
-        if m.isEditMode
-            if isAddProfile = true
-                ShowAddEditProfilePopup()
-            else
-                ShowAddEditProfilePopup("edit", m.selectedItem.profileName, m.selectedItem.profileUri, selectedIndex)
-            end if
-        else if isAddProfile = true
-            ShowAddEditProfilePopup()
-        else
-            ProfileData = {
-                "profileId": m.selectedItem.id
-                "profileUri": m.selectedItem.profileUri
-                "profileName": m.selectedItem.profileName
-            }
-            GlobalSet("selectedProfileID", m.selectedItem.id)
-            m.scene.ProfileData = ProfileData
-            m.scene.callFunc("StartApp")
-        end if
-    end if
-end function
-
-sub AutoSelectDefaultProfileForDeepLink()
-    if isValidDeeplinkingParams()
-        if isValid(m.profilesMarkup.content) AND m.profilesMarkup.content.getChildCount() > 0
-            m.profilesMarkup.itemSelected = 0
-        end if
-    end if
-end sub
-
-function isValidDeeplinkingParams() as boolean
-    return isNonEmptyString(m.scene.deepLinkingContentId) AND isNonEmptyString(m.scene.deepLinkingMediaType) AND isValid(m.scene.deeplinkingData) AND isNonEmptyString(m.scene.deeplinkingData.episodeId)
-end function
-
-sub ShowAddEditProfilePopup(popupMode = "create" as String, profileName = "" as String, profileUri = "" as String, profileIndex = -1 as Integer)
-    m.addEditProfilePopup.popupMode = popupMode
-    if popupMode = "edit" AND isValid(m.selectedItem)
-        m.addEditProfilePopup.profileId = m.selectedItem.id
-        if m.selectedItem.hasField("avatarId")
-            m.addEditProfilePopup.selectedAvatarId = m.selectedItem.avatarId
-        else
-            m.addEditProfilePopup.selectedAvatarId = ""
-        end if
-    else
-        m.addEditProfilePopup.profileId = ""
-        m.addEditProfilePopup.selectedAvatarId = ""
-    end if
-    m.addEditProfilePopup.avatarItems = m.avatarListItems
-    m.addEditProfilePopup.profileName = profileName
-    m.addEditProfilePopup.profileUri = profileUri
-    m.addEditProfilePopup.profileIndex = profileIndex
-    m.addEditProfilePopup.visible = true
-    SetFocus(m.addEditProfilePopup)
-end sub
-
-sub HideAddEditProfilePopup()
-    m.addEditProfilePopup.visible = false
-    UpdateEditModeUI()
-    SetFocus(m.profilesMarkup)
-end sub
-
-sub OnAddEditProfilePopupCloseRequested()
-    if not m.addEditProfilePopup.closeRequested then return
-    actionSucceeded = m.addEditProfilePopup.actionSucceeded
-    HideAddEditProfilePopup()
-    if actionSucceeded
-        CallGetProfilesAPI()
-    end if
+    if not isValid(m.profilesMarkup.content) then return
+    selectedItem = m.profilesMarkup.content.getChild(selectedIndex)
+    if not isValid(selectedItem) then return
+    profileData = {
+        "profileId": selectedItem.id
+        "profileUri": selectedItem.profileUri
+        "profileName": selectedItem.profileName
+    }
+    ' En la web esto es el localStorage "currentProfile" de ProfileItem.tsx.
+    m.registryManager.SaveSelectedProfile(profileData)
+    GlobalSet("selectedProfileID", selectedItem.id)
+    m.scene.ProfileData = profileData
+    m.scene.callFunc("StartApp")
 end sub
 
 Function onKeyEvent(key as String, press as Boolean) as Boolean
     print " Page : EditorProfilesPage : onKeyEvent : key = " key " press = " press
     handled = false
     if press
-        if m.addEditProfilePopup.visible
-            return false
-        end if
-        if key = "OK"
-            if m.editProfilesButton.hasFocus()
-                m.isEditMode = not m.isEditMode
-                UpdateEditModeUI()
-                RefreshProfilesMarkup(m.profilesMarkup.itemFocused)
+        if m.logoutButton.hasFocus()
+            ' Desde "Cerrar sesión" solo se puede bajar a los perfiles.
+            if key = "OK"
+                m.scene.callFunc("OnLogout")
                 handled = true
-            end if
-        else if key = "up"
-            if m.profilesMarkup.hasFocus()
-                SetFocus(m.editProfilesButton)
-            end if
-            handled = true
-        else if key = "down"
-            if m.editProfilesButton.hasFocus()
+            else if key = "down"
                 SetFocus(m.profilesMarkup)
-            end if
-            handled = true
-        else if key = "back"
-            if m.isEditMode
-                m.isEditMode = false
-                UpdateEditModeUI()
-                RefreshProfilesMarkup(m.profilesMarkup.itemFocused)
                 handled = true
+            else if key = "up" OR key = "left" OR key = "right"
+                handled = true ' bloqueado a proposito (no hace nada)
+            end if
+        else if m.profilesMarkup.hasFocus()
+            ' En los perfiles: arriba va al boton; izquierda/derecha SOLO
+            ' llegan hasta aca cuando el MarkupGrid ya no puede moverse mas
+            ' (primer/ultimo perfil) - se bloquean en vez de dejar que
+            ' burbujeen a MainScene y salten al sidebar. Abajo no hace nada.
+            if key = "up"
+                SetFocus(m.logoutButton)
+                handled = true
+            else if key = "down" OR key = "left" OR key = "right"
+                handled = true ' bloqueado a proposito (no hace nada)
             end if
         end if
-        return handled
     end if
+    return handled
 End Function

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Avatar de la grilla de EditProfileView (AvatarItem.tsx,
+     .main.editar-perfil .avatar-items .item img): caja de 8.5vw (163px),
+     borde .3vw + padding .5vw alrededor de la foto, atenuada al 60% y con
+     borde naranjo cuando tiene foco. -->
+<component name="EditAvatarItem" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/pages/EditProfilePage/EditAvatarItem.brs" />
+    <interface>
+        <field id="uri" type="string" onChange="OnUriChange" />
+        <field id="itemHasFocus" type="boolean" onChange="UpdateFocus" />
+    </interface>
+    <children>
+        <Poster id="pAvatar" width="132" height="132" loadWidth="132" loadHeight="132" loadDisplayMode="scaleToZoom" translation="[15,15]" opacity="0.6" />
+        <!-- Recorte circular sin MaskGroup (ver CLAUDE.md): marco #08090C. -->
+        <Poster id="pFrame" uri="pkg:/images/account/avatar_frame_132.png" width="132" height="132" loadWidth="132" loadHeight="132" translation="[15,15]" />
+        <Poster id="pRing" uri="pkg:/images/account/avatar_ring_163.png" width="163" height="163" loadWidth="163" loadHeight="163" visible="false" />
+    </children>
+</component>

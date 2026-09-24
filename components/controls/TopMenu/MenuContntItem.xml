@@ -13,6 +13,28 @@
   <children>
     <Poster id="pFocusBg" uri="pkg:/images/focus/R5Filled_30px.9.png" width="256" height="80" translation="[2,5]" opacity="0.22" visible="false" />
     <Poster id="itemIcon" width="40" height="40" loadWidth="40" loadHeight="40" loadDisplayMode="scaleToFit" translation="[25,25]" />
+    <!-- Avatar del item "Mi cuenta", mismo tamaño/posicion que itemIcon. Sin
+         MaskGroup a proposito: con ui_resolutions=fhd en un Roku de UI 720p,
+         la mascara no se reescala igual que el contenido y el avatar quedaba
+         recortado como un cuarto de circulo. El recorte circular lo hace
+         pAvatarFrame: un marco #08090C (color de fondo) con un agujero
+         circular, solo para fotos reales (default_user.png ya es circular). -->
+    <Poster id="pAvatar" width="40" height="40" loadWidth="40" loadHeight="40" loadDisplayMode="scaleToZoom" translation="[25,25]" visible="false" />
+    <Poster id="pAvatarFrame" uri="pkg:/images/masks/avatar_frame_sidebar.png" width="40" height="40" loadWidth="40" loadHeight="40" translation="[25,25]" visible="false" />
+    <!-- Foco del avatar: anillo (no disco) por encima del marco, para que las
+         esquinas del marco no lo tapen. -->
+    <Poster id="pAvatarFocusBg" uri="pkg:/images/masks/avatar_focus_ring.png" width="50" height="50" loadWidth="50" loadHeight="50" translation="[20,20]" opacity="0.22" visible="false" />
+    <!-- Anillo + placa "Premium" (.menu .avatar .premium / .premium::after).
+         Anillo dedicado (no el circle_ring_thin.png de los circulos de
+         senales/radios, pensado para 192px - a 46px se veia "entrecortado").
+         Placa mas ancha que el anillo (80px) porque dmSansBold18 - el Bold
+         mas chico importado - no entra en 46px sin cortar el texto. Centrada
+         en el mismo eje que el avatar y los iconos del riel (x=45 del item);
+         con el riel ya en x=45 su borde izquierdo queda a 50px del borde de
+         la pantalla (la "P" se cortaba cuando quedaba a 30px). -->
+    <Poster id="pPremiumRing" uri="pkg:/images/masks/avatar_premium_ring.png" width="46" height="46" loadWidth="46" loadHeight="46" translation="[22,22]" visible="false" />
+    <Poster id="pPremiumBadgeBg" uri="pkg:/images/other/premium_badge_bg.png" width="80" height="20" loadWidth="80" loadHeight="20" translation="[5,64]" visible="false" />
+    <Label id="lPremiumBadge" text="Premium" width="80" height="20" horizAlign="center" vertAlign="center" translation="[5,64]" visible="false" />
     <Label id="itemTitle" text="" width="200" height="40" vertAlign="center" translation="[80,25]" visible="false" />
   </children>
 </component>

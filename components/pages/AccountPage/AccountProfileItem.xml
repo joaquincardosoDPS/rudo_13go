@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Perfil de "Mi Cuenta": equivalente a ProfileItem.tsx de c13_reloaded
+     (.main.mi-cuenta .perfiles .item): avatar circular de 8vw, nombre y
+     boton redondo de editar (.btn-editar, 3.13vw) debajo. El foco lo maneja
+     AccountPage (foco virtual), este componente solo lo dibuja. -->
+<component name="AccountProfileItem" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/pages/AccountPage/AccountProfileItem.brs" />
+    <interface>
+        <field id="profileName" type="string" onChange="OnProfileNameChange" />
+        <field id="profileUri" type="string" onChange="OnProfileUriChange" />
+        <field id="isPhoto" type="boolean" onChange="OnProfileUriChange" />
+        <field id="avatarFocused" type="boolean" onChange="UpdateFocus" />
+        <field id="editFocused" type="boolean" onChange="UpdateFocus" />
+    </interface>
+    <children>
+        <!-- Caja de 154px (8vw): borde+padding de 16px alrededor de la foto
+             de 122px; el foco es un anillo naranjo de 5px por fuera. -->
+        <Poster id="pAvatar" width="122" height="122" loadWidth="122" loadHeight="122" loadDisplayMode="scaleToZoom" translation="[16,16]" opacity="0.6" />
+        <!-- Sin MaskGroup (recorta mal en este Roku, ver CLAUDE.md): las fotos
+             son JPG cuadrados y este marco #08090C tapa sus esquinas. -->
+        <Poster id="pAvatarFrame" uri="pkg:/images/account/avatar_frame_122.png" width="122" height="122" loadWidth="122" loadHeight="122" translation="[16,16]" visible="false" />
+        <!-- El anillo va despues del marco: las esquinas del marco llegan
+             hasta el radio del anillo en las diagonales y lo tapaban. -->
+        <Poster id="pRing" uri="pkg:/images/account/avatar_focus_ring.png" width="164" height="164" loadWidth="164" loadHeight="164" translation="[-5,-5]" visible="false" />
+        <Label id="lName" width="154" height="30" horizAlign="center" vertAlign="center" translation="[0,173]" />
+        <Group id="gEdit" translation="[47,258]">
+            <Poster id="pEditBorder" uri="pkg:/images/account/btn_circle_border.png" width="60" height="60" loadWidth="60" loadHeight="60" />
+            <Poster id="pEditIcon" uri="pkg:/images/account/icon_edit.png" width="30" height="30" loadWidth="30" loadHeight="30" translation="[15,15]" />
+        </Group>
+    </children>
+</component>

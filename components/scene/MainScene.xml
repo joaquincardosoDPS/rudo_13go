@@ -33,12 +33,15 @@
         <field id="isItemAddRemoveFav" type="assocArray" alwaysNotify="true" />
         <function name="ShowHideLoader" />
         <function name="ShowOnboardingPage" />
-        <function name="ShowSignUpPage" />
-        <function name="ShowLoginPage" />
         <function name="ShowDeviceLinkPage" />
         <function name="ShowEditorProfilesPage" />
+        <function name="ShowMyAccount" />
+        <function name="OnDeviceLinked" />
         <function name="ShowHomePage" />
         <function name="ShowAccountPage" />
+        <function name="ShowEditProfilePage" />
+        <function name="CloseEditProfilePage" />
+        <function name="UpdateCurrentProfile" />
         <function name="HandleBackKey" />
         <function name="OnLogout" />
         <function name="StartApp" />

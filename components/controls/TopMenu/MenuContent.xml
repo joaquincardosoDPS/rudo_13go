@@ -5,5 +5,10 @@
         <field id="isSelected" type="boolean" value="false" />
         <field id="iconUri" type="string" />
         <field id="isExpanded" type="boolean" value="false" />
+        <!-- El item "Mi cuenta" no usa un icono plano sino el avatar del perfil
+             (circular), con un anillo amarillo si la cuenta es premium. -->
+        <field id="isAvatar" type="boolean" value="false" />
+        <field id="avatarUri" type="string" />
+        <field id="isPremium" type="boolean" value="false" />
     </interface>
 </component>

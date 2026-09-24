@@ -8,15 +8,30 @@ end function
 
 function ContentAPI__New()
     this = {}
-    this.Login = ContentAPI__Login
-    this.SignUp = ContentAPI__SignUp
-    this.CheckValidToken = ContentAPI__CheckValidToken
-    this.ProfileManagement = ContentAPI__ProfileManagement
-    this.GetDeviceCodeAPI = ContentAPI__GetDeviceCodeAPI
-
-    this.GetAllAvatar = ContentAPI__GetAllAvatar
-    this.GetProfilesData = ContentAPI__GetProfilesData
+    ' Auth y perfiles: todo va por el gateway único (ver bloque más abajo)
+    this.GetDeviceCode = ContentAPI__GetDeviceCode
     this.VerifyDevice = ContentAPI__VerifyDevice
+    this.RefreshToken = ContentAPI__RefreshToken
+    this.GetUserProfile = ContentAPI__GetUserProfile
+    this.GetUserInfo = ContentAPI__GetUserInfo
+    this.GetProfilesData = ContentAPI__GetProfilesData
+    this.GetAvatarBaseUrl = ContentAPI__GetAvatarBaseUrl
+    this.UpdateProfile = ContentAPI__UpdateProfile
+    this.GetProfileData = ContentAPI__GetProfileData
+    this.AuthenticateContent = ContentAPI__AuthenticateContent
+    this.GetTracking = ContentAPI__GetTracking
+    this.UpdateTracking = ContentAPI__UpdateTracking
+    this.GetFavorites = ContentAPI__GetFavorites
+    this.SaveFavorite = ContentAPI__SaveFavorite
+
+    ' Vista de programa (feed 13.cl)
+    this.GetProgramBySlug = ContentAPI__GetProgramBySlug
+    this.GetProgramCategories = ContentAPI__GetProgramCategories
+    this.GetProgramChapters = ContentAPI__GetProgramChapters
+
+    ' Reproductor de capitulos (PlayerView)
+    this.GetEpisodeByLink = ContentAPI__GetEpisodeByLink
+    this.GetVodMediaInfo = ContentAPI__GetVodMediaInfo
 
     this.GetConfig = ContentAPI__GetConfig
     this.GetHomeConfig = ContentAPI__GetHomeConfig
@@ -46,92 +61,208 @@ function ContentAPI__New()
     return this
 end function
 
-function ContentAPI__Login(params as dynamic)
-    path = GlobalGet("apiEndPoints").Login
-    headers = GetHeaders()
+
+' ===================================================================
+' Gateway de 13go: auth y perfiles
+' -------------------------------------------------------------------
+' A diferencia de MiCHV (un endpoint REST por accion), 13go expone un
+' unico POST (https://rudo.video/gateway/13go/) donde la operacion se
+' elige con el campo "action". Con action=firebase, ademas, el campo
+' "path" apunta al documento de Firestore a leer/escribir.
+' Referencia: c13_reloaded/src/features/auth/services/authentication.ts
+' y c13_reloaded/src/services/profileService.ts
+' ===================================================================
+
+function ContentAPI__GatewayPost(data as object)
+    path = GlobalGet("apiEndPoints").Gateway
+    headers = { "Content-Type": "application/x-www-form-urlencoded" }
+    response = postRequest(path, data, headers)
+    return handleApiResponse(response)
+end function
+
+' Lectura/escritura de Firestore a traves del gateway. El token va SIEMPRE
+' como campo del form (el gateway no usa el header Authorization).
+function ContentAPI__FirebaseRequest(firebasePath as string, extraData = invalid as dynamic)
     data = {
-        "device": "roku"
-        "client": GlobalGet("appConfig").client
-        "email": params.email,
-        "password": params.password
+        "action": "firebase"
+        "path": firebasePath
+        "token": GetAccessToken()
     }
-    response = postRequest(path, data, headers)
-    return handleApiResponse(response)
+    if isValid(extraData)
+        for each key in extraData
+            data[key] = extraData[key]
+        end for
+    end if
+    return ContentAPI__GatewayPost(data)
 end function
 
-function ContentAPI__SignUp(params as dynamic)
-    path = GlobalGet("apiEndPoints").SignUp
-    headers = GetHeaders()
-    data = {
-        "client": GlobalGet("appConfig").client
-        "device": "roku"
-        "name": params.name,
-        "email": params.email,
-        "password": params.password
-    }
-    response = postRequest(path, data, headers)
-    return handleApiResponse(response)
+' Paso 1 del device linking: pide el codigo que se muestra en pantalla.
+' Respuesta: { data: { device_code, user_code, interval, expires, status } }
+function ContentAPI__GetDeviceCode()
+    return ContentAPI__GatewayPost({ "action": "deviceCode" })
 end function
 
-function ContentAPI__CheckValidToken(params as object)
-    path = GlobalGet("apiEndPoints").AutoLogin
-    headers = GetHeaders()
-    data = params
-    data["client"] = GlobalGet("appConfig").client
-    response = postRequest(path, data, headers)
-    return handleApiResponse(response)
-end function
-
-function ContentAPI__GetProfilesData()
-    path = GlobalGet("apiEndPoints").GetProfilesData
-    headers = GetHeaders()
-    data = {
-        "client": GlobalGet("appConfig").client
-        "token": GlobalGet("token")
-    }
-    response = postRequest(path, data, headers)
-    return handleApiResponse(response)
-end function
-
-function ContentAPI__GetAllAvatar()
-    path = GlobalGet("apiEndPoints").GetAllAvatar
-    headers = GetHeaders()
-    data = {
-        "client": GlobalGet("appConfig").client
-    }
-    response = postRequest(path, data, headers)
-    return handleApiResponse(response)
-end function
-
-
-function ContentAPI__ProfileManagement(action as dynamic, params as dynamic)
-    path = GlobalGet("apiEndPoints").ProfileManagement + action
-    headers = GetHeaders()
-    data = params
-    data["token"] = GlobalGet("token")
-    data["client"] = GlobalGet("appConfig").client
-
-    response = postRequest(path, data, headers)
-    return handleApiResponse(response)
-end function
-
-function ContentAPI__GetDeviceCodeAPI()
-    path = GlobalGet("apiEndPoints").GetDeviceCode
-    headers = GetHeaders()
-    data = {
-        "client": GlobalGet("appConfig").client
-    }
-    response = postRequest(path, data, headers)
-    return handleApiResponse(response)
-end function
-
+' Paso 2: se consulta cada "interval" segundos hasta que el usuario aprueba
+' el dispositivo en la web. Mientras espera devuelve status=error/message=pending.
+' Al aprobar: { data: { access_token, refresh_token, expires_in, token_type, user_id } }
 function ContentAPI__VerifyDevice(params as dynamic)
-    path = GlobalGet("apiEndPoints").VerifyDevice
-    headers = GetHeaders()
-    data = params
-    data["client"] = GlobalGet("appConfig").client
-    response = postRequest(path, data, headers)
-    return handleApiResponse(response)
+    return ContentAPI__GatewayPost({
+        "action": "deviceToken"
+        "device_code": getValueFromProps(params, "deviceCode", "")
+    })
+end function
+
+function ContentAPI__RefreshToken(params as dynamic)
+    return ContentAPI__GatewayPost({
+        "action": "refreshToken"
+        "refresh_token": getValueFromProps(params, "refreshToken", "")
+    })
+end function
+
+' Datos personales del usuario (nombre, genero, fecha de nacimiento...).
+function ContentAPI__GetUserProfile()
+    return ContentAPI__FirebaseRequest("/userProfile/" + GetUserId())
+end function
+
+' Estado de la suscripcion (subscriptionStatus, plans, products, ads_free).
+function ContentAPI__GetUserInfo()
+    return ContentAPI__FirebaseRequest("/userInfo/" + GetUserId())
+end function
+
+' Perfiles de la cuenta: array de documentos Firestore con fields.order/name/avatar.
+function ContentAPI__GetProfilesData()
+    return ContentAPI__FirebaseRequest("/userAccount/" + GetUserId() + "/profiles")
+end function
+
+' URL base de los avatares: se le concatena "<avatar>.jpg" de cada perfil.
+function ContentAPI__GetAvatarBaseUrl()
+    return ContentAPI__FirebaseRequest("/appData/avatars")
+end function
+
+' Un perfil puntual (EditProfileView): { data: { name: {stringValue}, avatar: {stringValue} } }
+function ContentAPI__GetProfileData(params as dynamic)
+    profileOrder = getValueFromProps(params, "profile", "")
+    return ContentAPI__FirebaseRequest("/userAccount/" + GetUserId() + "/profiles/profile-" + profileOrder + "/")
+end function
+
+' TrackingService.getTracking: historial de reproduccion del perfil
+' ({ data: [{ key_rudo, fields: { event_type, seconds, duration } }] }).
+function ContentAPI__GetTracking(params as dynamic)
+    return ContentAPI__FirebaseRequest("/accountTracking/" + GetUserId() + "/history", {
+        "profile": getValueFromProps(params, "profile", "")
+    })
+end function
+
+' TrackingService.updateTracking: guarda el punto de avance de un VOD
+' (event_type "progress" | "end"). Alimenta "Reanudar" y "Seguir viendo".
+function ContentAPI__UpdateTracking(params as dynamic)
+    return ContentAPI__GatewayPost({
+        "action": "contentTracking"
+        "token": GetAccessToken()
+        "profile_id": "profile-" + getValueFromProps(params, "profile", "")
+        "content_id": getValueFromProps(params, "contentId", "")
+        "event_type": getValueFromProps(params, "eventType", "progress")
+        "seconds": getValueFromProps(params, "seconds", "0")
+        "duration": getValueFromProps(params, "duration", "0")
+        "restriction": getValueFromProps(params, "restriction", "0")
+        "title": getValueFromProps(params, "title", "")
+        "show": getValueFromProps(params, "show", "")
+        "image": getValueFromProps(params, "image", "")
+        "path": getValueFromProps(params, "path", "")
+    })
+end function
+
+' FavoriteService.getFavorites: { data: { <id>: { fields: { nid, slug, id_program, status } } } }
+function ContentAPI__GetFavorites(params as dynamic)
+    profileId = "profile-" + getValueFromProps(params, "profile", "")
+    return ContentAPI__FirebaseRequest("/accountMyList/" + GetUserId() + "/categories/" + profileId + "/items")
+end function
+
+' FavoriteService.addFavorite/removeFavorite: mismo POST, status active/inactive.
+function ContentAPI__SaveFavorite(params as dynamic)
+    return ContentAPI__GatewayPost({
+        "action": "saveFavorites"
+        "token": GetAccessToken()
+        "user_id": GetUserId()
+        "profile_id": "profile-" + getValueFromProps(params, "profile", "")
+        "nid": getValueFromProps(params, "nid", "")
+        "tid": getValueFromProps(params, "tid", "")
+        "title": getValueFromProps(params, "title", "")
+        "slug": getValueFromProps(params, "slug", "")
+        "imagen_vertical": getValueFromProps(params, "imagen_vertical", "")
+        "url": getValueFromProps(params, "url", "")
+        "status": getValueFromProps(params, "status", "active")
+    })
+end function
+
+' Canal13GoService.getProgramBySlug: [{ title, description, fondo_imagen, config_id, tid, on_air, video_key, ... }]
+function ContentAPI__GetProgramBySlug(params as dynamic)
+    path = GlobalGet("apiEndPoints").GetProgramBySlug
+    headers = { "Content-Type": "application/json" }
+    return handleApiResponse(getRequest(path + "?v=/programas/" + getValueFromProps(params, "slug", ""), {}, headers))
+end function
+
+' Canal13GoService.getRudoCategoriesVod: [{ name, id, show }]
+function ContentAPI__GetProgramCategories(params as dynamic)
+    path = GlobalGet("apiEndPoints").GetProgramVod
+    headers = { "Content-Type": "application/json" }
+    return handleApiResponse(getRequest(path + getValueFromProps(params, "slug", "") + "/categorias", {}, headers))
+end function
+
+' Canal13GoService.getRudoCategoriesVodChapters: { data: [{ key, title, image, duration, link, restriction, packs }] }
+' La categoria va codificada a mano (puede traer tildes, espacios o "&").
+function ContentAPI__GetProgramChapters(params as dynamic)
+    path = GlobalGet("apiEndPoints").GetProgramVod
+    headers = { "Content-Type": "application/json" }
+    category = getValueFromProps(params, "category", "")
+    url = (path + getValueFromProps(params, "slug", "")).EncodeUri() + "?t=" + category.EncodeUriComponent()
+    return handleApiResponse(getRequest(url, {}, headers, true))
+end function
+
+' Canal13GoService.getProgramByLink: feed/video?v={link del capitulo} ->
+' [{ title, category, show, id, restriccion, vast_app, live_redirect, ... }]
+function ContentAPI__GetEpisodeByLink(params as dynamic)
+    path = GlobalGet("apiEndPoints").GetVideos
+    headers = { "Content-Type": "application/json" }
+    return handleApiResponse(getRequest(path + "?v=" + getValueFromProps(params, "link", ""), {}, headers))
+end function
+
+' RudoService.getVodMediaInfo: { status, data: { key, m3u8, duration, restriction, ... } }
+function ContentAPI__GetVodMediaInfo(params as dynamic)
+    path = GlobalGet("apiEndPoints").GetVodMediaInfo + "/" + getValueFromProps(params, "key", "")
+    headers = { "X-ACCESS-TOKEN": getValueFromProps(GlobalGet("appConfig"), "rudoAccessToken", "") }
+    return handleApiResponse(getRequest(path, {}, headers))
+end function
+
+function ContentAPI__UpdateProfile(params as dynamic)
+    profileOrder = getValueFromProps(params, "profile", "")
+    return ContentAPI__FirebaseRequest("/userAccount/" + GetUserId() + "/profiles/profile-" + profileOrder + "/", {
+        "name": getValueFromProps(params, "name", "")
+        "avatar": getValueFromProps(params, "avatar", "")
+        "store_method": "update"
+    })
+end function
+
+' Firma la reproduccion de un contenido restringido (type = "live" | "vod").
+function ContentAPI__AuthenticateContent(params as dynamic)
+    return ContentAPI__GatewayPost({
+        "action": "authContent"
+        "token": GetAccessToken()
+        "type": getValueFromProps(params, "type", "vod")
+        "id": getValueFromProps(params, "id", "")
+    })
+end function
+
+function GetAccessToken() as string
+    token = GlobalGet("token")
+    if isNonEmptyString(token) then return token
+    return ""
+end function
+
+function GetUserId() as string
+    userId = GlobalGet("userId")
+    if isNonEmptyString(userId) then return userId
+    return ""
 end function
 
 function ContentAPI__GetConfig()
@@ -299,8 +430,15 @@ function ContentAPI__AddRemoveFavourite(params as object)
     return handleApiResponse(response)
 end function
 
+' Favoritos/historial (Paso 4d.5) todavia no esta implementado para 13go - no
+' hay endpoint equivalente cargado en apiEndPoints (ver Global.brs). Estas tres
+' funciones son heredadas de MiCHV; se dejan sin borrar porque HomePage.brs/
+' DetailPage.brs/VideoPlayer.brs ya las llaman, pero devuelven error en vez de
+' crashear (path quedaba Invalid -> Type Mismatch en postRequest, crash real
+' visto en un Roku con telnet conectado apenas el login funciono por primera vez).
 function ContentAPI__GetWatchHistory(params as object)
     path = GlobalGet("apiEndPoints").GetWatchHistory
+    if not isNonEmptyString(path) then return error("GetWatchHistory: endpoint no implementado (pendiente 4d.5)")
     headers = GetHeaders()
     data = params
     data["token"] = GlobalGet("token")
@@ -312,6 +450,7 @@ end function
 
 function ContentAPI__GetAllWatchHistory(params as object)
     path = GlobalGet("apiEndPoints").GetAllWatchHistory
+    if not isNonEmptyString(path) then return error("GetAllWatchHistory: endpoint no implementado (pendiente 4d.5)")
     headers = GetHeaders()
     data = params
     response = postRequest(path, data, headers)
@@ -320,6 +459,7 @@ end function
 
 function ContentAPI__AddWatchHistory(params as object)
     path = GlobalGet("apiEndPoints").AddWatchHistory
+    if not isNonEmptyString(path) then return error("AddWatchHistory: endpoint no implementado (pendiente 4d.5)")
     headers = { "Content-Type": "application/json" }
     data = params
     data["token"] = GlobalGet("token")
