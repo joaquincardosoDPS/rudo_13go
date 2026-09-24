@@ -62,6 +62,9 @@
             <MaskGroup id="mgCircleMask" maskUri="pkg:/images/other/profile_mask.png" maskSize="[176,176]" translation="[8,8]">
                 <Poster id="pCircleCard" width="125" height="125" loadWidth="125" loadHeight="125" translation="[25.5,25.5]" loadDisplayMode="scaleToFit" visible="true" />
             </MaskGroup>
+            <!-- .card.bloqueado .imagen::after: velo #00000075 + candado de 2vw, dentro del circulo -->
+            <Poster id="pCircleLockBg" width="176" height="176" uri="pkg:/images/masks/circle_bg.png" blendColor="#000000" opacity="0.46" translation="[8,8]" visible="false" />
+            <Poster id="pCircleLock" width="38" height="38" uri="pkg:/images/live/lock.png" loadDisplayMode="scaleToFit" translation="[77,77]" visible="false" />
             <Poster id="pCircleRing" width="192" height="192" uri="pkg:/images/masks/circle_ring_thin.png" translation="[0,0]" />
         </Group>
     </children>

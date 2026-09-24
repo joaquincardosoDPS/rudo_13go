@@ -204,7 +204,14 @@ function AddSizeFields(childNode as dynamic)
         if isValid(childNode.format) AND childNode.format = "event" AND isValid(childNode.liveCategory) AND childNode.liveCategory = true
             isCatEvent = true
         end if
-        if isValid(childNode.format) AND childNode.format = "circle"
+        if isValid(childNode.format) AND childNode.format = "tracking"
+            ' "Seguir viendo" (TrackingItem.tsx): tarjeta de 17vw (326) con imagen 16:9
+            ' + epigrafe + titulo; gap 1.83vw (35)
+            m.rowHeights.push(300)
+            m.rowItemSize.push([326, 300])
+            m.rowSpacings.push(70)
+            m.rowItemSpacing.push([35, 100])
+        else if isValid(childNode.format) AND childNode.format = "circle"
             m.rowHeights.push(220)
             m.rowItemSize.push([200, 200])
             m.rowSpacings.push(70)
@@ -298,6 +305,12 @@ sub createDynamicCardsRowList()
     end if
     m.rowList.focusBitmapBlendColor = m.theme.focPrimary
     m.rowList.itemComponentName = "CommonItemComponent"
+    ' "Seguir viendo" dibuja su propia tarjeta y su propio anillo de foco.
+    isTrackingRow = isValid(m.top.category) AND isValid(m.top.category.format) AND m.top.category.format = "tracking"
+    if isTrackingRow
+        m.rowList.itemComponentName = "TrackingCardItem"
+        m.rowList.drawFocusFeedback = false
+    end if
 
     m.rowList.rowLabelFont = m.fonts.dmSansBold32
     m.rowList.rowLabelColor = m.theme.white

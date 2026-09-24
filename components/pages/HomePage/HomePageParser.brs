@@ -19,12 +19,15 @@ function createChildNode(rowNode as dynamic, programs as dynamic, image_orientat
                     itemAA.image_orientation = image_orientation
                     itemAA.format = format
                     itemAA.category_key = rowNode.key
-                    if rowNode.title = "Seguir Viendo"
-                        itemContent = CreateObject("roSGNode", "EpisodeItemNode")
+                    if format = "tracking"
+                        ' "Seguir viendo": los campos de /accountTracking (seconds, show, path...)
+                        ' no estan declarados en ProgramItemNode; update(, true) los crea.
+                        itemContent = CreateObject("roSGNode", "ContentNode")
+                        itemContent.update(itemAA, true)
                     else
                         itemContent = CreateObject("roSGNode", "ProgramItemNode")
+                        itemContent.setFields(itemAA)
                     end if
-                    itemContent.setFields(itemAA)
                     if format = "ranking"
                         itemContent.AddFields({ number: counter })
                     end if

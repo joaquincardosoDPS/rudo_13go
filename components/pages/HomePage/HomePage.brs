@@ -35,27 +35,27 @@ end sub
 sub SetObservers()
     m.top.observeField("focusedChild", "onFocusedChild")
     m.top.observeField("visible", "onVisibleChange")
-    m.scene.observeField("isWatchHistoryFetched", "refreshRowlistContent")
-    m.scene.observeField("updatedContinueWatchData", "onAddUpdateContinueWatchingRow")
 end sub
 
 sub initVar()
     m.categoriesData = invalid
     m.apiInProgress = 0
     m.heroSlider = invalid
-    m.continueWatchingData = invalid
-
-    m.cwSectionIndex = 0
-    m.cwDisplayTitle = ""
     m.categoriesNode = []
-    m.continteWatchingSliderView = invalid
+    ' "Seguir viendo": fila en la posicion del CMS; se vacia/llena al volver al Home
+    m.trackingSlider = invalid
+    m.trackingTitle = ""
+    m.trackingEmpty = true
+    m.homeLoaded = false
     m.isReRenderUI = false
     m.isFirstTime = false
 end sub
 
+' Al volver al Home (ej. despues de ver un capitulo) se vuelve a pedir el
+' historial: en la web el Home se vuelve a montar y lo pide de nuevo.
 sub onVisibleChange()
-    if m.top.visible
-        refreshRowlistContent()
+    if m.top.visible AND m.homeLoaded AND isValid(m.trackingSlider)
+        GetHomeTracking(m.trackingTitle, true)
     end if
 end sub
 
@@ -77,12 +77,10 @@ end sub
 sub onPageDestroy()
     if m.top.isDestroy
         initVar()
-        m.scene.isWatchHistoryFetched = false
-        m.scene.updatedContinueWatchData = {}
         if isValid(m.focusableGroup) then m.focusableGroup.callFunc("clearNodes")
-        if isValid(m.watchHistoryTask)
-            m.watchHistoryTask.control = "stop"
-            m.watchHistoryTask = invalid
+        if isValid(m.trackingTask)
+            m.trackingTask.control = "stop"
+            m.trackingTask = invalid
         end if
         if isValid(m.getFeaturedSliderProgramsTask)
             m.getFeaturedSliderProgramsTask.control = "stop"
@@ -99,101 +97,131 @@ sub Initialize()
     m.rowSpacing = 134
     m.focusableGroup.rowSpacing = m.rowSpacing
     GetHomeSections()
-    fetchAndStoreWatchHistory()
-
 end sub
 
-' Continue Watching
-sub refreshRowlistContent()
-    if m.scene.isWatchHistoryFetched AND m.top.visible
-        m.scene.isWatchHistoryFetched = false
-        fetchAndStoreWatchHistory()
+' ===================================================================
+' "Seguir viendo" (SeguirViendoSection + TrackingListCarousel + use-home-data.ts)
+' -------------------------------------------------------------------
+' El historial del perfil (/accountTracking/{uid}/history): solo los
+' event_type "progress" con menos del 95% visto, hasta 10. Sin sesion o sin
+' items la fila no se muestra (la web devuelve null).
+' ===================================================================
+sub GetHomeTracking(rowTitle as string, isRefresh = false as boolean)
+    m.trackingTitle = rowTitle
+    profile = getValueFromProps(m.scene.ProfileData, "profileId", "")
+    if m.scene.isUserLoggedIn <> true OR not isNonEmptyString(profile)
+        if not isRefresh then ProcessNextHomeSection()
+        return
     end if
+    if isValid(m.trackingTask) then m.trackingTask.control = "stop"
+    m.trackingIsRefresh = isRefresh
+    m.trackingTask = CreateObject("roSGNode", "AuthAPIAction")
+    m.trackingTask.functionName = "GetTracking"
+    m.trackingTask.params = { profile: profile }
+    m.trackingTask.ObserveField("result", "OnGetHomeTrackingResponse")
+    m.trackingTask.control = "RUN"
 end sub
 
-sub fetchAndStoreWatchHistory()
-    if m.scene.isUserLoggedIn
-        m.apiInProgress++
-        if isValid(m.watchHistoryTask)
-            m.watchHistoryTask.control = "STOP"
-            m.watchHistoryTask = invalid
-        end if
-        params = {}
-        params["client"] = GlobalGet("appConfig").client
-        params["token"] = GlobalGet("token")
-        params["profile"] = GlobalGet("selectedProfileID")
-        params["end"] = 0
-        ' params["page"] = 1
-        ' params["limit"] = GlobalGet("appConfig").pageSize
-        m.watchHistoryTask = CreateObject("roSGNode", "ContentAPIAction")
-        m.watchHistoryTask.functionName = "GetAllWatchHistory"
-        m.watchHistoryTask.params = params
-        m.watchHistoryTask.observeField("result", "onGetAllWatchHistoryResponse")
-        m.watchHistoryTask.control = "RUN"
+sub OnGetHomeTrackingResponse(event as dynamic)
+    m.trackingTask = invalid
+    rawItems = getValueFromProps(event.getData(), "data.data", [])
+    items = []
+    if isNotEmptyArray(rawItems)
+        for each raw in rawItems
+            fields = getValueFromProps(raw, "fields", {})
+            if getValueFromProps(fields, "event_type.stringValue", "") = "progress"
+                seconds = convertToNumber(getValueFromProps(fields, "seconds.integerValue", "0"))
+                duration = convertToNumber(getValueFromProps(fields, "duration.integerValue", "0"))
+                if not (duration > 0 AND seconds / duration >= 0.95)
+                    items.Push({
+                        key: getValueFromProps(raw, "key_rudo", "")
+                        image: getValueFromProps(fields, "image.stringValue", "")
+                        show: getValueFromProps(fields, "show.stringValue", "")
+                        title: getValueFromProps(fields, "title.stringValue", "")
+                        seconds: seconds
+                        duration: duration
+                        path: getValueFromProps(fields, "path.stringValue", "")
+                        restriction: getValueFromProps(fields, "restriction.stringValue", "0")
+                    })
+                end if
+            end if
+            if items.count() >= 10 then exit for
+        end for
     end if
-end sub
-
-sub onGetAllWatchHistoryResponse(event as dynamic)
-    response = event.getData()
-    print "onGetAllWatchHistoryResponse >>>> response : " 'formatjson(response)
-    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND isValid(response.data.data.count() > 0)
-        data = response.data.data
-        catData = {}
-        catData.title = "Seguir Viendo"
-        catData.format = "default"
-        catData.image_orientation = "landscape"
-        catData.liveCategory = false
-        catData.image_background_category = {} 
-        catData.image_logo_category = {} 
-        catData.key = "Seguir Viendo"
-        catData.total_display_records = 10
-        catData.total_records = 10
-        catData.last_page = 1
-        catData.programs = data
-        if m.continueWatchingData = invalid
-            m.continueWatchingData = catData
-        else
-            m.scene.updatedContinueWatchData = catData
-        end if
-    end if
-    m.apiInProgress--
-    if m.isFirstTime = false then createDynamicRowList()
-    m.watchHistoryTask = invalid
-end sub
-
-sub CreateSilderViewForContinueWatching()
-    if isValid(m.continueWatchingData) AND m.continueWatchingData.count() > 0
-        catNode = rowListDataParser(m.continueWatchingData)
-        if isValid(catNode) AND isValid(m.continteWatchingSliderView)
-            m.continteWatchingSliderView.category = m.continueWatchingData
-            m.continteWatchingSliderView.content = catNode
-        end if
-    end if
-end sub
-
-sub onAddUpdateContinueWatchingRow()
-    continueWatchingData = m.scene.updatedContinueWatchData
     catNode = invalid
-    if isValid(continueWatchingData) AND continueWatchingData.count() > 0
-        catNode = rowListDataParser(continueWatchingData)
-        if isValid(catNode) AND isValid(m.continteWatchingSliderView)
-            m.continteWatchingSliderView.category = continueWatchingData
-        end if
+    catData = invalid
+    if items.count() > 0
+        catData = {
+            title: m.trackingTitle
+            format: "tracking"
+            image_orientation: "landscape"
+            liveCategory: false
+            image_background_category: {}
+            image_logo_category: {}
+            key: "seguirviendo"
+            total_display_records: items.count()
+            total_records: items.count()
+            programs: items
+        }
+        catNode = rowListDataParser(catData)
     end if
-    if isValid(m.continteWatchingSliderView) then checkRefreshNodes(m.continteWatchingSliderView, catNode)
-end sub
-
-sub createLastWatchedSlider()
+    if m.trackingIsRefresh = true
+        ApplyTrackingRefresh(catData, catNode)
+        return
+    end if
+    ' Primera carga: la fila queda en su lugar del CMS aunque venga vacia, para
+    ' poder llenarla al volver al Home despues de ver algo.
     sliderView = createObject("roSGNode", "SliderView")
     sliderView.ObserveField("itemSelected", "onRowItemSelected")
     sliderView.ObserveField("itemFocused", "onRowItemFocused")
     sliderView.id = "seguirviendo"
-    sliderView.componentHeight = 180 + 50
-    m.continteWatchingSliderView = sliderView
+    sliderView.componentHeight = 300 + 50
+    m.trackingSlider = sliderView
+    m.trackingEmpty = not isValid(catNode)
+    if isValid(catNode)
+        sliderView.category = catData
+        sliderView.content = catNode
+    end if
     m.categoriesNode.push(sliderView)
-    CreateSilderViewForContinueWatching()
+    ProcessNextHomeSection()
 end sub
-' End Continue Watching
+
+' Ya tenia items y sigue teniendo: se reemplazan sin tocar el foco. Si aparece o
+' desaparece, se vuelven a acomodar las filas.
+sub ApplyTrackingRefresh(catData as dynamic, catNode as dynamic)
+    slider = m.trackingSlider
+    if not isValid(slider) then return
+    hasRowList = isValid(slider.content) AND slider.content.getChildCount() > 0
+    if isValid(catNode)
+        slider.category = catData
+        if hasRowList
+            slider.updateContent = catNode
+        else
+            slider.content = catNode
+        end if
+        if not m.trackingEmpty then return
+        m.trackingEmpty = false
+    else
+        if m.trackingEmpty then return
+        m.trackingEmpty = true
+    end if
+    RenderHomeRows()
+end sub
+
+' La fila de "Seguir viendo" vacia no se dibuja (su RowList queda armado).
+function IsRowRenderable(node as dynamic) as boolean
+    if not isValid(node) then return false
+    if isValid(m.trackingSlider) AND node.isSameNode(m.trackingSlider) AND m.trackingEmpty then return false
+    return (isValid(node.content) AND node.content.getChildCount() > 0) OR node.subtype() = "HeroSlider" OR node.subtype() = "MonumentalCard"
+end function
+
+sub RenderHomeRows()
+    m.focusableGroup.callFunc("clearNodes")
+    for each node in m.categoriesNode
+        if IsRowRenderable(node) then m.focusableGroup.callFunc("setTranslation", node)
+    end for
+    manageFocus()
+end sub
 
 sub GetHomeSections()
     m.apiInProgress++
@@ -269,8 +297,12 @@ sub ProcessNextHomeSection()
         else
             ProcessNextHomeSection()
         end if
+    else if despliegue = "seguirviendo"
+        title = section.titulo
+        if not isNonEmptyString(title) then title = "Seguir viendo"
+        GetHomeTracking(title)
     else
-        ' seguirviendo / favoritos / bannerpromo / preguntasfrecuentes: sin fetch propio por ahora
+        ' favoritos / bannerpromo / preguntasfrecuentes: sin fetch propio por ahora
         ProcessNextHomeSection()
     end if
 end sub
@@ -418,6 +450,8 @@ sub OnGetHomeSenalesAPIResponse(event as dynamic)
             ringColor: raw.color_principal
             format: "circle"
             type: "senal"
+            ' PlaylistItemCarousel: candado si validateRestriction(restriction, packs)
+            blocked: ValidateRestriction(getValueFromProps(raw, "restriction", "0"), getValueFromProps(raw, "packs", []))
         })
     end for
     PushHomeRow(m.pendingRowTitle, items, "circle", 270)
@@ -544,7 +578,6 @@ sub createDynamicRowList()
     ' catData = MergedCategoriesData()
     if isValid(m.categoriesData) AND m.categoriesData.count() > 0
         bufferSize = 50
-        createLastWatchedSlider()
         for each catData in m.categoriesData
             componentHeight = 180
             if catData.image_orientation = "landscape"
@@ -572,10 +605,9 @@ sub createDynamicRowList()
         end for
     end if
     for each node in m.categoriesNode
-        if (isValid(node) AND ((isValid(node.content) AND node.content.getChildCount() > 0) OR node.subtype() = "HeroSlider" OR node.subtype() = "MonumentalCard"))
-            m.focusableGroup.callFunc("setTranslation", node)
-        end if
+        if IsRowRenderable(node) then m.focusableGroup.callFunc("setTranslation", node)
     end for
+    m.homeLoaded = true
     manageFocus()
     if (isNonEmptyString(m.scene.deepLinkingContentId) AND isValid(m.scene.deeplinkingData) AND isValid(m.scene.deeplinkingData.programid) AND isNonEmptyString(m.scene.DeeplinkingMediaType))
         m.scene.isDeeplinking = true

@@ -39,6 +39,8 @@ sub SetControls()
     m.gCircle = m.top.findNode("gCircle")
     m.pCircleCard = m.top.findNode("pCircleCard")
     m.pCircleRing = m.top.findNode("pCircleRing")
+    m.pCircleLockBg = m.top.findNode("pCircleLockBg")
+    m.pCircleLock = m.top.findNode("pCircleLock")
 
     m.gEpisodeCard = m.top.findNode("gEpisodeCard")
     m.mgEBorderMask = m.top.findNode("mgEBorderMask")
@@ -148,6 +150,9 @@ sub itemContent_Changed()
         ringColor = m.theme.focPrimary
         if isNonEmptyString(itemContent.ringColor) then ringColor = itemContent.ringColor
         m.pCircleRing.blendColor = ringColor
+        blocked = itemContent.blocked = true
+        m.pCircleLockBg.visible = blocked
+        m.pCircleLock.visible = blocked
         m.gCircle.visible = true
     else if isValid(itemContent) AND isValid(itemContent.image_orientation) AND itemContent.image_orientation = "portrait"
         if isValid(itemContent.type) AND (itemContent.type = "live" OR itemContent.type = "program") AND isValid(itemContent.gmt0_unlocked) AND itemContent.gmt0_unlocked <> ""

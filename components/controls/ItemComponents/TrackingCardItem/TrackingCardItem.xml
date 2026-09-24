@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tarjeta de "Seguir viendo" (TrackingItem.tsx, .componente.grilla-capitulos
+     .card de 17vw): imagen 16:9 con esquinas de 10px, brightness(.5) sin foco,
+     duracion abajo a la derecha, barra de avance naranja de 6px pegada abajo y,
+     debajo, el programa (epigrafe) y el capitulo en negrita. Item de un RowList. -->
+<component name="TrackingCardItem" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/controls/ItemComponents/TrackingCardItem/TrackingCardItem.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="itemContent" type="node" onChange="OnContentChange" />
+        <field id="focusPercent" type="float" onChange="OnFocusChange" />
+        <field id="itemHasFocus" type="boolean" onChange="OnFocusChange" />
+        <field id="rowListHasFocus" type="boolean" onChange="OnFocusChange" />
+        <field id="rowHasFocus" type="boolean" onChange="OnFocusChange" />
+    </interface>
+    <children>
+        <Rectangle id="rImageBg" width="326" height="183" color="#333333" />
+        <Poster id="pImage" width="326" height="183" loadWidth="326" loadHeight="183" loadDisplayMode="scaleToZoom" blendColor="#808080" />
+        <Poster id="pDurationFade" uri="pkg:/images/program/chapter_duration_fade.png" width="326" height="183" visible="false" />
+        <Label id="lDuration" width="310" height="30" horizAlign="right" vertAlign="bottom" translation="[0,142]" />
+        <!-- .progress-bar: 6px #FA6428 abajo, ancho = segundos / duracion -->
+        <Rectangle id="rProgress" width="0" height="6" color="#FA6428" translation="[0,177]" />
+        <!-- Esquinas redondeadas con marco #08090C (sin MaskGroup) y anillo de foco de 4px -->
+        <Poster id="pFrame" uri="pkg:/images/home/tracking_frame.png" width="326" height="183" />
+        <Poster id="pFocus" uri="pkg:/images/home/tracking_focus_ring.png" width="326" height="183" visible="false" />
+        <!-- .data: margin-top 1.3vw (25px) -->
+        <Label id="lEpigrafe" width="326" height="28" vertAlign="center" translation="[0,208]" />
+        <Label id="lTitle" width="326" wrap="true" maxLines="2" lineSpacing="-2" translation="[0,238]" />
+    </children>
+</component>
