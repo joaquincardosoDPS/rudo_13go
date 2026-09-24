@@ -284,6 +284,7 @@ sub OnGetConfigAPIResponse(event as dynamic)
     GlobalSet("logo", logo)
     GlobalSet("backgroundImage", background_image)
     m.getConfigTask = invalid
+    StartSplash(getValueFromProps(response, "splash_tv", ""))
     RestoreSession()
 end sub
 
@@ -323,7 +324,7 @@ end sub
 sub StartAsGuest()
     m.authData = invalid
     ShowHideLoader(false)
-    StartApp()
+    StartAfterSplash("login")
 end sub
 
 sub RefreshSessionToken()
@@ -434,11 +435,10 @@ sub OnGetUserInfoAPIResponse(event as dynamic)
         print "MainScene : OnGetUserInfoAPIResponse : relanzamiento con perfil guardado, StartApp directo"
         GlobalSet("selectedProfileID", savedProfile.profileId)
         m.top.ProfileData = savedProfile
-        StartApp()
+        StartAfterSplash("home")
     else
         print "MainScene : OnGetUserInfoAPIResponse : mostrando selector de perfiles (skipIfSaved=" m.skipProfilePickerIfSaved " hasSavedProfile=" hasSavedProfile ")"
-        StartApp()
-        ShowEditorProfilesPage(false)
+        StartAfterSplash("picker")
     end if
 end sub
 
@@ -489,6 +489,59 @@ sub RefreshVisiblePageForProfile()
             showCategoryDetailPage(categoryContent, true)
         end if
     end if
+end sub
+
+' ===================================================================
+' Splash en video (SplashView.tsx): splash_tv del feed de configuracion. Se
+' muestra una sola vez al abrir el canal (no con un deep link) y la primera
+' pantalla espera a que termine, como el handleNavigate de la web. La sesion
+' se sigue restaurando por detras mientras se ve el video.
+' ===================================================================
+sub StartSplash(url as string)
+    if m.splashShown = true OR not isNonEmptyString(url) OR IsValidDeepLinkingParams() then return
+    m.splashShown = true
+    m.splashPlaying = true
+    m.splash = CreateObject("roSGNode", "SplashScreen")
+    m.splash.id = "SplashScreen"
+    m.splash.observeField("finished", "OnSplashFinished")
+    m.top.appendChild(m.splash)
+    m.splash.setFocus(true)
+    m.splash.url = url
+end sub
+
+sub OnSplashFinished()
+    if not isValid(m.splash) then return
+    m.splash.unobserveField("finished")
+    m.top.removeChild(m.splash)
+    m.splash = invalid
+    m.splashPlaying = false
+    ' Si la sesion ya resolvio a donde ir, se va; si no, queda el spinner hasta
+    ' que termine (RestoreSession/OnGetUserInfoAPIResponse llaman StartAfterSplash).
+    if isValid(m.pendingStart)
+        pending = m.pendingStart
+        m.pendingStart = invalid
+        StartAfterSplash(pending.target)
+    else
+        ShowHideLoader(true)
+    end if
+end sub
+
+' Primera pantalla, apenas termina el splash (handleNavigate de SplashView):
+' "login" sin sesion (en la web todo lo demas esta detras del AuthGuard y
+' redirige a /login), "picker" con sesion recien resuelta ("Quien anda ahi?"
+' sobre la Portada) y "home" al relanzar con un perfil ya elegido.
+sub StartAfterSplash(target as string)
+    if m.splashPlaying = true
+        m.pendingStart = { target: target }
+        return
+    end if
+    ShowHideLoader(false)
+    if target = "login"
+        ShowOnboardingPage(true)
+        return
+    end if
+    StartApp()
+    if target = "picker" then ShowEditorProfilesPage(false)
 end sub
 
 sub StartApp()
@@ -618,8 +671,8 @@ sub OnLogoutUser()
         profileUri: m.defaultProfileUri
     }
     m.viewStackManager.HideAll()
-    UpdateSelectedTopMenu(1)
-    showHomePage(true)
+    ' Como la web: sin usuario el AuthGuard manda a /login.
+    ShowOnboardingPage(true)
 end sub
 
 ' Destino del item "Mi cuenta" del sidebar: con sesion abierta es una seccion
@@ -1349,7 +1402,7 @@ function HandleBackKey() as boolean
             result = true
         else if m.exitCalled = false
             If(m.viewStackManager.GetViewCount() = 1) then
-                if (m.TopMenu = invalid OR (isValid(m.TopMenu) AND (m.TopMenu.hasFocus() OR m.TopMenu.IsInFocusChain())))
+                if (m.TopMenu = invalid OR not m.gTopMenu.visible OR (isValid(m.TopMenu) AND (m.TopMenu.hasFocus() OR m.TopMenu.IsInFocusChain())))
                     If(m.exitPopUpOpened = false OR m.exitCalled = false)
                         ShowHideExitConfirmation()
                         result = true

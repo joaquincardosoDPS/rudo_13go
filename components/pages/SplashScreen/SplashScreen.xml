@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash en video, calcado de c13_reloaded/src/pages/Splash/SplashView.tsx:
+     el video "splash_tv" del feed de configuracion a pantalla completa sobre
+     negro; al terminar (o si falla) avisa con "finished" y la app sigue. Va
+     encima de todo y se queda con las teclas mientras se reproduce. -->
+<component name="SplashScreen" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/pages/SplashScreen/SplashScreen.brs" />
+    <interface>
+        <field id="url" type="string" onChange="OnUrlSet" />
+        <field id="finished" type="boolean" value="false" alwaysNotify="true" />
+    </interface>
+    <children>
+        <Rectangle id="rBackground" width="1920" height="1080" color="#000000" />
+        <Video id="video" width="1920" height="1080" enableUI="false" />
+        <!-- Si el video no arranca a tiempo (red lenta, codec), se sigue igual -->
+        <Timer id="startTimeout" duration="8" repeat="false" />
+    </children>
+</component>
