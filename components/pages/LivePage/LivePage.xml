@@ -2,6 +2,7 @@
 <component name="LivePage" extends="Group">
     <script type="text/brightscript" uri="LivePage.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/PlayerUtils.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <interface>

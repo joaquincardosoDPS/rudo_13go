@@ -200,3 +200,21 @@ sub SetUrlParam(params as object, key as string, value as string)
     end for
     params.Push({ key: key, value: value })
 end sub
+
+' DAI de Google (DAIPlayerTask) para una senal en vivo. La pagina observa
+' urlData (URL del stream con anuncios) y errors (sigue con el stream normal).
+function NewLiveDaiTask(video as object, assetKey as string, contentId as string) as object
+    task = CreateObject("roSGNode", "DAIPlayerTask")
+    task.video = video
+    task.streamData = { assetKey: assetKey, type: "live", contentId: contentId }
+    return task
+end function
+
+' Termina el loop de la task (no se puede matar un hilo: se le avisa con "stop").
+sub StopLiveDaiTask(task as dynamic)
+    if task = invalid then return
+    task.unobserveField("urlData")
+    task.unobserveField("errors")
+    task.unobserveField("adPlaying")
+    task.stop = true
+end sub

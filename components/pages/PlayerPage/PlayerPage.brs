@@ -13,6 +13,8 @@ sub Init()
     m.adsTimeout.observeField("fire", "OnAdsTimeout")
     m.adsPlaying = false
     m.adsTask = invalid
+    m.useDai = false
+    m.daiTask = invalid
     m.lError = m.top.findNode("lError")
     m.lError.font = m.global.fonts.dmSansMedium32
     m.lError.color = m.theme.white
@@ -44,6 +46,7 @@ sub OnParamsSet()
     ' Otro capitulo en la misma pagina ("A continuacion" o el panel de
     ' episodios, el navigate(ep.link) de la web): se corta el anterior.
     if m.adsPlaying then FinishPreroll()
+    StopDai()
     if isValid(m.info)
         m.video.control = "stop"
         m.info = invalid
@@ -145,8 +148,8 @@ end sub
 ' /player/live (LiveDirectPlayerView.tsx), desde una tarjeta de Destacados que
 ' es una senal en vivo: sin cadena de capitulos, el m3u8 sale de la media info
 ' de rudo con la key de la tarjeta (firmado si es restringido) y se reproduce en
-' modo en vivo (sin barra, sin panel de episodios ni tracking). Si trae
-' DPSDAIAssetKey se usa el stream de DAI. Back vuelve al Home.
+' modo en vivo (sin barra, sin panel de episodios ni tracking). Si es libre y
+' trae DPSDAIAssetKey, el stream va por DAI de Google. Back vuelve al Home.
 sub StartLiveDirect(live as object)
     restriction = getValueFromProps(live, "restriction", "0")
     packs = getValueFromProps(live, "packs", [])
@@ -235,10 +238,9 @@ sub StartPlayback(mediaUrl as string)
         vastUrl: getValueFromProps(m.episode, "vast_app", "")
         isLive: isLive
     }
-    ' streamUrl de LiveDirectPlayerView: con DPSDAIAssetKey, el stream de DAI.
-    if isLive AND isNonEmptyString(m.liveDaiAssetKey)
-        mediaUrl = "https://dai.google.com/linear/hls/event/" + m.liveDaiAssetKey + "/master.m3u8"
-    end if
+    ' Con DPSDAIAssetKey, DAI con el SDK de Google (como el reproductor de Rudo
+    ' de 13go.cl: solo en senales libres; en las de suscripcion, el m3u8 firmado).
+    m.useDai = isLive AND isNonEmptyString(m.liveDaiAssetKey) AND m.info.restriction = "0"
     ' La misma sesion DPS va en el video y en la URL del anuncio.
     session = GetDpsSessionParams()
     url = ForceSessionParams(mediaUrl, session)
@@ -292,6 +294,8 @@ end sub
 function ShouldPlayAds() as boolean
     vastUrl = m.info.vastUrl
     if not isNonEmptyString(vastUrl) OR vastUrl.Trim() = "" OR vastUrl = "none" then return false
+    ' En vivo, como el reproductor de Rudo: el anuncio va para todos (ads_free no aplica).
+    if m.info.isLive then return true
     user = GlobalGet("UserData")
     policy = getValueFromProps(GlobalGet("homeConfig"), "ads_free", invalid)
     if not isValid(policy) OR type(policy) <> "roAssociativeArray"
@@ -369,12 +373,86 @@ sub PlayContent()
     if not isValid(m.pendingContent) then return
     content = m.pendingContent
     m.pendingContent = invalid
+    if m.useDai = true
+        StartDai(content)
+        return
+    end if
     ShowLoading(false)
     m.video.content = content
     m.video.control = "play"
     ' La UI arranca visible (isUIVisible = true) y se oculta a los 4s.
     m.controls.callFunc("ShowControls")
     m.qualitiesTask = RunTask("ContentAPIAction", "GetTextByUrl", { url: m.masterUrl }, "OnMasterPlaylistResponse")
+end sub
+
+' ---- DAI en vivo (DAIPlayerTask) ----
+
+' El contenido normal queda de respaldo si Google no entrega el stream.
+sub StartDai(content as object)
+    print "PlayerPage : DAI assetKey " m.liveDaiAssetKey
+    ShowLoading(true)
+    m.daiFallbackContent = content
+    m.daiTask = NewLiveDaiTask(m.video, m.liveDaiAssetKey, m.info.key)
+    m.daiTask.observeField("urlData", "OnDaiUrl")
+    m.daiTask.observeField("errors", "OnDaiErrors")
+    m.daiTask.control = "RUN"
+    if not isValid(m.daiTimer)
+        m.daiTimer = CreateObject("roSGNode", "Timer")
+        m.daiTimer.duration = 20
+        m.daiTimer.observeField("fire", "OnDaiTimeout")
+    end if
+    m.daiTimer.control = "stop"
+    m.daiTimer.control = "start"
+end sub
+
+sub StopDai()
+    if isValid(m.daiTimer) then m.daiTimer.control = "stop"
+    if isValid(m.daiTask)
+        StopLiveDaiTask(m.daiTask)
+        m.daiTask = invalid
+    end if
+end sub
+
+sub OnDaiUrl(event as dynamic)
+    if not isValid(m.daiTask) OR IsStale() then return
+    m.daiTimer.control = "stop"
+    url = getValueFromProps(event.getData(), "manifest", "")
+    if not isNonEmptyString(url)
+        DaiFallback("sin manifest")
+        return
+    end if
+    print "PlayerPage : stream DAI : " url
+    content = m.daiFallbackContent
+    content.url = url
+    format = getValueFromProps(event.getData(), "format", "")
+    if isNonEmptyString(format) then content.streamFormat = format
+    ' Variantes de la misma sesion de DAI: el SDK sigue midiendo al cambiar.
+    m.masterUrl = url
+    m.daiFallbackContent = invalid
+    ShowLoading(false)
+    m.video.content = content
+    m.video.control = "play"
+    m.controls.callFunc("ShowControls")
+    m.qualitiesTask = RunTask("ContentAPIAction", "GetTextByUrl", { url: m.masterUrl }, "OnMasterPlaylistResponse")
+end sub
+
+sub OnDaiErrors(event as dynamic)
+    if not isValid(m.daiTask) OR IsStale() then return
+    DaiFallback(FormatJson(event.getData()))
+end sub
+
+sub OnDaiTimeout()
+    if not isValid(m.daiTask) then return
+    DaiFallback("Google no entrego el stream en 20s")
+end sub
+
+sub DaiFallback(reason as string)
+    print "PlayerPage : DAI no disponible (" reason "), stream normal"
+    StopDai()
+    m.useDai = false
+    m.pendingContent = m.daiFallbackContent
+    m.daiFallbackContent = invalid
+    PlayContent()
 end sub
 
 sub OnVideoStateChange()
@@ -590,6 +668,7 @@ sub OnVisibleChange()
     if not m.top.visible
         m.cancelled = true
         if m.adsPlaying then FinishPreroll()
+        StopDai()
         m.controls.callFunc("HideControls")
         ShowLoading(false)
         m.video.control = "stop"

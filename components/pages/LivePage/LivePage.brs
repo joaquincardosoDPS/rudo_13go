@@ -30,6 +30,8 @@ sub setLocals()
     m.rowGap = 5
     m.clipHeight = 441
     m.gridWidth = 1721
+    m.adsPlaying = false
+    m.adsTask = invalid
 end sub
 
 sub setControls()
@@ -83,6 +85,8 @@ end sub
 
 sub onVisibleChange(event as dynamic)
     if not event.getData()
+        finishPreroll()
+        stopDai()
         if isValid(m.vLive)
             m.vLive.control = "stop"
             m.vLive.content = invalid
@@ -107,6 +111,8 @@ end sub
 
 sub onPageDestroy()
     if m.top.isDestroy
+        finishPreroll()
+        stopDai()
         if isValid(m.vLive)
             m.vLive.control = "stop"
             m.vLive.content = invalid
@@ -201,16 +207,13 @@ function isoToEpoch(iso as string) as integer
     return days * 86400 + h * 3600 + mi * 60 + s
 end function
 
-' Nombre del programa de un evento del EPG. En algunas senales (Canal 13, 13
-' Internacional, Ecuavisa) el "title" de cada bloque es el nombre del canal y el
-' programa real viene en "episodeTitle" ("Tu Dia", "Teletrece Tarde"...); en el
-' resto "title" ya es el programa. La web muestra siempre "title" (se ve "Canal 13"
-' en todos los bloques); aca se usa episodeTitle solo cuando title es el canal.
-function ProgramTitle(ev as object, epgChannel as string) as string
-    title = getValueFromProps(ev, "title", "")
+' Nombre de un bloque del EPG: como la grilla de 13go.cl, el del episodio
+' ("episodeTitle": "Machos | Capitulo 100", "Tu Dia"...) y, si no viene, "title"
+' (en algunas senales "title" es solo el nombre del canal o de la serie).
+function ProgramTitle(ev as object) as string
     episodeTitle = getValueFromProps(ev, "episodeTitle", "")
-    if isNonEmptyString(episodeTitle) AND (not isNonEmptyString(title) OR LCase(title.Trim()) = epgChannel) then return episodeTitle
-    return title
+    if isNonEmptyString(episodeTitle) then return episodeTitle
+    return getValueFromProps(ev, "title", "")
 end function
 
 function epochToLocalHHMM(epoch as integer) as string
@@ -237,14 +240,13 @@ sub buildChannels()
         for each epgItem in m.programation
             if getValueFromProps(epgItem, "key_live", "") = keyLive
                 events = getValueFromProps(epgItem, "events", [])
-                epgChannel = LCase(getValueFromProps(epgItem, "channel", "").Trim())
                 for each ev in events
                     endE = isoToEpoch(getValueFromProps(ev, "endTime", ""))
                     if endE > nowE
                         if programs.count() >= 5 then exit for
                         beginE = isoToEpoch(getValueFromProps(ev, "beginTime", ""))
                         programs.push({
-                            "title": ProgramTitle(ev, epgChannel)
+                            "title": ProgramTitle(ev)
                             "timeText": epochToLocalHHMM(beginE)
                             "isLive": (nowE >= beginE AND nowE <= endE)
                         })
@@ -261,7 +263,12 @@ sub buildChannels()
             "color": getValueFromProps(item, "color", "")
             "preview_m3u8": getValueFromProps(item, "preview_m3u8", "")
             "m3u8": getValueFromProps(item, "m3u8", "")
-            "blocked": (restriction <> "0")
+            ' validateRestriction, como LiveGridRow de la web: un suscriptor cuyo plan
+            ' incluye la senal no la ve bloqueada.
+            "blocked": ValidateRestriction(restriction, getValueFromProps(item, "packs", []))
+            "restriction": restriction
+            "assetKey": getValueFromProps(item, "assetKey", "")
+            "vast": getValueFromProps(item, "vast", "")
             "programs": programs
         })
     end for
@@ -295,8 +302,205 @@ sub selectChannel(index as integer)
     if ch.blocked then return
     m.selectedIndex = index
     updateHeader(ch)
-    playUrl(ch.preview_m3u8, ch.m3u8)
     hideOverlay()
+    finishPreroll()
+    stopDai()
+    ' Reproductor de Rudo (haveAds = 1 en todas las senales, sin mirar al
+    ' usuario): primero el anuncio VAST y recien despues el stream (DAI, firmado
+    ' o normal).
+    if isNonEmptyString(ch.vast)
+        startPreroll(index)
+        return
+    end if
+    playChannel(index)
+end sub
+
+' El stream de la senal elegida, una vez terminado el anuncio.
+sub playChannel(index as integer)
+    ch = m.channels[index]
+    ' Reproductor de Rudo (13go.cl): las senales libres con assetKey van por DAI
+    ' de Google (DAI=1); las de suscripcion nunca (DAI=0, stream de DPS con token).
+    if ch.restriction = "0" AND isNonEmptyString(ch.assetKey)
+        startDai(index)
+        return
+    end if
+    ' LivePlayerContainer: las senales de suscripcion (restriction distinta de 0
+    ' y 2) se firman con authContent (type live, id = assetKey). Sin token (o sin
+    ' assetKey) se sigue con el stream normal, como la web.
+    if ch.restriction <> "0" AND ch.restriction <> "2" AND isNonEmptyString(ch.assetKey)
+        if isValid(m.liveAuthTask) then m.liveAuthTask.control = "stop"
+        m.liveAuthIndex = index
+        m.liveAuthTask = CreateObject("roSGNode", "AuthAPIAction")
+        m.liveAuthTask.functionName = "AuthenticateContent"
+        m.liveAuthTask.params = { type: "live", id: ch.assetKey }
+        m.liveAuthTask.observeField("result", "onLiveAuthResponse")
+        m.liveAuthTask.control = "RUN"
+        return
+    end if
+    playUrl(ch.preview_m3u8, ch.m3u8)
+end sub
+
+sub onLiveAuthResponse(event as dynamic)
+    m.liveAuthTask = invalid
+    ' Si mientras tanto se eligio otra senal, esta respuesta ya no sirve.
+    if m.liveAuthIndex <> m.selectedIndex then return
+    ch = m.channels[m.selectedIndex]
+    token = getValueFromProps(event.getData(), "data.data.access_token", "")
+    if not isNonEmptyString(token) then token = getValueFromProps(event.getData(), "data.access_token", "")
+    ' El gateway puede entregar el token ya codificado (event%3D...): se deja
+    ' tal cual lo usa el reproductor de 13go.cl (auth-token=event=...~exp=...~hmac=...).
+    ' Codificarlo de nuevo lo arruina y Google/DPS responden 401.
+    if isNonEmptyString(token) AND Instr(1, token, "%") > 0 then token = token.DecodeUriComponent()
+    if isNonEmptyString(token)
+        print "LivePage : senal autenticada : " ch.name_live
+        playUrl(BuildLiveTokenUrl(ch.m3u8, token), ch.preview_m3u8)
+    else
+        print "LivePage : no se pudo autenticar la senal : " FormatJson(event.getData())
+        playUrl(ch.preview_m3u8, ch.m3u8)
+    end if
+end sub
+
+' buildLiveUrl de use-hls-player.ts: el primer tramo despues de /hls/ del m3u8
+' de la senal va a redirector.dps.live con el token como auth-token (sin volver a
+' codificarlo: los = y ~ del token van tal cual, como en el sitio).
+function BuildLiveTokenUrl(src as string, token as string) as string
+    match = CreateObject("roRegex", "/hls/([^/]+)/", "").Match(src)
+    if match.count() < 2 then return src
+    return "https://redirector.dps.live/hls/" + match[1] + "/playlist.m3u8?auth-token=" + token
+end function
+
+'===> Anuncio VAST al elegir la senal (el adsURL/VMAP del reproductor de Rudo)
+' El campo vast de la senal es el VMAP de Rudo para apps
+' (rudo.video/ads/vmap/live/{slug}?app=true): un solo preroll de Google, que RAF
+' resuelve tal cual. Sin anuncio, con error o si en 10s no empezo (el
+' prerollTimeout de Rudo), sigue el stream.
+sub startPreroll(index as integer)
+    ch = m.channels[index]
+    print "LivePage : anuncio : " ch.vast
+    m.vLive.control = "stop"
+    showLoading(true)
+    m.adsPlaying = true
+    m.adsIndex = index
+    m.adsTask = CreateObject("roSGNode", "PrerollAdsTask")
+    m.adsTask.adUrl = ch.vast
+    m.adsTask.view = m.top
+    m.adsTask.contentId = ch.key_live
+    m.adsTask.observeField("status", "onPrerollStatus")
+    m.adsTask.control = "RUN"
+    if not isValid(m.tAds)
+        m.tAds = CreateObject("roSGNode", "Timer")
+        m.tAds.duration = 10
+        m.tAds.observeField("fire", "onPrerollTimeout")
+    end if
+    m.tAds.control = "stop"
+    m.tAds.control = "start"
+end sub
+
+sub onPrerollStatus()
+    if not isValid(m.adsTask) then return
+    status = m.adsTask.status
+    if status = "playing"
+        ' RAF muestra el anuncio con su propia interfaz y maneja las teclas.
+        m.tAds.control = "stop"
+        showLoading(false)
+    else if status = "none" OR status = "done"
+        index = m.adsIndex
+        finishPreroll()
+        playChannel(index)
+    else if status = "exited"
+        ' Back durante el anuncio: sale de En vivo, como back en la pagina.
+        finishPreroll()
+        m.scene.callFunc("HandleBackKey")
+    end if
+end sub
+
+sub onPrerollTimeout()
+    if not m.adsPlaying then return
+    print "LivePage : el anuncio no empezo en 10s, sigue la senal"
+    index = m.adsIndex
+    finishPreroll()
+    playChannel(index)
+end sub
+
+sub finishPreroll()
+    if isValid(m.tAds) then m.tAds.control = "stop"
+    if not m.adsPlaying then return
+    m.adsPlaying = false
+    showLoading(false)
+    if isValid(m.adsTask)
+        m.adsTask.cancel = true
+        m.adsTask.unobserveField("status")
+        m.adsTask = invalid
+    end if
+    ' RAF se queda con el foco mientras reproduce: vuelve a la pagina.
+    if m.top.visible then m.top.setFocus(true)
+end sub
+
+'===> DAI (SDK IMA de Google, DAIPlayerTask)
+sub startDai(index as integer)
+    ch = m.channels[index]
+    print "LivePage : DAI : " ch.name_live " assetKey " ch.assetKey
+    m.vLive.control = "stop"
+    m.daiIndex = index
+    m.daiTask = NewLiveDaiTask(m.vLive, ch.assetKey, ch.key_live)
+    m.daiTask.observeField("urlData", "onDaiUrl")
+    m.daiTask.observeField("errors", "onDaiErrors")
+    m.daiTask.control = "RUN"
+    ' Si Google no entrega el stream a tiempo se sigue con el normal.
+    if not isValid(m.tDai)
+        m.tDai = CreateObject("roSGNode", "Timer")
+        m.tDai.duration = 20
+        m.tDai.observeField("fire", "onDaiTimeout")
+    end if
+    m.tDai.control = "stop"
+    m.tDai.control = "start"
+end sub
+
+sub stopDai()
+    if isValid(m.tDai) then m.tDai.control = "stop"
+    if isValid(m.daiTask)
+        StopLiveDaiTask(m.daiTask)
+        m.daiTask = invalid
+    end if
+end sub
+
+sub onDaiUrl(event as dynamic)
+    if not isValid(m.daiTask) OR m.daiIndex <> m.selectedIndex then return
+    m.tDai.control = "stop"
+    data = event.getData()
+    url = getValueFromProps(data, "manifest", "")
+    if not isNonEmptyString(url)
+        daiFallback("sin manifest")
+        return
+    end if
+    print "LivePage : stream DAI : " url
+    ' Calidades como en las demas senales: las variantes del manifest de DAI son
+    ' de la misma sesion (stream_id) y todas traen las marcas ID3 con que el SDK
+    ' detecta los anuncios, asi que cambiar de variante no corta la medicion.
+    m.masterPlaylistUrl = url
+    m.availableQualities = [{ "label": "Auto", "url": url }]
+    m.qualityIndex = 0
+    m.lQualValue.text = "Auto"
+    startPlayback(url)
+    fetchQualities(url)
+end sub
+
+sub onDaiErrors(event as dynamic)
+    if not isValid(m.daiTask) OR m.daiIndex <> m.selectedIndex then return
+    daiFallback(FormatJson(event.getData()))
+end sub
+
+sub onDaiTimeout()
+    if not isValid(m.daiTask) then return
+    daiFallback("Google no entrego el stream en 20s")
+end sub
+
+' Como el streamURL de Rudo: sin DAI, el stream normal de la senal.
+sub daiFallback(reason as string)
+    print "LivePage : DAI no disponible (" reason "), stream normal"
+    stopDai()
+    ch = m.channels[m.selectedIndex]
+    playUrl(ch.preview_m3u8, ch.m3u8)
 end sub
 
 sub updateHeader(ch as dynamic)
@@ -312,6 +516,7 @@ sub playUrl(previewUrl as string, fallbackUrl as string)
     url = previewUrl
     if not isNonEmptyString(url) then url = fallbackUrl
     if not isNonEmptyString(url) then return
+    url = ForceSessionParams(url, GetDpsSessionParams())
     m.masterPlaylistUrl = url
     m.availableQualities = [{ "label": "Auto", "url": url }]
     m.qualityIndex = 0
@@ -345,63 +550,25 @@ sub onQualitiesResponse(event as dynamic)
     response = event.getData()
     m.getQualitiesTask = invalid
     if not isValid(response) OR not response.ok then return
-    variants = parseHlsVariants(response.data)
+    variants = ParseHlsVariants(response.data)
     if variants.count() = 0 then return
     qualities = [{ "label": "Auto", "url": m.masterPlaylistUrl }]
+    seen = {}
     for each v in variants
-        qualities.push({ "label": v.label, "url": v.url })
+        label = ""
+        if v.height > 0
+            label = v.height.ToStr() + "p"
+        else if v.bandwidth > 0
+            label = Int(v.bandwidth / 1000).ToStr() + " kbps"
+        end if
+        if label <> "" AND not seen.DoesExist(label)
+            seen[label] = true
+            qualities.push({ "label": label, "url": ResolveHlsUrl(m.masterPlaylistUrl, v.url) })
+        end if
     end for
     m.availableQualities = qualities
     m.qualityIndex = 0
 end sub
-
-' Extrae las variantes (#EXT-X-STREAM-INF) de un manifest maestro HLS, ordenadas
-' de mayor a menor calidad.
-function parseHlsVariants(playlistText as string) as object
-    variants = []
-    regexCR = CreateObject("roRegex", chr(13), "")
-    lines = regexCR.ReplaceAll(playlistText, "").Split(chr(10))
-    n = lines.count()
-    regexInf = CreateObject("roRegex", "^#EXT-X-STREAM-INF:", "i")
-    regexRes = CreateObject("roRegex", "RESOLUTION=(\d+)x(\d+)", "i")
-    regexBw = CreateObject("roRegex", "BANDWIDTH=(\d+)", "i")
-    i = 0
-    while i < n
-        line = lines[i].Trim()
-        if regexInf.IsMatch(line)
-            bandwidth = 0
-            label = ""
-            bwMatch = regexBw.Match(line)
-            if bwMatch.count() > 1 then bandwidth = Val(bwMatch[1])
-            resMatch = regexRes.Match(line)
-            if resMatch.count() > 2
-                label = resMatch[2] + "p"
-            else if bandwidth > 0
-                label = Str(Int(bandwidth / 1000)).Trim() + " kbps"
-            end if
-            j = i + 1
-            while j < n AND (lines[j].Trim() = "" OR Left(lines[j].Trim(), 1) = "#")
-                j = j + 1
-            end while
-            if j < n AND isNonEmptyString(label)
-                variants.push({ "label": label, "url": lines[j].Trim(), "bandwidth": bandwidth })
-            end if
-            i = j
-        else
-            i = i + 1
-        end if
-    end while
-    for a = 0 to variants.count() - 2
-        for b = 0 to variants.count() - 2 - a
-            if variants[b].bandwidth < variants[b + 1].bandwidth
-                tmp = variants[b]
-                variants[b] = variants[b + 1]
-                variants[b + 1] = tmp
-            end if
-        end for
-    end for
-    return variants
-end function
 
 sub cycleQuality()
     if not isValid(m.availableQualities) OR m.availableQualities.count() <= 1 then return
@@ -527,6 +694,12 @@ sub onFocusedChild()
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean
+    ' Mientras se pide el anuncio, back sigue saliendo y el resto se ignora (con
+    ' el anuncio en pantalla las teclas son de RAF).
+    if m.adsPlaying
+        if key = "back" then return false
+        return true
+    end if
     if not press then return false
     if not m.loaded then return false
 

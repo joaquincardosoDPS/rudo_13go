@@ -306,7 +306,9 @@ function ContentAPI__GetTextByUrl(requestParams as object)
     path = requestParams.url
     headers = {}
     data = {}
-    response = getRequest(path, data, headers)
+    ' La URL ya viene armada (m3u8 con sesion DPS o tokens): EncodeUri() volveria
+    ' a codificar los % y romperia la firma.
+    response = getRequest(path, data, headers, true)
     if response.isSuccess
         return ok(response.response)
     else
