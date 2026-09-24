@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Anuncio VAST antes del capitulo (el VastPlayer de c13_reloaded, que usa el
+     SDK IMA de HTML5) con la libreria de anuncios de Roku (RAF): Roku exige RAF
+     para certificar y el SDK IMA de Roku solo sirve para DAI. -->
+<component name="PrerollAdsTask" extends="Task">
+    <script type="text/brightscript" uri="pkg:/components/pages/PlayerPage/PrerollAdsTask.brs" />
+    <interface>
+        <field id="adUrl" type="string" />
+        <!-- Nodo bajo el que RAF dibuja el anuncio (la pagina del reproductor) -->
+        <field id="view" type="node" />
+        <field id="contentId" type="string" />
+        <field id="contentLength" type="integer" value="0" />
+        <!-- La pagina dejo de esperar (timeout de 15s o salio): no mostrar nada -->
+        <field id="cancel" type="boolean" value="false" />
+        <!-- "none" (sin anuncio o error) | "playing" | "done" (terminado) | "exited" (back) -->
+        <field id="status" type="string" value="" />
+    </interface>
+</component>

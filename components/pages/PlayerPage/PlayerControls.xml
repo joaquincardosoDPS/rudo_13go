@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Controles del reproductor calcados de c13_reloaded/src/components/VideoPlayer/UI:
+     PlayerTopBar (volver + titulo/programa arriba a la izquierda), Seekbar (barra
+     de 12px abajo con perilla y tiempos), PlayerControls/PlayerControlsLive
+     (botones redondos de 56px + pildora "Calidad" con su lista hacia arriba),
+     EpisodeSidebar (panel derecho de capitulos) y NextEpisodeOverlay (tarjeta
+     "A continuacion" con cuenta regresiva). Fondo negro al 50% sobre el video,
+     se oculta a los 4s. Foco virtual: la pagina mantiene el foco y le pasa las
+     teclas con HandleKey()/HandleKeyRelease().
+     Ojo: findNode() busca desde la raiz del componente, asi que ningun id se
+     repite (las piezas de cada boton se leen con getChild). -->
+<component name="PlayerControls" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/pages/PlayerPage/PlayerControls.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="title" type="string" onChange="OnTextChange" />
+        <field id="description" type="string" onChange="OnTextChange" />
+        <field id="isLive" type="boolean" value="false" onChange="OnLiveChange" />
+        <field id="duration" type="float" onChange="OnProgressChange" />
+        <field id="position" type="float" onChange="OnProgressChange" />
+        <field id="playing" type="boolean" value="false" onChange="OnPlayingChange" />
+        <!-- [{ value, label }] con "auto" primero; currentQuality = value -->
+        <field id="qualities" type="array" onChange="OnQualitiesChange" />
+        <field id="currentQuality" type="string" value="auto" onChange="OnQualitiesChange" />
+        <!-- Capitulos de la categoria [{ key, title }] y el que se esta viendo -->
+        <field id="episodes" type="array" onChange="OnEpisodesChange" />
+        <field id="currentEpisodeKey" type="string" onChange="OnEpisodesChange" />
+        <!-- "A continuacion": { title, image }, visible y segundos restantes -->
+        <field id="nextEpisode" type="assocarray" onChange="OnNextEpisodeChange" />
+        <field id="nextVisible" type="boolean" value="false" onChange="OnNextVisibleChange" />
+        <field id="countdown" type="integer" value="60" onChange="OnCountdownChange" />
+        <field id="shown" type="boolean" value="false" />
+        <!-- { type: "toggle" | "seek" | "back" | "quality" | "next" | "episode", time?, value?, index? } -->
+        <field id="action" type="assocarray" alwaysNotify="true" />
+        <function name="HandleKey" />
+        <function name="HandleKeyRelease" />
+        <function name="ShowControls" />
+        <function name="HideControls" />
+    </interface>
+    <children>
+        <!-- NextEpisodeOverlay: debajo de la capa de controles (en la web z-index
+             100 < 998), right 4vw, bottom 12vw con controles / 4vw sin ellos. -->
+        <Group id="gNext" visible="false" opacity="0" translation="[1229,768]">
+            <Group id="gNextCard" scaleRotateCenter="[307,117]">
+                <Poster id="pNextBg" uri="pkg:/images/player/next_card_bg.png" width="614" height="235" />
+                <Label id="lNextHeader" text="A continuación" translation="[27,27]" color="#FA6428" />
+                <Poster id="pNextImage" width="250" height="141" loadWidth="250" loadHeight="141" loadDisplayMode="scaleToZoom" translation="[27,67]" />
+                <Poster id="pNextFade" uri="pkg:/images/player/next_count_fade.png" width="250" height="57" translation="[27,151]" />
+                <Poster id="pNextFrame" uri="pkg:/images/player/next_image_frame.png" width="250" height="141" translation="[27,67]" />
+                <Label id="lNextCountdown" width="250" height="24" horizAlign="center" vertAlign="center" translation="[27,178]" />
+                <Label id="lNextTitle" width="291" height="141" wrap="true" maxLines="3" vertAlign="center" translation="[296,67]" />
+                <Poster id="pNextBorder" uri="pkg:/images/player/next_card_border.png" width="614" height="235" visible="false" />
+            </Group>
+        </Group>
+        <Group id="gOverlay" opacity="0">
+            <Rectangle id="rDim" width="1920" height="1080" color="#000000" opacity="0.5" />
+            <!-- Seekbar: padding 0 55px, pegado abajo (min-height 94) -->
+            <Group id="gSeek" translation="[55,986]">
+                <Poster id="pTrack" uri="pkg:/images/player/bar.9.png" width="1810" height="12" blendColor="#525252" />
+                <Poster id="pProgress" uri="pkg:/images/player/bar.9.png" width="0" height="12" blendColor="#FA6428" visible="false" />
+                <Poster id="pThumb" uri="pkg:/images/player/thumb.png" width="30" height="30" translation="[-15,-9]" />
+                <Label id="lCurrent" text="00:00" translation="[0,22]" />
+                <Label id="lTotal" text="00:00" width="300" horizAlign="right" translation="[1510,22]" />
+            </Group>
+            <!-- Botones: right 55, bottom 140 (en vivo bottom 80), gap 22.
+                 Hijos de cada boton: 0 relleno de foco, 1 anillo, 2 icono. -->
+            <Group id="gButtons">
+                <Group id="bRestart">
+                    <Poster id="pRestartFill" uri="pkg:/images/player/btn_fill.png" width="56" height="56" opacity="0.1" visible="false" />
+                    <Poster id="pRestartRing" uri="pkg:/images/player/btn_ring.png" width="56" height="56" />
+                    <Poster id="pRestartIcon" uri="pkg:/images/player/icon_restart.png" width="26" height="26" translation="[15,15]" />
+                </Group>
+                <Group id="bPlay">
+                    <Poster id="pPlayFill" uri="pkg:/images/player/btn_fill.png" width="56" height="56" opacity="0.1" visible="false" />
+                    <Poster id="pPlayRing" uri="pkg:/images/player/btn_ring.png" width="56" height="56" />
+                    <Poster id="pPlayIcon" uri="pkg:/images/player/icon_play.png" width="26" height="26" translation="[15,15]" />
+                </Group>
+                <Group id="bEpisodes" visible="false">
+                    <Poster id="pEpisodesFill" uri="pkg:/images/player/btn_fill.png" width="56" height="56" opacity="0.1" visible="false" />
+                    <Poster id="pEpisodesRing" uri="pkg:/images/player/btn_ring.png" width="56" height="56" />
+                    <Poster id="pEpisodesIcon" uri="pkg:/images/player/icon_episodes.png" width="26" height="26" translation="[15,15]" />
+                </Group>
+                <Group id="bQuality">
+                    <Poster id="pQualityFill" uri="pkg:/images/player/pill_fill.9.png" height="56" opacity="0.1" visible="false" />
+                    <Poster id="pQualityRing" uri="pkg:/images/player/pill_ring.9.png" height="56" />
+                    <Poster id="pQualityIcon" uri="pkg:/images/player/icon_config.png" width="26" height="26" translation="[22,15]" />
+                    <Label id="lQualityText" text="Calidad" height="56" vertAlign="center" translation="[56,0]" />
+                    <Label id="lQualityValue" text="Auto" height="56" vertAlign="center" color="#808080" />
+                </Group>
+            </Group>
+            <!-- Lista de calidades: arriba de la pildora (bottom 100% + 8px), alineada a la derecha -->
+            <Group id="gQualityMenu" visible="false">
+                <Rectangle id="rMenuBorder" color="#333333" />
+                <Rectangle id="rMenuBg" color="#08090C" translation="[1,1]" />
+                <Rectangle id="rMenuFocus" color="#FF3C00" />
+                <Group id="gMenuOptions" />
+            </Group>
+            <!-- EpisodeSidebar: capa negra al 50% + panel de 500px a la derecha
+                 (padding 32px 16px) que entra deslizando. -->
+            <Rectangle id="rSidebarDim" width="1920" height="1080" color="#000000" opacity="0.5" visible="false" />
+            <Group id="gSidebar" translation="[1920,0]" visible="false">
+                <Group id="gEpisodeList" />
+            </Group>
+            <!-- PlayerTopBar: top 62, left 40, gap 16 (por encima del panel, como en la web) -->
+            <Group id="gTopBar" translation="[40,62]">
+                <Group id="bBack">
+                    <Poster id="pBackFill" uri="pkg:/images/player/btn_fill.png" width="56" height="56" opacity="0.1" visible="false" />
+                    <Poster id="pBackRing" uri="pkg:/images/player/btn_ring.png" width="56" height="56" />
+                    <Poster id="pBackIcon" uri="pkg:/images/player/icon_back.png" width="22" height="22" translation="[17,17]" />
+                </Group>
+                <LayoutGroup id="lgTexts" layoutDirection="vert" itemSpacings="[10]" translation="[72,0]">
+                    <Label id="lTitle" width="1536" wrap="true" maxLines="2" />
+                    <Label id="lDescription" width="1536" opacity="0.9" />
+                </LayoutGroup>
+            </Group>
+        </Group>
+        <Timer id="hideTimer" duration="4" repeat="false" />
+        <Timer id="seekTimer" duration="0.6" repeat="false" />
+        <!-- Mientras se mantiene apretada una flecha en la barra -->
+        <Timer id="holdTimer" duration="0.2" repeat="true" />
+        <Animation id="fadeIn" duration="0.3" repeat="false" easeFunction="linear">
+            <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, 1.0]" fieldToInterp="gOverlay.opacity" />
+        </Animation>
+        <Animation id="fadeOut" duration="0.3" repeat="false" easeFunction="linear">
+            <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[1.0, 0.0]" fieldToInterp="gOverlay.opacity" />
+        </Animation>
+        <Animation id="sidebarAnimation" duration="0.3" repeat="false" easeFunction="outCubic">
+            <Vector2DFieldInterpolator id="sidebarInterpolator" key="[0.0, 1.0]" fieldToInterp="gSidebar.translation" />
+        </Animation>
+        <Animation id="listAnimation" duration="0.3" repeat="false" easeFunction="outCubic">
+            <Vector2DFieldInterpolator id="listInterpolator" key="[0.0, 1.0]" fieldToInterp="gEpisodeList.translation" />
+        </Animation>
+        <Animation id="nextFadeIn" duration="0.4" repeat="false" easeFunction="outCubic">
+            <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, 1.0]" fieldToInterp="gNext.opacity" />
+        </Animation>
+        <Animation id="nextMove" duration="0.3" repeat="false" easeFunction="linear">
+            <Vector2DFieldInterpolator id="nextMoveInterpolator" key="[0.0, 1.0]" fieldToInterp="gNext.translation" />
+        </Animation>
+    </children>
+</component>

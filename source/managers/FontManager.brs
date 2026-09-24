@@ -8,6 +8,7 @@ Function CreateFontManager() as Object
     this = {}
     ' *** DM Sans Bold Fonts ***
     this.dmSansBold48 = CreateFonts(dmSansBold, 48)
+    this.dmSansBold40 = CreateFonts(dmSansBold, 40)
     this.dmSansBold36 = CreateFonts(dmSansBold, 36)
     this.dmSansBold32 = CreateFonts(dmSansBold, 32)
     this.dmSansBold30 = CreateFonts(dmSansBold, 30)

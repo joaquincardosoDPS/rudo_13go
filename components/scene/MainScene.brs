@@ -1201,7 +1201,8 @@ function OnkeyEvent(key as string, press as boolean) as boolean
                 result = true
             end if
         else if key = "left"
-            if isValid(m.TopMenu) AND m.TopMenu.visible 'and topNode.id <> "DetailPage"
+            ' Con el sidebar oculto (reproductor, onboarding) no se le da el foco.
+            if isValid(m.TopMenu) AND m.TopMenu.visible AND m.gTopMenu.visible
                 SetFocus(m.TopMenu)
                 result = true
             end if
@@ -1225,10 +1226,14 @@ function HandleBackKey() as boolean
             if (m.ViewStackManager.GetViewCount() = 1 AND isValid(m.TopMenu) AND m.TopMenu.visible)
                 topNode = m.viewStackManager.GetTop()
                 if isValid(topNode) AND (LCase(topNode.id) <> "homepage") then m.top.isWatchHistoryFetched = false
-                if isValid(topNode) AND (topNode.id = "loginPage" OR topNode.id = "onboardingPage" OR topNode.id = "DeviceLinkPage")
+                if isValid(topNode) AND (topNode.id = "OnboardingPage" OR topNode.id = "DeviceLinkPage" OR topNode.id = "EditorProfilesPage")
                 else
                     ShowHideMenu(true)
                 end if
+            else if m.ViewStackManager.GetTopId() = "ProgramPage"
+                ' Vuelta desde el reproductor (o el login) a la vista de programa,
+                ' que se ve con el sidebar.
+                ShowHideMenu(true)
             end if
             result = true
         else if m.exitCalled = false

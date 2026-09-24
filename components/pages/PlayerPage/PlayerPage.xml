@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reproductor de capitulos: equivalente a c13_reloaded/src/pages/VOD/Player/PlayerView.tsx
+     (/programas/:slug/:categoria/:capitulo). Resuelve el capitulo (feed/video,
+     programa, capitulos de la categoria), valida la restriccion, pide el m3u8 a
+     rudo (firmado con authContent si es restringido), le agrega la sesion DPS y
+     lo reproduce a pantalla completa, sin sidebar. Se abre apilado sobre la
+     vista de programa: back vuelve ahi. -->
+<component name="PlayerPage" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/pages/PlayerPage/PlayerPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/PlayerUtils.brs" />
+    <interface>
+        <!-- { link, slug, initialSeconds } -->
+        <field id="params" type="assocarray" onChange="OnParamsSet" />
+    </interface>
+    <children>
+        <Rectangle id="rBackground" width="1920" height="1080" color="#000000" />
+        <Video id="video" width="1920" height="1080" notificationInterval="1" enableUI="false" />
+        <PlayerControls id="controls" />
+        <!-- Timeout de seguridad del anuncio (VastPlayer: 15s sin respuesta) -->
+        <Timer id="adsTimeout" duration="15" repeat="false" />
+        <Label id="lError" width="1920" height="1080" horizAlign="center" vertAlign="center" visible="false" />
+    </children>
+</component>
