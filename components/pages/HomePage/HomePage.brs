@@ -339,6 +339,7 @@ sub OnGetHomeCategoryProgramsAPIResponse(event as dynamic)
                 description: stripEmojis(decodeHtmlEntities(raw.bajada))
                 description_short: stripEmojis(decodeHtmlEntities(raw.bajada))
                 key: raw.id
+                url: raw.url
                 image_background: { small: bgUrl, medium: bgUrl, normal: bgUrl, big: bgUrl, default: bgUrl }
             })
         end for
@@ -352,6 +353,7 @@ sub OnGetHomeCategoryProgramsAPIResponse(event as dynamic)
                 description: stripEmojis(decodeHtmlEntities(raw.bajada))
                 description_short: stripEmojis(decodeHtmlEntities(raw.bajada))
                 key: raw.id
+                url: raw.url
                 image_orientation: "portrait"
                 format: "default"
                 image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
@@ -381,6 +383,7 @@ sub OnGetHomeTop10APIResponse(event as dynamic)
         items.push({
             title: stripEmojis(decodeHtmlEntities(raw.title))
             key: raw.id
+            url: raw.url
             image_orientation: "portrait"
             format: "default"
             image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }

@@ -122,6 +122,10 @@ Sub GetApiEndPoints(appConfig as object) as Dynamic
         GetPrograms: feedBaseUrl + "programas",
         GetVideos: feedBaseUrl + "video",
         GetSearch: feedBaseUrl + "search",
+        ' Vista de programa (ProgramView): metadatos por slug (?v=/programas/slug),
+        ' categorias (programas/slug/categorias) y capitulos (programas/slug?t=categoria)
+        GetProgramBySlug: feedBaseUrl + "programa",
+        GetProgramVod: feedBaseUrl + "programas/",
 
         ' Streaming / EPG: CDN de rudo.video, bajo el tenant "canal-13"
         GetEPGChannels: cdnBaseUrl + "assets/" + tenant + "/playlists/static/playlist.json?random="

@@ -53,6 +53,9 @@
         <function name="UpdateSelectedTopMenu" />
         <function name="ShowLivePage" />
         <function name="ShowRadioPage" />
+        <function name="ShowPlayerPage" />
+        <function name="ClosePlayerPage" />
+        <function name="RunBackgroundTask" />
     </interface>
 
     <children>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Capitulo de la grilla de ProgramView (ChapterCard.tsx, .grilla-capitulos
+     .card): imagen 16:9 con esquinas de 10px, brightness(.5) sin foco,
+     duracion abajo a la derecha, candado si esta bloqueado y el titulo en
+     negrita debajo. Item de un MarkupGrid. -->
+<component name="ChapterCardItem" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/pages/ProgramPage/ChapterCardItem.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="itemContent" type="node" onChange="OnContentChange" />
+        <field id="width" type="float" />
+        <field id="height" type="float" />
+        <field id="focusPercent" type="float" onChange="OnFocusChange" />
+        <field id="itemHasFocus" type="boolean" onChange="OnFocusChange" />
+        <field id="gridHasFocus" type="boolean" onChange="OnFocusChange" />
+    </interface>
+    <children>
+        <Rectangle id="rImageBg" width="305" height="172" color="#333333" />
+        <Poster id="pImage" width="305" height="172" loadWidth="305" loadHeight="172" loadDisplayMode="scaleToZoom" blendColor="#808080" />
+        <!-- .card.bloqueado .imagen::after: velo #00000075 + candado de 2vw. -->
+        <Rectangle id="rLocked" width="305" height="172" color="#000000" opacity="0.46" visible="false" />
+        <Poster id="pLock" uri="pkg:/images/live/lock.png" width="38" height="38" loadDisplayMode="scaleToFit" translation="[133,67]" visible="false" />
+        <Poster id="pDurationFade" uri="pkg:/images/program/chapter_duration_fade.png" width="305" height="172" visible="false" />
+        <Label id="lDuration" width="290" height="30" horizAlign="right" vertAlign="bottom" translation="[0,137]" />
+        <!-- Esquinas redondeadas (radio 10) sin MaskGroup (ver CLAUDE.md): marco
+             #08090C, por eso ProgramPage deja el fondo solido detras de la grilla. -->
+        <Poster id="pFrame" uri="pkg:/images/program/chapter_frame.png" width="305" height="172" />
+        <!-- Borde de foco de 0.21vw (4px) con el mismo radio que la tarjeta, asi
+             ninguna esquina queda por fuera del anillo. -->
+        <Poster id="pFocus" uri="pkg:/images/program/chapter_focus_ring.png" width="305" height="172" visible="false" />
+        <Label id="lTitle" width="305" wrap="true" maxLines="2" lineSpacing="-2" translation="[0,197]" />
+    </children>
+</component>

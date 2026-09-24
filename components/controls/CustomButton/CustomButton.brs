@@ -44,6 +44,7 @@ sub OnPosterImageDataChange()
         m.btnImage.loadWidth = size
     end if
     m.btnImage.visible = true
+    SetTranslations()
 end sub
 
 Sub OnMarginChange()
@@ -54,6 +55,7 @@ Sub OnMarginChange()
         m.slButtonText.translation = [m.top.margin, 0]
     end if
     OnBorderSize()
+    SetTranslations()
 End Sub
 
 Sub OnPaddingChange()
@@ -68,6 +70,7 @@ Sub OnButtonWidthChange()
         m.slButtonText.Width = m.top.buttonWidth
     end if
     OnBorderSize()
+    SetTranslations()
 End Sub
 
 Sub OnFontSizeChange()
@@ -80,14 +83,12 @@ End Sub
 
 Sub OnButtonTextChange()
     m.slButtonText.text = m.top.buttonText
+    SetTranslations()
 End Sub
 
 Sub OnButtonHeightChange()
     m.slButtonText.height = m.top.buttonHeight
-    ' brButtonBackround = m.rButtonBackround.boundingRect()
-    btnImageRect = m.btnImage.boundingRect()
-    yPos = (m.top.buttonHeight - btnImageRect.width) / 2
-    m.btnImage.translation = [m.Padding, yPos]
+    SetTranslations()
 End Sub
 
 Sub OnBackgroundColorChange()
@@ -111,25 +112,36 @@ Sub OnFocusedChild()
     SetFocusItem(m.top.hasFocus())
 End Sub
 
+' Boton con icono (.btn: display flex, gap 10px): icono + texto centrados como
+' un bloque, el icono centrado en el alto. Se recalcula ante cualquier cambio
+' de icono/texto/fuente/medidas porque update() aplica los campos en cualquier
+' orden (antes el icono quedaba calculado con alto 0 y se veia corrido abajo).
 Sub SetTranslations()
-    if isNonEmptyString(m.top.posterImage)
-        Xpos = m.Padding
-        btnImageRect = m.btnImage.boundingRect()
-        yPos = (m.top.buttonHeight - btnImageRect.height) / 2
-        m.btnImage.translation = [Xpos, yPos]
-        slButtonText = m.slButtonText.boundingRect()
-        m.slButtonText.translation = [Xpos + 50, 0]
-        m.slButtonText.height = m.top.buttonHeight
-        if isValid(m.btnImage) AND m.btnImage.visible AND (m.btnImage.width + m.btnImage.translation[0] + slButtonText.width) > m.top.buttonWidth
-            m.slButtonText.width = m.top.buttonWidth - (m.btnImage.width + (m.slButtonText.translation[0] - 30))
-        else
-            m.slButtonText.width = (slButtonText.width + (Xpos * 2))
-        end if
-        m.rButtonBackround.width = m.top.buttonWidth 'slButtonText.width + (Xpos * 2) + btnImageRect.width
-        m.rButtonBackround.loadwidth = m.rButtonBackround.width
-        m.slButtonText.horizAlign = "left"
-        m.slButtonText.vertAlign = "center"
+    if not isNonEmptyString(m.top.posterImage) then return
+    gap = 10
+    padding = m.top.padding
+    iconW = m.btnImage.width
+    iconH = m.btnImage.height
+    m.slButtonText.horizAlign = "left"
+    m.slButtonText.vertAlign = "center"
+    m.slButtonText.height = m.top.buttonHeight
+    ' Se mide en una sola linea: un Label con wrap y sin ancho puede medir 0.
+    m.slButtonText.wrap = false
+    m.slButtonText.width = 0
+    textW = m.slButtonText.boundingRect().width
+    x = (m.top.buttonWidth - (iconW + gap + textW)) / 2
+    ' Sin medida del texto (aun sin fuente/texto): alineado a la izquierda.
+    if textW <= 0 OR x < padding then x = padding
+    maxTextW = m.top.buttonWidth - x - iconW - gap - padding
+    if textW <= 0 OR textW > maxTextW
+        textW = maxTextW
+        m.slButtonText.wrap = true
     end if
+    m.btnImage.translation = [x, (m.top.buttonHeight - iconH) / 2]
+    m.slButtonText.translation = [x + iconW + gap, 0]
+    if textW > 0 then m.slButtonText.width = textW
+    m.rButtonBackround.width = m.top.buttonWidth
+    m.rButtonBackround.loadwidth = m.rButtonBackround.width
 End Sub
 
 Sub SetFocusItem(isFocused)

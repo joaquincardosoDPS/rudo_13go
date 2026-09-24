@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vista de un programa: equivalente a c13_reloaded/src/pages/VOD/Program/ProgramView.tsx
+     (/programas/:slug) + use-program-data.ts. Cabecera .programas-cabecera
+     (29.17vw) con fondo_imagen a 85vw arriba a la derecha y degradados hacia
+     #08090C, titulo/bajada/botones (Reanudar, Favoritos); debajo la
+     .grilla-capitulos: selector de categoria (o su nombre), "N videos" y la
+     grilla de 5 columnas. Se abre con el sidebar visible. -->
+<component name="ProgramPage" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/pages/ProgramPage/ProgramPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <interface>
+        <field id="slug" type="string" onChange="OnSlugSet" />
+    </interface>
+    <children>
+        <Group id="gPage" visible="false">
+            <Poster id="pBackground" width="1632" height="918" loadWidth="1632" loadHeight="918" loadDisplayMode="scaleToZoom" translation="[288,0]" />
+            <!-- El degradado llega a #08090C solido justo antes de la grilla (y=664;
+                 en la web ahi ya esta ~82% oscuro) y de ahi para abajo el fondo es
+                 solido: las esquinas redondeadas de las tarjetas son un marco del
+                 color de fondo, sobre la imagen se verian como esquinas oscuras. -->
+            <Poster id="pFadeBottom" uri="pkg:/images/overlay/hero_fade_bottom.png" width="1920" height="560" loadDisplayMode="stretchToFit" translation="[0,104]" />
+            <Rectangle id="rGridBackground" width="1920" height="360" color="#08090C" translation="[0,663]" />
+            <Poster id="pFadeLeft" uri="pkg:/images/overlay/hero_fade_left.png" width="1200" height="918" loadDisplayMode="stretchToFit" />
+            <!-- .programas-cabecera .data: max-width 32vw (614px), centrado en el alto. -->
+            <LayoutGroup id="lgHeader" layoutDirection="vert" itemSpacings="[16,28]" translation="[206,150]">
+                <Label id="lTitle" width="614" wrap="true" maxLines="2" />
+                <Label id="lDescription" width="614" wrap="true" maxLines="4" lineSpacing="-2" />
+                <Group id="gActions">
+                    <CustomButton id="resumeButton" buttonText="Reanudar" buttonWidth="190" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" visible="false" />
+                    <CustomButton id="favoriteButton" buttonText="Agregar a favoritos" buttonWidth="300" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" />
+                </Group>
+            </LayoutGroup>
+            <!-- .grilla-capitulos .header: select.titulo-2 (o h2) + .sumario. El select
+                 NO tiene caja (select.titulo-2 { border: none } le gana a .btn): texto de
+                 40px sin padding a la izquierda, 1.9vw a la derecha con la flecha, ancho
+                 de la opcion mas larga y alto de una linea (line-height: 1em). -->
+            <Group id="gCategory" translation="[206,560]">
+                <Label id="lCategory" height="44" vertAlign="center" />
+                <Poster id="pSelectArrow" uri="pkg:/images/program/icon_arrow_down.png" width="24" height="24" visible="false" />
+            </Group>
+            <Label id="lSummary" translation="[206,604]" />
+            <!-- .grilla-capitulos .content { margin-top: 2vw } -->
+            <MarkupGrid id="chaptersGrid" itemComponentName="ChapterCardItem" numColumns="5" numRows="3" itemSize="[305,255]" itemSpacing="[29,70]" drawFocusFeedback="false" vertFocusAnimationStyle="floatingFocus" translation="[206,672]" />
+            <Label id="lEmpty" text="No hay capítulos disponibles" translation="[206,672]" visible="false" />
+        </Group>
+        <!-- Dropdown del selector: se abre ARRIBA del select (como la web). -->
+        <Group id="gDropdown" visible="false">
+            <Rectangle id="rDropdownBorder" color="#333333" />
+            <Rectangle id="rDropdownBg" color="#000000" translation="[1,1]" />
+            <Group id="gDropdownClip">
+                <Group id="gDropdownOptions" />
+            </Group>
+        </Group>
+        <!-- "Programa no encontrado" + "Volver a VOD" -->
+        <Group id="gNotFound" visible="false">
+            <Label id="lNotFound" text="Programa no encontrado" width="1714" horizAlign="center" translation="[206,440]" />
+            <CustomButton id="backButton" buttonText="Volver a VOD" buttonWidth="260" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" translation="[933,540]" />
+        </Group>
+        <!-- Recibe el foco "virtual" del selector y del dropdown. -->
+        <Group id="gFocusProxy" focusable="true" />
+        <!-- Scroll vertical de la pagina (scrollTo/scrollIntoView "smooth" en la web). -->
+        <Animation id="scrollAnimation" duration="0.35" easeFunction="outCubic" repeat="false">
+            <Vector2DFieldInterpolator id="scrollInterpolator" key="[0.0, 1.0]" fieldToInterp="gPage.translation" />
+        </Animation>
+    </children>
+</component>

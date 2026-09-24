@@ -117,6 +117,7 @@ sub OnProgramsResult(event as dynamic)
                     items.push({
                         title: raw.titulo
                         key: raw.id
+                        url: raw.url
                         image_orientation: "portrait"
                         format: "default"
                         image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }

@@ -155,7 +155,7 @@ sub applyFilter()
         if count >= m.maxResults then exit for
         if Instr(1, LCase(program.title), query) > 0
             itemNode = content.createChild("ContentNode")
-            itemNode.setFields({ "title": program.title })
+            itemNode.setFields({ "title": program.title, "url": program.url })
             itemNode.addFields({ "image": program.image, "key": program.id })
             count = count + 1
         end if

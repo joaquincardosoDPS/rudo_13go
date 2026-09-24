@@ -11,6 +11,26 @@ function GetJsonByUrl() as void
     m.top.result = response
 end function
 
+sub GetProgramBySlug()
+    m.top.result = ContentAPI().GetProgramBySlug(m.top.params)
+end sub
+
+sub GetProgramCategories()
+    m.top.result = ContentAPI().GetProgramCategories(m.top.params)
+end sub
+
+sub GetProgramChapters()
+    m.top.result = ContentAPI().GetProgramChapters(m.top.params)
+end sub
+
+sub GetEpisodeByLink()
+    m.top.result = ContentAPI().GetEpisodeByLink(m.top.params)
+end sub
+
+sub GetVodMediaInfo()
+    m.top.result = ContentAPI().GetVodMediaInfo(m.top.params)
+end sub
+
 function GetTextByUrl() as void
     response = ContentAPI().GetTextByUrl(m.top.params)
     m.top.result = response

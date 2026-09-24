@@ -572,6 +572,13 @@ sub onTopMenuItemSelected(event as dynamic)
         if isValid(topNode) AND isNonEmptyString(targetPageId) AND LCase(topNode.id) = targetPageId
             return
         end if
+        ' Un programa apilado sobre esta misma seccion: la grilla del riel puede
+        ' disparar itemSelected del item activo con solo entrar al sidebar
+        ' ("Bug real #4"), no hay que sacar al usuario del programa por eso.
+        if isValid(topNode) AND topNode.id = "ProgramPage" AND m.ViewStackManager.GetViewCount() > 1
+            baseNode = m.ViewStackManager.ViewStack[0]
+            if isValid(baseNode) AND LCase(baseNode.id) = targetPageId then return
+        end if
 
         if isValid(m.HomePage) then m.HomePage.isDestroy = true
         if isValid(m.LivePage) then m.LivePage.isDestroy = true
@@ -813,6 +820,22 @@ function GetHomePageObject(isReplace as boolean) as object
 end function
 
 sub showDetailPage(data as dynamic, isReplace = false as boolean)
+    ' Tarjetas de programa (url "/programas/<slug>", como ProgramItem/TopItem/
+    ' MonumentalCarouselItem/ResultItem de la web) -> vista de programa.
+    itemData = getValueFromProps(data, "itemData", invalid)
+    url = ""
+    if isValid(itemData) AND isNonEmptyString(itemData.url) then url = itemData.url
+    if Left(url, 11) = "/programas/"
+        ShowProgramPage(Mid(url, 12))
+        return
+    end if
+    ' El DetailPage heredado de MiCHV habla el API de MiCHV y se quedaba colgado:
+    ' salvo el deep link (sigue en ese flujo), el resto (capitulos de
+    ' "Destacados", que en la web van al reproductor) espera el PlayerView.
+    if getValueFromProps(data, "sliderId", "") <> "deeplinking"
+        print "MainScene : showDetailPage : sin vista para este item (pendiente reproductor) : " url
+        return
+    end if
     m.DetailPage = GetDetailPageObject(true)
     m.DetailPage.contentNode = data
     if (isReplace = true)
@@ -822,6 +845,70 @@ sub showDetailPage(data as dynamic, isReplace = false as boolean)
     end if
     ShowHideMenu(false)
     setFocus(m.DetailPage)
+end sub
+
+' /programas/:slug (ProgramView). Se apila sobre la seccion actual con el
+' sidebar visible; back vuelve a donde estaba el usuario.
+sub ShowProgramPage(slug as string)
+    page = createObject("roSGNode", "ProgramPage")
+    page.id = "ProgramPage"
+    page.visible = true
+    m.gPageContainer.appendChild(page)
+    m.ViewStackManager.ShowScreen(page)
+    ShowHideMenu(true)
+    page.slug = slug
+    setFocus(page)
+end sub
+
+' /programas/:slug/:categoria/:capitulo (PlayerView). params = { link, slug,
+' initialSeconds }. Pantalla completa sin sidebar, apilada sobre la vista de
+' programa: back vuelve ahi (el navigate(`/programas/${slug}`) de la web).
+sub ShowPlayerPage(params as object)
+    page = createObject("roSGNode", "PlayerPage")
+    page.id = "PlayerPage"
+    page.visible = true
+    m.gPageContainer.appendChild(page)
+    m.ViewStackManager.ShowScreen(page)
+    ShowHideMenu(false)
+    setFocus(page)
+    page.params = params
+end sub
+
+' Task "dispara y olvida" que tiene que terminar aunque la pagina que la lanzo
+' se cierre (ej: el ultimo reporte de avance del reproductor al apretar back).
+' La escena guarda la referencia hasta que la task termina.
+sub RunBackgroundTask(request as object)
+    if not isValid(m.backgroundTasks) then m.backgroundTasks = {}
+    if not isValid(m.backgroundTaskCount) then m.backgroundTaskCount = 0
+    m.backgroundTaskCount = m.backgroundTaskCount + 1
+    task = CreateObject("roSGNode", request.taskType)
+    task.id = "bgTask" + m.backgroundTaskCount.ToStr()
+    task.functionName = request.functionName
+    if isValid(request.params) then task.params = request.params
+    task.observeField("state", "OnBackgroundTaskState")
+    m.backgroundTasks[task.id] = task
+    task.control = "RUN"
+end sub
+
+sub OnBackgroundTaskState(event as dynamic)
+    state = event.getData()
+    if state = "done" OR state = "stop"
+        task = event.getRoSGNode()
+        print "MainScene : background task " task.functionName " : " FormatJson(task.result)
+        m.backgroundTasks.Delete(task.id)
+    end if
+end sub
+
+' Cierra el reproductor desde adentro (ej: capitulo restringido sin sesion).
+sub ClosePlayerPage()
+    top = m.ViewStackManager.GetTop()
+    if isValid(top) AND top.id = "PlayerPage"
+        m.ViewStackManager.HideTop()
+        m.gPageContainer.removeChild(top)
+        ' La pagina de abajo (vista de programa o una seccion) se ve con sidebar.
+        topId = m.ViewStackManager.GetTopId()
+        if topId <> "OnboardingPage" AND topId <> "DeviceLinkPage" AND topId <> "EditorProfilesPage" then ShowHideMenu(true)
+    end if
 end sub
 
 function GetDetailPageObject(isReplace as boolean) as object

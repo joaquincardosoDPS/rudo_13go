@@ -1,4 +1,6 @@
-function getRequest(path as string, data as dynamic, headers as dynamic) as object
+' skipEncode: la URL ya viene con sus valores codificados (EncodeUri() volveria
+' a codificar los "%" como "%25").
+function getRequest(path as string, data as dynamic, headers as dynamic, skipEncode = false as boolean) as object
     req = createRoTransferInstance()
 
     port = CreateObject("roMessagePort")
@@ -17,7 +19,8 @@ function getRequest(path as string, data as dynamic, headers as dynamic) as obje
     end for
     ' print "BaseRequests : getRequest compiledData : " compiledData
 
-    finalURL = compiledData.EncodeUri()
+    finalURL = compiledData
+    if not skipEncode then finalURL = compiledData.EncodeUri()
     req.SetUrl(finalURL)
     print "BaseRequests : getRequest finalURL : " finalURL
 
