@@ -511,6 +511,13 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
                 llamado: raw.llamado
                 duration: raw.duration
                 key: raw.nid
+                link: getValueFromProps(raw, "link", "")
+                type: getValueFromProps(raw, "type", "")
+                rudoKey: getValueFromProps(raw, "key", "")
+                restriction: getValueFromProps(raw, "restriction", "0")
+                packs: getValueFromProps(raw, "packs", [])
+                vastUrl: getValueFromProps(raw, "vast_app", "")
+                daiAssetKey: getValueFromProps(raw, "DPSDAIAssetKey", "")
                 image_land: {
                     small: imageUrl,
                     medium: imageUrl,
@@ -693,9 +700,49 @@ sub onRowItemSelected(event as dynamic)
             m.scene.callFunc("showEventDetailPage", selectedItem, false)
         else if isValid(selectedItem.itemData.type) AND selectedItem.itemData.type = "senal"
             m.scene.callFunc("ShowLivePage", false)
+        else if isValid(selectedItem.itemData.format) AND selectedItem.itemData.format = "tracking"
+            OpenChapterLink(selectedItem.itemData.path, Int(convertToNumber(selectedItem.itemData.seconds)))
+        else if selectedItem.sliderId = "destacados"
+            OpenFeaturedItem(selectedItem.itemData)
         else
             m.scene.callFunc("showDetailPage", selectedItem, false)
         end if
+    end if
+end sub
+
+' Abre un capitulo por su link (/programas/{slug}/{categoria}/{capitulo}),
+' opcionalmente desde un segundo ("Seguir viendo"). La restriccion la valida el
+' reproductor. Se apila la vista del programa debajo, porque en la web back
+' desde el reproductor va a /programas/{slug}.
+sub OpenChapterLink(link as dynamic, initialSeconds = 0 as integer)
+    if not isNonEmptyString(link) then return
+    parts = link.Split("/")
+    if parts.count() < 4 OR parts[1] <> "programas" then return
+    slug = parts[2]
+    m.scene.callFunc("showDetailPage", { itemData: { url: "/programas/" + slug } }, false)
+    m.scene.callFunc("ShowPlayerPage", { link: link, slug: slug, initialSeconds: initialSeconds })
+end sub
+
+' Tarjetas de Destacados (FeaturedItem.tsx handleClick): si es en vivo (type
+' "live" o un link que no es /programas/...) se reproduce directo con la key de
+' rudo, como /player/live (back vuelve al Home); si no, es un capitulo.
+sub OpenFeaturedItem(item as object)
+    link = item.link
+    isLive = item.type = "live" OR not isNonEmptyString(link) OR Instr(1, link, "programas/") = 0
+    if isLive
+        if not isNonEmptyString(item.rudoKey) then return
+        m.scene.callFunc("ShowPlayerPage", {
+            live: {
+                key: item.rudoKey
+                title: item.title
+                restriction: item.restriction
+                packs: item.packs
+                vastUrl: item.vastUrl
+                daiAssetKey: item.daiAssetKey
+            }
+        })
+    else
+        OpenChapterLink(link)
     end if
 end sub
 

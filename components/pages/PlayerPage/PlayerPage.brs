@@ -39,7 +39,8 @@ end sub
 
 sub OnParamsSet()
     link = getValueFromProps(m.top.params, "link", "")
-    if not isNonEmptyString(link) then return
+    live = getValueFromProps(m.top.params, "live", invalid)
+    if not isValid(live) AND not isNonEmptyString(link) then return
     ' Otro capitulo en la misma pagina ("A continuacion" o el panel de
     ' episodios, el navigate(ep.link) de la web): se corta el anterior.
     if m.adsPlaying then FinishPreroll()
@@ -54,9 +55,14 @@ sub OnParamsSet()
     m.nextChapter = invalid
     m.lastPosition = invalid
     m.video.visible = true
+    m.liveDaiAssetKey = ""
     m.cancelled = false
     m.lError.visible = false
     ShowLoading(true)
+    if isValid(live)
+        StartLiveDirect(live)
+        return
+    end if
     ' 1. Info del episodio por su link
     m.episodeTask = RunTask("ContentAPIAction", "GetEpisodeByLink", { link: link }, "OnEpisodeResponse")
 end sub
@@ -136,6 +142,45 @@ sub OnChaptersResponse(event as dynamic)
     m.mediaTask = RunTask("ContentAPIAction", "GetVodMediaInfo", { key: getValueFromProps(m.chapter, "key", "") }, "OnMediaInfoResponse")
 end sub
 
+' /player/live (LiveDirectPlayerView.tsx), desde una tarjeta de Destacados que
+' es una senal en vivo: sin cadena de capitulos, el m3u8 sale de la media info
+' de rudo con la key de la tarjeta (firmado si es restringido) y se reproduce en
+' modo en vivo (sin barra, sin panel de episodios ni tracking). Si trae
+' DPSDAIAssetKey se usa el stream de DAI. Back vuelve al Home.
+sub StartLiveDirect(live as object)
+    restriction = getValueFromProps(live, "restriction", "0")
+    packs = getValueFromProps(live, "packs", [])
+    ' FeaturedItem.handleClick: la restriccion se valida antes de abrir
+    if isNonEmptyString(restriction) AND restriction <> "0"
+        if m.scene.isUserLoggedIn <> true
+            ShowLoading(false)
+            m.scene.callFunc("ClosePlayerPage")
+            m.scene.callFunc("ShowOnboardingPage", false)
+            return
+        end if
+        if restriction = "1" AND ValidateRestriction(restriction, packs)
+            ' navigate("/suscribe"): SuscribeView todavia no esta portada.
+            ShowError("Este contenido requiere una suscripción")
+            return
+        end if
+    end if
+    m.episode = { live_redirect: "1", vast_app: getValueFromProps(live, "vastUrl", ""), show: "" }
+    m.show = invalid
+    m.chapters = []
+    m.chapter = {
+        key: getValueFromProps(live, "key", "")
+        title: getValueFromProps(live, "title", "")
+        restriction: restriction
+        packs: packs
+        link: ""
+        image: ""
+    }
+    m.liveDaiAssetKey = getValueFromProps(live, "daiAssetKey", "")
+    ' La web la cuenta por el cambio de ruta a /player/live (titulo "Live").
+    m.scene.callFunc("TrackPage", { path: "/player/live" })
+    m.mediaTask = RunTask("ContentAPIAction", "GetVodMediaInfo", { key: m.chapter.key }, "OnMediaInfoResponse")
+end sub
+
 sub OnMediaInfoResponse(event as dynamic)
     if IsStale() then return
     m.mediaTask = invalid
@@ -190,6 +235,10 @@ sub StartPlayback(mediaUrl as string)
         vastUrl: getValueFromProps(m.episode, "vast_app", "")
         isLive: isLive
     }
+    ' streamUrl de LiveDirectPlayerView: con DPSDAIAssetKey, el stream de DAI.
+    if isLive AND isNonEmptyString(m.liveDaiAssetKey)
+        mediaUrl = "https://dai.google.com/linear/hls/event/" + m.liveDaiAssetKey + "/master.m3u8"
+    end if
     ' La misma sesion DPS va en el video y en la URL del anuncio.
     session = GetDpsSessionParams()
     url = ForceSessionParams(mediaUrl, session)

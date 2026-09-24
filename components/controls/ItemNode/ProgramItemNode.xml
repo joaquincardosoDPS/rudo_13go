@@ -27,5 +27,14 @@
         <field id="epigrafe" type="string" />
         <field id="llamado" type="string" />
         <field id="duration" type="string" />
+        <!-- validateRestriction: el usuario no tiene acceso (candado en la tarjeta) -->
+        <field id="blocked" type="boolean" value="false" />
+        <!-- Tarjetas de Destacados (FeaturedItem.tsx): a donde lleva y como reproducirla -->
+        <field id="link" type="string" />
+        <field id="rudoKey" type="string" />
+        <field id="restriction" type="string" value="0" />
+        <field id="packs" type="array" />
+        <field id="vastUrl" type="string" />
+        <field id="daiAssetKey" type="string" />
     </interface>
 </component>
