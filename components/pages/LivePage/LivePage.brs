@@ -201,6 +201,18 @@ function isoToEpoch(iso as string) as integer
     return days * 86400 + h * 3600 + mi * 60 + s
 end function
 
+' Nombre del programa de un evento del EPG. En algunas senales (Canal 13, 13
+' Internacional, Ecuavisa) el "title" de cada bloque es el nombre del canal y el
+' programa real viene en "episodeTitle" ("Tu Dia", "Teletrece Tarde"...); en el
+' resto "title" ya es el programa. La web muestra siempre "title" (se ve "Canal 13"
+' en todos los bloques); aca se usa episodeTitle solo cuando title es el canal.
+function ProgramTitle(ev as object, epgChannel as string) as string
+    title = getValueFromProps(ev, "title", "")
+    episodeTitle = getValueFromProps(ev, "episodeTitle", "")
+    if isNonEmptyString(episodeTitle) AND (not isNonEmptyString(title) OR LCase(title.Trim()) = epgChannel) then return episodeTitle
+    return title
+end function
+
 function epochToLocalHHMM(epoch as integer) as string
     nd = CreateObject("roDateTime")
     nd.fromSeconds(epoch)
@@ -225,13 +237,14 @@ sub buildChannels()
         for each epgItem in m.programation
             if getValueFromProps(epgItem, "key_live", "") = keyLive
                 events = getValueFromProps(epgItem, "events", [])
+                epgChannel = LCase(getValueFromProps(epgItem, "channel", "").Trim())
                 for each ev in events
                     endE = isoToEpoch(getValueFromProps(ev, "endTime", ""))
                     if endE > nowE
                         if programs.count() >= 5 then exit for
                         beginE = isoToEpoch(getValueFromProps(ev, "beginTime", ""))
                         programs.push({
-                            "title": getValueFromProps(ev, "title", "")
+                            "title": ProgramTitle(ev, epgChannel)
                             "timeText": epochToLocalHHMM(beginE)
                             "isLive": (nowE >= beginE AND nowE <= endE)
                         })
