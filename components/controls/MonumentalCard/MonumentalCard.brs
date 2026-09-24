@@ -92,8 +92,11 @@ sub setPosterSize(node as object, w as dynamic, h as dynamic)
     if node = invalid then return
     node.width = w
     node.height = h
-    node.loadWidth = w
-    node.loadHeight = h
+    ' loadWidth/loadHeight solo existen en Poster (rCardBg es un Rectangle).
+    if node.hasField("loadWidth")
+        node.loadWidth = w
+        node.loadHeight = h
+    end if
 end sub
 
 sub setMaskBox(w as float, h as float, x as float, y as float)
