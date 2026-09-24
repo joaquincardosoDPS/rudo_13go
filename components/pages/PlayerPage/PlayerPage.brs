@@ -193,6 +193,8 @@ sub StartPlayback(mediaUrl as string)
     ' La misma sesion DPS va en el video y en la URL del anuncio.
     session = GetDpsSessionParams()
     url = ForceSessionParams(mediaUrl, session)
+    ' GA4 a mano, como PlayerView.tsx: trackPage(pathname, titulo del capitulo).
+    m.scene.callFunc("TrackPage", { path: getValueFromProps(m.top.params, "link", ""), title: m.info.title })
     print "PlayerPage : URL final : " url
     content = CreateObject("roSGNode", "ContentNode")
     content.url = url

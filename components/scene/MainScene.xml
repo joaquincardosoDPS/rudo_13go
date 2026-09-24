@@ -56,6 +56,7 @@
         <function name="ShowPlayerPage" />
         <function name="ClosePlayerPage" />
         <function name="RunBackgroundTask" />
+        <function name="TrackPage" />
     </interface>
 
     <children>
@@ -70,5 +71,7 @@
             <Label id="ToastMsgText" />
         </Group>
         <Timer id="toastMessageTimer" repeat="true" duration="5" />
+        <!-- GA4: mira que pagina esta arriba del stack para mandar el page_view -->
+        <Timer id="ga4Timer" repeat="true" duration="0.5" />
     </children>
 </component>

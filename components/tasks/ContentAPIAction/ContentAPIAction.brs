@@ -31,6 +31,10 @@ sub GetVodMediaInfo()
     m.top.result = ContentAPI().GetVodMediaInfo(m.top.params)
 end sub
 
+sub SendAnalyticsHit()
+    m.top.result = ContentAPI().SendAnalyticsHit(m.top.params)
+end sub
+
 function GetTextByUrl() as void
     response = ContentAPI().GetTextByUrl(m.top.params)
     m.top.result = response

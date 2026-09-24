@@ -142,6 +142,8 @@ sub OnVisibleChange()
         OnSlugSet()
     else if m.isLoaded
         LoadTracking()
+        ' Volver a /programas/:slug es otra vista para GA4 (en la web ProgramView se vuelve a montar).
+        TrackProgramView()
     end if
 end sub
 
@@ -234,6 +236,13 @@ sub OnChaptersResponse(event as dynamic)
     LoadTracking()
 end sub
 
+' GA4 a mano, como ProgramView.tsx: trackPage(pathname, program.title || "Programa VOD").
+sub TrackProgramView()
+    title = getValueFromProps(m.program, "title", "")
+    if not isNonEmptyString(title) then title = "Programa VOD"
+    m.scene.callFunc("TrackPage", { path: "/programas/" + m.top.slug, title: title })
+end sub
+
 ' Historial del perfil -> boton "Reanudar". Se vuelve a pedir al volver del
 ' reproductor (en la web ProgramView se vuelve a montar y lo pide de nuevo).
 sub LoadTracking()
@@ -247,6 +256,7 @@ sub FinishLoading()
     m.gPage.visible = true
     if not m.isLoaded
         m.isLoaded = true
+        TrackProgramView()
         ' Foco inicial: Reanudar si hay, si no Favoritos.
         if m.top.isInFocusChain() then SetFocusArea("favorite")
     end if

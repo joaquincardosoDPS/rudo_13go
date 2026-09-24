@@ -53,6 +53,7 @@ end sub
 
 sub SetObservers()
     m.top.observeField("ProfileData", "OnProfileDataChanged")
+    InitAnalytics()
 end sub
 
 ' Start Deep Linking
@@ -898,6 +899,116 @@ sub OnBackgroundTaskState(event as dynamic)
         m.backgroundTasks.Delete(task.id)
     end if
 end sub
+
+' ===================================================================
+' GA4 (ga4Service.ts + AnalyticsProvider de c13_reloaded, sin Chartbeat)
+' -------------------------------------------------------------------
+' Un page_view por pantalla, con la ruta equivalente de la web. La web lo
+' dispara al cambiar de ruta; aca un timer mira la pagina de arriba del stack
+' (cubre push, reemplazo y back). La vista de programa y el reproductor lo
+' mandan a mano con su titulo (trackPage), igual que la web, que salta el
+' envio automatico en /programas/:slug y /programas/:slug/:cat/:cap.
+' ===================================================================
+sub InitAnalytics()
+    reg = CreateObject("roRegistrySection", "Canal13GoDevice")
+    m.ga4ClientId = ""
+    if reg.Exists("ga4_client_id") then m.ga4ClientId = reg.Read("ga4_client_id")
+    if not isNonEmptyString(m.ga4ClientId)
+        m.ga4ClientId = LCase(CreateObject("roDeviceInfo").GetRandomUUID().Replace("-", ""))
+        reg.Write("ga4_client_id", m.ga4ClientId)
+        reg.Flush()
+    end if
+    ' Date.now() al arrancar: un id de sesion por cada vez que se abre el canal.
+    now = CreateObject("roDateTime")
+    ms = now.GetMilliseconds().ToStr()
+    while Len(ms) < 3
+        ms = "0" + ms
+    end while
+    m.ga4SessionId = now.AsSeconds().ToStr() + ms
+    m.ga4HitCounter = 0
+    m.ga4LastPath = ""
+    m.ga4LastTopId = ""
+    m.ga4Timer = m.top.findNode("ga4Timer")
+    m.ga4Timer.observeField("fire", "OnAnalyticsTick")
+    m.ga4Timer.control = "start"
+end sub
+
+' Ruta de la web para cada pagina (vacio = no se manda automatico).
+function AnalyticsPathForPage(page as object) as string
+    if not isValid(page) then return ""
+    id = page.id
+    if id = "HomePage" then return "/home"
+    if id = "ShowProgramsPage" then return "/programas"
+    if id = "LivePage" then return "/en-vivo"
+    if id = "RadioPage" then return "/radio"
+    if id = "SearchPage" then return "/buscador"
+    if id = "AccountPage" then return "/mi-cuenta"
+    if id = "EditProfilePage" then return "/edit-perfil/" + AnyToText(page.profileId)
+    if id = "OnboardingPage" then return "/login"
+    if id = "DeviceLinkPage" then return "/connect"
+    if id = "EditorProfilesPage" then return "/whosthere"
+    return ""
+end function
+
+sub OnAnalyticsTick()
+    top = m.ViewStackManager.GetTop()
+    topId = ""
+    if isValid(top) then topId = top.id
+    if topId = m.ga4LastTopId then return
+    m.ga4LastTopId = topId
+    path = AnalyticsPathForPage(top)
+    if isNonEmptyString(path) then TrackPage({ path: path })
+end sub
+
+' trackPage/sendGA4PageView. params = { path, title? }. Sin titulo, el ultimo
+' tramo de la ruta con los guiones como espacios y la primera en mayuscula.
+' No repite la misma ruta dos veces seguidas (lastTrackedRef).
+sub TrackPage(params as object)
+    path = getValueFromProps(params, "path", "")
+    if not isNonEmptyString(path) OR path = m.ga4LastPath then return
+    m.ga4LastPath = path
+    title = getValueFromProps(params, "title", "")
+    if not isNonEmptyString(title)
+        parts = Mid(path, 2).Split("/")
+        last = ""
+        if parts.count() > 0 then last = parts[parts.count() - 1]
+        if last = ""
+            title = "Home"
+        else
+            title = last.Replace("-", " ")
+            title = UCase(Left(title, 1)) + Mid(title, 2)
+        end if
+    end if
+    absolutePath = "https://www.13go.cl" + path
+    m.ga4HitCounter = m.ga4HitCounter + 1
+    query = [
+        "v=2"
+        "tid=G-33D1K2C2YN"
+        "cid=" + m.ga4ClientId
+        "sid=" + m.ga4SessionId
+        "_s=" + m.ga4HitCounter.ToStr()
+        "en=page_view"
+        "ep.title=" + title.EncodeUriComponent()
+        "ep.path=" + absolutePath.EncodeUriComponent()
+        "ep.device_type=Roku"
+        "dl=" + absolutePath.EncodeUriComponent()
+        "dt=" + title.EncodeUriComponent()
+        "_p=" + Rnd(2147483646).ToStr()
+    ]
+    print "MainScene : GA4 page_view : " path " : " title
+    RunBackgroundTask({
+        taskType: "ContentAPIAction"
+        functionName: "SendAnalyticsHit"
+        params: { url: "https://www.google-analytics.com/g/collect?" + query.Join("&") }
+    })
+end sub
+
+function AnyToText(value as dynamic) as string
+    if value = invalid then return ""
+    if GetInterface(value, "ifString") <> invalid then return value
+    if GetInterface(value, "ifToStr") <> invalid then return value.ToStr()
+    return ""
+end function
 
 ' Cierra el reproductor desde adentro (ej: capitulo restringido sin sesion).
 sub ClosePlayerPage()

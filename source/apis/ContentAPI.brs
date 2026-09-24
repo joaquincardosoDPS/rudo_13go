@@ -33,6 +33,9 @@ function ContentAPI__New()
     this.GetEpisodeByLink = ContentAPI__GetEpisodeByLink
     this.GetVodMediaInfo = ContentAPI__GetVodMediaInfo
 
+    ' Analitica (GA4)
+    this.SendAnalyticsHit = ContentAPI__SendAnalyticsHit
+
     this.GetConfig = ContentAPI__GetConfig
     this.GetHomeConfig = ContentAPI__GetHomeConfig
 
@@ -232,6 +235,14 @@ function ContentAPI__GetVodMediaInfo(params as dynamic)
     path = GlobalGet("apiEndPoints").GetVodMediaInfo + "/" + getValueFromProps(params, "key", "")
     headers = { "X-ACCESS-TOKEN": getValueFromProps(GlobalGet("appConfig"), "rudoAccessToken", "") }
     return handleApiResponse(getRequest(path, {}, headers))
+end function
+
+' ga4Service.ts: el hit va entero en la URL (g/collect?v=2&tid=...) como un POST
+' sin cuerpo. GA4 responde 204 sin contenido, asi que no se parsea.
+function ContentAPI__SendAnalyticsHit(params as dynamic)
+    response = postRequest(getValueFromProps(params, "url", ""), {}, {})
+    if response.isSuccess then return ok("")
+    return error(GetErrorReason(response))
 end function
 
 function ContentAPI__UpdateProfile(params as dynamic)
