@@ -15,7 +15,10 @@
     </interface>
     <children>
         <Rectangle id="rBackground" width="1920" height="1080" color="#000000" />
-        <Video id="video" width="1920" height="1080" notificationInterval="1" enableUI="false" />
+        <!-- Dentro del area segura de Roku (1728x972 centrado, 16:9): el overscan de
+             la TV recorta los bordes y la imagen tiene que verse entera, aunque
+             queden bordes negros. Los controles si ocupan toda la pantalla. -->
+        <Video id="video" width="1728" height="972" translation="[96,54]" notificationInterval="1" enableUI="false" />
         <PlayerControls id="controls" />
         <!-- Timeout de seguridad del anuncio (VastPlayer: 15s sin respuesta) -->
         <Timer id="adsTimeout" duration="15" repeat="false" />

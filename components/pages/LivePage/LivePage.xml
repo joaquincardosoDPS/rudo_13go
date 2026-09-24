@@ -9,7 +9,7 @@
     </interface>
     <children>
         <Rectangle id="rBg" width="1920" height="1080" color="#000000" />
-        <Video id="vLive" width="1920" height="1080" translation="[0,0]" enableUI="false" enableTrickPlay="false" />
+        <Video id="vLive" width="1728" height="972" translation="[96,54]" enableUI="false" enableTrickPlay="false" />
         <Group id="gOverlay" visible="false">
             <Poster id="pFadeBottom" width="1248" height="351" uri="pkg:/images/overlay/hero_fade_bottom.png" loadDisplayMode="stretchToFit" translation="[672,351]" visible="false" />
             <Poster id="pPill" width="108" height="28" uri="pkg:/images/focus/R5Filled_30px.9.png" loadDisplayMode="scaleToZoom" translation="[153,209]" />

@@ -443,9 +443,12 @@ sub hideOverlay()
     m.gOverlay.visible = false
     setMenuVisible(false)
     m.pFadeBottom.visible = false
-    m.vLive.translation = [0, 0]
-    m.vLive.width = 1920
-    m.vLive.height = 1080
+    ' Pantalla completa dentro del area segura de Roku (90%, 16:9): el overscan
+    ' de la TV recorta los bordes y la imagen tiene que verse entera, aunque
+    ' queden bordes negros.
+    m.vLive.translation = [96, 54]
+    m.vLive.width = 1728
+    m.vLive.height = 972
     m.tHide.control = "stop"
 end sub
 
