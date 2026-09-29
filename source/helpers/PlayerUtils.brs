@@ -218,3 +218,35 @@ sub StopLiveDaiTask(task as dynamic)
     task.unobserveField("adPlaying")
     task.stop = true
 end sub
+
+'===> Token de las senales en vivo (authContent, type live)
+' Canal 13 exige token en todas las senales: es lo que impide que un usuario sin
+' suscripcion vea una senal de pago.
+
+' Senal de pago: restriction distinta de 0 y 2 (la condicion de LiveView.tsx).
+function IsPaidRestriction(restriction as dynamic) as boolean
+    if not isNonEmptyString(restriction) then return false
+    return restriction <> "0" AND restriction <> "2"
+end function
+
+' El access_token de la respuesta del gateway. Puede venir ya codificado
+' (event%3D...): se deja tal cual lo usa el reproductor de 13go.cl
+' (auth-token=event=...~exp=...~hmac=...). Codificarlo de nuevo lo arruina y
+' Google/DPS responden 401.
+function LiveTokenFromAuthResponse(result as dynamic) as string
+    token = getValueFromProps(result, "data.data.access_token", "")
+    if not isNonEmptyString(token) then token = getValueFromProps(result, "data.access_token", "")
+    if not isNonEmptyString(token) then return ""
+    if Instr(1, token, "%") > 0 then token = token.DecodeUriComponent()
+    return token
+end function
+
+' buildLiveUrl de use-hls-player.ts: el primer tramo despues de /hls/ del m3u8
+' de la senal va a redirector.dps.live con el token como auth-token (sin volver a
+' codificarlo: los = y ~ del token van tal cual, como en el sitio). Si el m3u8 no
+' tiene ese formato se devuelve tal cual.
+function BuildLiveTokenUrl(src as string, token as string) as string
+    match = CreateObject("roRegex", "/hls/([^/]+)/", "").Match(src)
+    if match.count() < 2 then return src
+    return "https://redirector.dps.live/hls/" + match[1] + "/playlist.m3u8?auth-token=" + token
+end function

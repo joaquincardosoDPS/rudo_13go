@@ -59,6 +59,7 @@ sub OnParamsSet()
     m.lastPosition = invalid
     m.video.visible = true
     m.liveDaiAssetKey = ""
+    m.isLiveDirect = isValid(live)
     m.cancelled = false
     m.lError.visible = false
     ShowLoading(true)
@@ -195,10 +196,18 @@ sub OnMediaInfoResponse(event as dynamic)
     end if
     m.mediaUrl = m3u8
     m.mediaDuration = Int(convertToNumber(getValueFromProps(media, "duration", 0)))
+    m.mediaRestriction = getValueFromProps(media, "restriction", "0")
+    ' Senal en vivo de Destacados: Canal 13 exige token en todas las senales
+    ' (es lo que impide ver una de pago sin suscripcion), asi que se firma
+    ' siempre, sin mirar la restriccion ni la suscripcion.
+    if m.isLiveDirect = true
+        m.authTask = RunTask("AuthAPIAction", "AuthenticateContent", { type: "vod", id: getValueFromProps(m.chapter, "key", "") }, "OnAuthContentResponse")
+        return
+    end if
     ' 7. Firma del VOD si es restringido. authenticateContent exige suscripcion
     ' activa; si no la hay (o el gateway falla) la web sigue sin firma.
     subscriptionActive = getValueFromProps(GlobalGet("UserData"), "suscription.active", false) = true
-    if getValueFromProps(media, "restriction", "0") = "1" AND isNonEmptyString(GlobalGet("token")) AND subscriptionActive
+    if m.mediaRestriction = "1" AND isNonEmptyString(GlobalGet("token")) AND subscriptionActive
         m.authTask = RunTask("AuthAPIAction", "AuthenticateContent", { type: "vod", id: getValueFromProps(m.chapter, "key", "") }, "OnAuthContentResponse")
     else
         StartPlayback(m.mediaUrl)
@@ -216,6 +225,11 @@ sub OnAuthContentResponse(event as dynamic)
         print "PlayerPage : VOD autenticado"
     else
         print "PlayerPage : error autenticando VOD : " FormatJson(event.getData())
+        ' Una senal de pago sin token no se reproduce.
+        if m.isLiveDirect = true AND (IsPaidRestriction(m.mediaRestriction) OR IsPaidRestriction(getValueFromProps(m.chapter, "restriction", "0")))
+            ShowError("Este contenido requiere una suscripción")
+            return
+        end if
     end if
     StartPlayback(url)
 end sub

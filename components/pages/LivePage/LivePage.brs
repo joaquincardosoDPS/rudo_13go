@@ -56,6 +56,7 @@ sub setControls()
     m.gGridTrack = m.top.findNode("gGridTrack")
     m.tHide = m.top.findNode("tHide")
     m.bsLoading = m.top.findNode("bsLoading")
+    m.lMessage = m.top.findNode("lMessage")
 end sub
 
 sub setupFonts()
@@ -64,6 +65,7 @@ sub setupFonts()
     m.lProgramTitle.font = m.fonts.dmSansMedium23
     m.lQualLabel.font = m.fonts.dmSansMedium20
     m.lQualValue.font = m.fonts.dmSansMedium20
+    m.lMessage.font = m.fonts.dmSansMedium32
 end sub
 
 sub setupColors()
@@ -301,6 +303,7 @@ sub selectChannel(index as integer)
     ch = m.channels[index]
     if ch.blocked then return
     m.selectedIndex = index
+    hideMessage()
     updateHeader(ch)
     hideOverlay()
     finishPreroll()
@@ -316,19 +319,18 @@ sub selectChannel(index as integer)
 end sub
 
 ' El stream de la senal elegida, una vez terminado el anuncio.
+' Canal 13 exige token en todas las senales (seguridad: el token es lo que
+' impide que un usuario sin suscripcion vea una senal de pago), asi que se pide
+' authContent (type live, id = assetKey) siempre, sin mirar la restriccion. La
+' web solo lo pide en las de suscripcion y sin token sigue con el stream normal;
+' eso no se copia.
 sub playChannel(index as integer)
     ch = m.channels[index]
-    ' Reproductor de Rudo (13go.cl): las senales libres con assetKey van por DAI
-    ' de Google (DAI=1); las de suscripcion nunca (DAI=0, stream de DPS con token).
-    if ch.restriction = "0" AND isNonEmptyString(ch.assetKey)
-        startDai(index)
-        return
-    end if
-    ' LivePlayerContainer: las senales de suscripcion (restriction distinta de 0
-    ' y 2) se firman con authContent (type live, id = assetKey). Sin token (o sin
-    ' assetKey) se sigue con el stream normal, como la web.
-    if ch.restriction <> "0" AND ch.restriction <> "2" AND isNonEmptyString(ch.assetKey)
+    hideMessage()
+    m.daiFallbackUrl = ""
+    if isNonEmptyString(ch.assetKey)
         if isValid(m.liveAuthTask) then m.liveAuthTask.control = "stop"
+        showLoading(true)
         m.liveAuthIndex = index
         m.liveAuthTask = CreateObject("roSGNode", "AuthAPIAction")
         m.liveAuthTask.functionName = "AuthenticateContent"
@@ -337,37 +339,53 @@ sub playChannel(index as integer)
         m.liveAuthTask.control = "RUN"
         return
     end if
+    ' Sin assetKey no hay con que pedir el token: stream normal.
+    print "LivePage : senal sin assetKey, sin token : " ch.name_live
     playUrl(ch.preview_m3u8, ch.m3u8)
 end sub
 
 sub onLiveAuthResponse(event as dynamic)
     m.liveAuthTask = invalid
     ' Si mientras tanto se eligio otra senal, esta respuesta ya no sirve.
-    if m.liveAuthIndex <> m.selectedIndex then return
+    if m.liveAuthIndex <> m.selectedIndex OR not m.top.visible then return
+    showLoading(false)
     ch = m.channels[m.selectedIndex]
-    token = getValueFromProps(event.getData(), "data.data.access_token", "")
-    if not isNonEmptyString(token) then token = getValueFromProps(event.getData(), "data.access_token", "")
-    ' El gateway puede entregar el token ya codificado (event%3D...): se deja
-    ' tal cual lo usa el reproductor de 13go.cl (auth-token=event=...~exp=...~hmac=...).
-    ' Codificarlo de nuevo lo arruina y Google/DPS responden 401.
-    if isNonEmptyString(token) AND Instr(1, token, "%") > 0 then token = token.DecodeUriComponent()
+    token = LiveTokenFromAuthResponse(event.getData())
+    signedUrl = ""
     if isNonEmptyString(token)
         print "LivePage : senal autenticada : " ch.name_live
-        playUrl(BuildLiveTokenUrl(ch.m3u8, token), ch.preview_m3u8)
+        signedUrl = BuildLiveTokenUrl(ch.m3u8, token)
     else
         print "LivePage : no se pudo autenticar la senal : " FormatJson(event.getData())
+        ' Una senal de pago sin token no se reproduce.
+        if IsPaidRestriction(ch.restriction)
+            m.vLive.control = "stop"
+            m.vLive.content = invalid
+            showMessage("Este contenido requiere una suscripción")
+            return
+        end if
+    end if
+    ' Reproductor de Rudo (13go.cl): las senales libres con assetKey van por DAI
+    ' de Google (DAI=1), con el stream firmado de respaldo; las de suscripcion
+    ' nunca (DAI=0, stream de DPS con token).
+    if ch.restriction = "0"
+        m.daiFallbackUrl = signedUrl
+        startDai(m.selectedIndex)
+    else if isNonEmptyString(signedUrl)
+        playUrl(signedUrl, ch.preview_m3u8)
+    else
         playUrl(ch.preview_m3u8, ch.m3u8)
     end if
 end sub
 
-' buildLiveUrl de use-hls-player.ts: el primer tramo despues de /hls/ del m3u8
-' de la senal va a redirector.dps.live con el token como auth-token (sin volver a
-' codificarlo: los = y ~ del token van tal cual, como en el sitio).
-function BuildLiveTokenUrl(src as string, token as string) as string
-    match = CreateObject("roRegex", "/hls/([^/]+)/", "").Match(src)
-    if match.count() < 2 then return src
-    return "https://redirector.dps.live/hls/" + match[1] + "/playlist.m3u8?auth-token=" + token
-end function
+sub showMessage(text as string)
+    m.lMessage.text = text
+    m.lMessage.visible = true
+end sub
+
+sub hideMessage()
+    m.lMessage.visible = false
+end sub
 
 '===> Anuncio VAST al elegir la senal (el adsURL/VMAP del reproductor de Rudo)
 ' El campo vast de la senal es el VMAP de Rudo para apps
@@ -495,12 +513,16 @@ sub onDaiTimeout()
     daiFallback("Google no entrego el stream en 20s")
 end sub
 
-' Como el streamURL de Rudo: sin DAI, el stream normal de la senal.
+' Como el streamURL de Rudo: sin DAI, el stream de la senal (firmado si hay token).
 sub daiFallback(reason as string)
-    print "LivePage : DAI no disponible (" reason "), stream normal"
+    print "LivePage : DAI no disponible (" reason "), stream de respaldo"
     stopDai()
     ch = m.channels[m.selectedIndex]
-    playUrl(ch.preview_m3u8, ch.m3u8)
+    if isNonEmptyString(m.daiFallbackUrl)
+        playUrl(m.daiFallbackUrl, ch.preview_m3u8)
+    else
+        playUrl(ch.preview_m3u8, ch.m3u8)
+    end if
 end sub
 
 sub updateHeader(ch as dynamic)
