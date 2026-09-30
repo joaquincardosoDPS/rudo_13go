@@ -201,10 +201,11 @@ sub BuildProfiles()
         if isNonEmptyString(m.avatarBaseUrl) AND isNonEmptyString(avatarId)
             profileUri = m.avatarBaseUrl + avatarId + ".jpg"
         end if
+        ' Claves entre comillas: se guarda en el registry (ver BuildAuthDataFromGateway).
         m.profiles.Push({
-            profileId: FirestoreString(fields, "order", "0")
-            profileName: FirestoreString(fields, "name")
-            profileUri: profileUri
+            "profileId": FirestoreString(fields, "order", "0")
+            "profileName": FirestoreString(fields, "name")
+            "profileUri": profileUri
         })
     end for
     ' Cada .item mide 8vw (154px) + padding-right 1vw (19px).

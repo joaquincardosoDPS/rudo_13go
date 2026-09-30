@@ -795,10 +795,11 @@ sub UpdateCurrentProfile(profile as object)
     current = m.top.ProfileData
     currentId = getValueFromProps(current, "profileId", "")
     if not isNonEmptyString(currentId) OR currentId <> getValueFromProps(profile, "profileId", "") then return
+    ' Claves entre comillas: se guarda en el registry (ver BuildAuthDataFromGateway).
     updated = {
-        profileId: currentId
-        profileName: getValueFromProps(profile, "profileName", "")
-        profileUri: getValueFromProps(profile, "profileUri", "")
+        "profileId": currentId
+        "profileName": getValueFromProps(profile, "profileName", "")
+        "profileUri": getValueFromProps(profile, "profileUri", "")
     }
     m.registryManager.SaveSelectedProfile(updated)
     m.top.ProfileData = updated

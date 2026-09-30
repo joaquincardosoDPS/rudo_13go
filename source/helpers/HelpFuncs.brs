@@ -578,14 +578,17 @@ end function
 
 ' Normaliza la respuesta de token del gateway (action=deviceToken o
 ' action=refreshToken) al shape que guardamos en el registry.
+' Claves entre comillas: en el Roku real las claves sin comillas de un literal
+' se guardan en minusculas (FormatJson escribe "accesstoken") y al releer el
+' registry no se encontraba "accessToken" (la sesion se perdia al relanzar).
 function BuildAuthDataFromGateway(tokenData as object, deviceId = "" as string) as object
     return {
-        userId: getValueFromProps(tokenData, "user_id", "")
-        accessToken: getValueFromProps(tokenData, "access_token", "")
-        refreshToken: getValueFromProps(tokenData, "refresh_token", "")
-        tokenType: getValueFromProps(tokenData, "token_type", "")
-        expiresIn: convertToNumber(getValueFromProps(tokenData, "expires_in", 0))
-        deviceId: deviceId
+        "userId": getValueFromProps(tokenData, "user_id", "")
+        "accessToken": getValueFromProps(tokenData, "access_token", "")
+        "refreshToken": getValueFromProps(tokenData, "refresh_token", "")
+        "tokenType": getValueFromProps(tokenData, "token_type", "")
+        "expiresIn": convertToNumber(getValueFromProps(tokenData, "expires_in", 0))
+        "deviceId": deviceId
     }
 end function
 

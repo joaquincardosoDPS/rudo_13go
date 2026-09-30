@@ -12,10 +12,16 @@ Function CreateRegistryManager() as Object
             reg.Flush()
         End Sub,
 
+        ' ParseJSON con "i": claves sin distinguir mayusculas. En el Roku real el
+        ' AA de ParseJSON si las distingue, y una sesion guardada con claves en
+        ' minusculas ("accesstoken") no se encontraba al buscar "accessToken": el
+        ' canal arrancaba sin sesion cada vez.
         GetAuthData: Function() as Object
             reg = CreateObject("roRegistrySection", m.SECTION)
             if not reg.Exists("authData") then return invalid
-            return ParseJSON(reg.Read("authData"))
+            data = ParseJSON(reg.Read("authData"), "i")
+            print "RegistryManager : GetAuthData : sesion guardada, accessToken=" isValid(data) AND isValid(data.accessToken) AND data.accessToken <> ""
+            return data
         End Function,
 
         ClearAuthData: Sub()
@@ -35,7 +41,7 @@ Function CreateRegistryManager() as Object
         GetSelectedProfile: Function() as Object
             reg = CreateObject("roRegistrySection", m.SECTION)
             if not reg.Exists("currentProfile") then return invalid
-            return ParseJSON(reg.Read("currentProfile"))
+            return ParseJSON(reg.Read("currentProfile"), "i")
         End Function,
 
         ClearAllSettings: Sub()
