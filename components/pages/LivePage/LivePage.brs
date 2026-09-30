@@ -463,6 +463,8 @@ sub startDai(index as integer)
     m.daiTask = NewLiveDaiTask(m.vLive, ch.assetKey, ch.key_live)
     m.daiTask.observeField("urlData", "onDaiUrl")
     m.daiTask.observeField("errors", "onDaiErrors")
+    m.daiTask.observeField("adPlaying", "onDaiAdPlaying")
+    m.daiTask.observeField("state", "onDaiTaskState")
     m.daiTask.control = "RUN"
     ' Si Google no entrega el stream a tiempo se sigue con el normal.
     if not isValid(m.tDai)
@@ -472,6 +474,40 @@ sub startDai(index as integer)
     end if
     m.tDai.control = "stop"
     m.tDai.control = "start"
+end sub
+
+' Fin de la tanda de DAI o de la task: RAF puede quedarse con el foco (ver
+' ShouldReclaimFocusAfterDai). Se reintenta unos segundos porque RAF puede
+' tomarlo de nuevo un poco despues (adPeriodEnded llega ~3 s despues).
+sub onDaiAdPlaying(event as dynamic)
+    if event.getData() = false then startDaiFocusReclaim()
+end sub
+
+sub onDaiTaskState(event as dynamic)
+    if event.getData() = "stop" then startDaiFocusReclaim()
+end sub
+
+sub startDaiFocusReclaim()
+    if not isValid(m.tDaiFocus)
+        m.tDaiFocus = CreateObject("roSGNode", "Timer")
+        m.tDaiFocus.duration = 1
+        m.tDaiFocus.repeat = true
+        m.tDaiFocus.observeField("fire", "onDaiFocusReclaim")
+    end if
+    m.daiFocusTries = 6
+    m.tDaiFocus.control = "stop"
+    m.tDaiFocus.control = "start"
+    onDaiFocusReclaim()
+end sub
+
+sub onDaiFocusReclaim()
+    ' Con el anuncio VAST en pantalla las teclas son de RAF (legitimo).
+    if not m.adsPlaying AND ShouldReclaimFocusAfterDai(m.top)
+        print "LivePage : el foco quedo fuera de la pagina tras la tanda, se recupera"
+        m.top.setFocus(true)
+    end if
+    m.daiFocusTries = m.daiFocusTries - 1
+    if m.daiFocusTries <= 0 then m.tDaiFocus.control = "stop"
 end sub
 
 sub stopDai()

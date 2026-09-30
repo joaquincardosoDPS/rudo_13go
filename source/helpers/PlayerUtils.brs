@@ -216,8 +216,24 @@ sub StopLiveDaiTask(task as dynamic)
     task.unobserveField("urlData")
     task.unobserveField("errors")
     task.unobserveField("adPlaying")
+    task.unobserveField("state")
     task.stop = true
 end sub
+
+' En una tanda de DAI, RAF (stitchedAdHandledEvent) se queda con el foco para
+' manejar las teclas del anuncio y al terminar no lo devuelve: la pagina deja de
+' recibir teclas (ni back). Tras la tanda (o si la task termina, ej. el usuario
+' salio del anuncio con back) la pagina lo recupera, salvo que lo tenga otro
+' componente legitimo: el sidebar o un dialogo.
+function ShouldReclaimFocusAfterDai(page as object) as boolean
+    if not page.visible OR page.isInFocusChain() then return false
+    scene = page.getScene()
+    if scene = invalid then return false
+    if scene.dialog <> invalid then return false
+    menu = scene.findNode("gTopMenu")
+    if menu <> invalid AND menu.visible AND menu.isInFocusChain() then return false
+    return true
+end function
 
 '===> Token de las senales en vivo (authContent, type live)
 ' Canal 13 exige token en todas las senales: es lo que impide que un usuario sin
