@@ -30,7 +30,7 @@
              chico real de la web (15px) el espacio fijo que deja CustomButton entre el
              icono y el texto (+50px, ver SetTranslations en CustomButton.brs) se ve
              desproporcionado; a este tamaño de icono/padding se ve bien. -->
-        <CustomButton id="LoginButton" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" focusBorderImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" posterImage="pkg:/images/focus/btnplay.png" posterImageSize="24" padding="20" buttonWidth="260" buttonHeight="58" buttonText="Iniciar sesión" isFilledBgOnFocus="false" translation="[170,756]" visible="true" />
+        <CustomButton id="LoginButton" backGroundImage="pkg:/images/focus/btn_pill_58.9.png" focusBorderImage="pkg:/images/focus/btn_pill_58.9.png" posterImage="pkg:/images/focus/btnplay.png" posterImageSize="24" padding="20" buttonWidth="260" buttonHeight="58" buttonText="Iniciar sesión" isFilledBgOnFocus="false" translation="[170,756]" visible="true" />
 
         <!-- Columna derecha: tarjeta de QR -->
         <Group id="gQr" translation="[1462,533]">

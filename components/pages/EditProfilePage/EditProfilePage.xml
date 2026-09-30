@@ -29,7 +29,7 @@
             <Group id="gAvatarClip" translation="[837,204]" clippingRect="[0,0,815,710]">
                 <Group id="gAvatars" />
             </Group>
-            <CustomButton id="saveButton" buttonText="Guardar cambios" buttonWidth="290" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" translation="[1099,914]" />
+            <CustomButton id="saveButton" buttonText="Guardar cambios" buttonWidth="290" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/btn_pill_60.9.png" translation="[1099,914]" />
         </Group>
     </children>
 </component>

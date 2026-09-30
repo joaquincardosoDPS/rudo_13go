@@ -15,7 +15,7 @@
 
     <children>
         <Rectangle id="backgroundPanel" width="1920" height="1080" />
-        <CustomButton id="logoutButton" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" buttonWidth="250" buttonHeight="72" buttonText="Cerrar sesión" isFilledBgOnFocus="false" visible="true" translation="[1570, 60]" />
+        <CustomButton id="logoutButton" backGroundImage="pkg:/images/focus/btn_pill_72.9.png" buttonWidth="250" buttonHeight="72" buttonText="Cerrar sesión" isFilledBgOnFocus="false" visible="true" translation="[1570, 60]" />
         <Poster id="brandLogo" height="120" loadDisplayMode="scaleToFit" translation="[0, 190]" />
         <Label id="screenTitle" translation="[0, 340]" width="1920" height="70" text="¿Quién anda ahí?" horizAlign="center" vertAlign="center" />
         <MarkupGrid id="profilesMarkup" itemComponentName="ProfileListItem" itemSpacing="[50, 0]" numRows="1" numColumns="1" itemSize="[201,300]" vertFocusAnimationStyle="floatingFocus" drawFocusFeedback="false" />

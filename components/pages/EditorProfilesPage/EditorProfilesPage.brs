@@ -81,7 +81,7 @@ sub Initialize()
         focusTextColor: m.theme.white
         unfocusTextColor: m.theme.clrSecondaryText
         backgroundColor: m.theme.clrSecondaryText
-        focusBorderImage: "pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png"
+        focusBorderImage: "pkg:/images/focus/btn_pill_72.9.png"
         focusBackgroundColor: m.theme.focPrimary
         fontSize: "dmSansMedium24"
         margin: 20

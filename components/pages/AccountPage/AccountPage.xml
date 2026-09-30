@@ -31,7 +31,7 @@
                  pagina no puede recuperar el foco desde el boton hijo (mismo
                  caso que gKeyboard en SearchPage). -->
             <Group id="gProfiles" focusable="true" translation="[206,508]" />
-            <CustomButton id="logoutButton" buttonText="Cerrar Sesión" buttonWidth="250" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" translation="[206,928]" />
+            <CustomButton id="logoutButton" buttonText="Cerrar Sesión" buttonWidth="250" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/btn_pill_60.9.png" translation="[206,928]" />
         </Group>
     </children>
 </component>

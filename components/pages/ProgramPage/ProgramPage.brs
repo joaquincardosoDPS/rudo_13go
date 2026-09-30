@@ -98,7 +98,7 @@ sub SetupButtons()
             unfocusTextColor: m.theme.white
             backgroundColor: m.theme.clrSecondaryText
             focusBackgroundColor: m.theme.focPrimary
-            focusBorderImage: "pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png"
+            focusBorderImage: "pkg:/images/focus/btn_pill_60.9.png"
             fontSize: "dmSansBold23"
             addColorOnImage: true
             padding: 20

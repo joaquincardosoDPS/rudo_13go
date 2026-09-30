@@ -26,8 +26,8 @@
                 <Label id="lTitle" width="614" wrap="true" maxLines="2" />
                 <Label id="lDescription" width="614" wrap="true" maxLines="4" lineSpacing="-2" />
                 <Group id="gActions">
-                    <CustomButton id="resumeButton" buttonText="Reanudar" buttonWidth="190" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" visible="false" />
-                    <CustomButton id="favoriteButton" buttonText="Agregar a favoritos" buttonWidth="300" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" />
+                    <CustomButton id="resumeButton" buttonText="Reanudar" buttonWidth="190" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/btn_pill_60.9.png" visible="false" />
+                    <CustomButton id="favoriteButton" buttonText="Agregar a favoritos" buttonWidth="300" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/btn_pill_60.9.png" />
                 </Group>
             </LayoutGroup>
             <!-- .grilla-capitulos .header: select.titulo-2 (o h2) + .sumario. El select
@@ -54,7 +54,7 @@
         <!-- "Programa no encontrado" + "Volver a VOD" -->
         <Group id="gNotFound" visible="false">
             <Label id="lNotFound" text="Programa no encontrado" width="1714" horizAlign="center" translation="[206,440]" />
-            <CustomButton id="backButton" buttonText="Volver a VOD" buttonWidth="260" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" translation="[933,540]" />
+            <CustomButton id="backButton" buttonText="Volver a VOD" buttonWidth="260" buttonHeight="60" isFilledBgOnFocus="false" backGroundImage="pkg:/images/focus/btn_pill_60.9.png" translation="[933,540]" />
         </Group>
         <!-- Recibe el foco "virtual" del selector y del dropdown. -->
         <Group id="gFocusProxy" focusable="true" />
