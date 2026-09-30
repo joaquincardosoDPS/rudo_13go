@@ -50,6 +50,8 @@
         <function name="ShowRadioPage" />
         <function name="ShowPlayerPage" />
         <function name="ClosePlayerPage" />
+        <function name="ShowSuscribePage" />
+        <function name="CloseSuscribePage" />
         <function name="RunBackgroundTask" />
         <function name="TrackPage" />
     </interface>

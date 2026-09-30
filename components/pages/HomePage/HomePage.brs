@@ -518,6 +518,7 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
                 packs: getValueFromProps(raw, "packs", [])
                 vastUrl: getValueFromProps(raw, "vast_app", "")
                 daiAssetKey: getValueFromProps(raw, "DPSDAIAssetKey", "")
+                image: imageUrl
                 image_land: {
                     small: imageUrl,
                     medium: imageUrl,
@@ -680,7 +681,12 @@ sub onRowItemSelected(event as dynamic)
         else if isValid(selectedItem.itemData.format) AND selectedItem.itemData.format = "event"
             m.scene.callFunc("showEventDetailPage", selectedItem, false)
         else if isValid(selectedItem.itemData.type) AND selectedItem.itemData.type = "senal"
-            m.scene.callFunc("ShowLivePage", false)
+            ' PlaylistListCarousel.tsx: una senal que el plan no incluye va a /suscribe.
+            if selectedItem.itemData.blocked = true
+                m.scene.callFunc("ShowSuscribePage", {})
+            else
+                m.scene.callFunc("ShowLivePage", false)
+            end if
         else if isValid(selectedItem.itemData.format) AND selectedItem.itemData.format = "tracking"
             OpenChapterLink(selectedItem.itemData.path, Int(convertToNumber(selectedItem.itemData.seconds)))
         else if selectedItem.sliderId = "destacados"
@@ -720,6 +726,7 @@ sub OpenFeaturedItem(item as object)
                 packs: item.packs
                 vastUrl: item.vastUrl
                 daiAssetKey: item.daiAssetKey
+                image: item.image
             }
         })
     else

@@ -969,6 +969,7 @@ function AnalyticsPathForPage(page as object) as string
     if id = "OnboardingPage" then return "/login"
     if id = "DeviceLinkPage" then return "/connect"
     if id = "EditorProfilesPage" then return "/whosthere"
+    if id = "SuscribePage" then return "/suscribe"
     return ""
 end function
 
@@ -1033,6 +1034,33 @@ function AnyToText(value as dynamic) as string
 end function
 
 ' Cierra el reproductor desde adentro (ej: capitulo restringido sin sesion).
+' /suscribe (SuscribeView.tsx): el usuario tiene sesion pero su plan no incluye
+' el contenido. Se apila sin sidebar, con la imagen del contenido de fondo
+' (state.bgImage) o fondo_corporativo. Desde el reproductor lo reemplaza, como el
+' navigate('/suscribe', { replace: true }) de PlayerView: back vuelve al programa.
+sub ShowSuscribePage(params = invalid as dynamic)
+    if getValueFromProps(params, "replacePlayer", false) = true then ClosePlayerPage()
+    page = createObject("roSGNode", "SuscribePage")
+    page.id = "SuscribePage"
+    page.visible = true
+    page.backgroundImage = getValueFromProps(params, "bgImage", "")
+    m.gPageContainer.appendChild(page)
+    m.ViewStackManager.ShowScreen(page)
+    ShowHideMenu(false)
+    setFocus(page)
+end sub
+
+' "Volver" / back: vuelve a la pagina de abajo y repone el sidebar si la usa.
+sub CloseSuscribePage()
+    top = m.ViewStackManager.GetTop()
+    if not isValid(top) OR top.id <> "SuscribePage" then return
+    m.ViewStackManager.HideTop()
+    m.gPageContainer.removeChild(top)
+    topId = m.ViewStackManager.GetTopId()
+    if topId <> "OnboardingPage" AND topId <> "DeviceLinkPage" AND topId <> "EditorProfilesPage" AND topId <> "PlayerPage" then ShowHideMenu(true)
+    m.ViewStackManager.FocusTop()
+end sub
+
 sub ClosePlayerPage()
     top = m.ViewStackManager.GetTop()
     if isValid(top) AND top.id = "PlayerPage"
@@ -1299,6 +1327,11 @@ function OnkeyEvent(key as string, press as boolean) as boolean
 end function
 
 function HandleBackKey() as boolean
+    ' /suscribe: back es el mismo "Volver" (navigate(-1)), repone el sidebar.
+    if m.ViewStackManager.GetTopId() = "SuscribePage"
+        CloseSuscribePage()
+        return true
+    end if
     result = false
     if (m.ViewStackManager.GetViewCount() > 1)
         topNode = m.viewStackManager.GetTop()

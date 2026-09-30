@@ -18,6 +18,7 @@ sub setLocals()
     m.channels = []
     m.rowNodes = []
     m.selectedIndex = 0
+    m.resumeOnShow = false
     m.overlayShown = false
     m.focusArea = "grid"
     m.controlIndex = 0
@@ -94,6 +95,20 @@ sub onVisibleChange(event as dynamic)
             m.vLive.content = invalid
         end if
         setMenuVisible(true)
+    else if m.resumeOnShow = true
+        ' Vuelta desde /suscribe: la grilla queda abierta en la senal bloqueada
+        ' y vuelve a sonar la elegida (con su anuncio, como al remontar LiveView).
+        m.resumeOnShow = false
+        if m.overlayShown then resetHideTimer() else showOverlay()
+        setMenuVisible(true)
+        ch = m.channels[m.selectedIndex]
+        if isValid(ch)
+            if isNonEmptyString(ch.vast)
+                startPreroll(m.selectedIndex)
+            else
+                playChannel(m.selectedIndex)
+            end if
+        end if
     end if
 end sub
 
@@ -315,7 +330,13 @@ end sub
 sub selectChannel(index as integer)
     if index < 0 OR index >= m.channels.count() then return
     ch = m.channels[index]
-    if ch.blocked then return
+    ' Senal que el plan no incluye: /suscribe, como handleEventClick de
+    ' LiveGridRow.tsx. Al volver se reanuda la senal que estaba sonando.
+    if ch.blocked
+        m.resumeOnShow = true
+        m.scene.callFunc("ShowSuscribePage", {})
+        return
+    end if
     m.selectedIndex = index
     hideMessage()
     updateHeader(ch)

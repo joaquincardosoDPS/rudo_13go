@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- /suscribe: calcada de c13_reloaded/src/pages/Auth/SuscribeView.tsx. Usa las mismas
+     clases que la bienvenida (".main.bienvenida": .fondo, .titular, .acciones, .qr), asi
+     que reusa las medidas de OnboardingPage: fondo full-bleed con degrades, logo + titulo
+     abajo-izquierda, boton "Volver" (AccountButton, clase btn-reanudar) y la tarjeta de QR
+     abajo-derecha ("Escanea el codigo QR" / "o entrando a 13go.cl").
+     Fondo: la imagen del contenido bloqueado (state.bgImage) o config.fondo_corporativo. -->
+<component name="SuscribePage" extends="Group">
+    <script type="text/brightscript" uri="SuscribePage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+
+    <interface>
+        <!-- imagen del contenido bloqueado (state.bgImage de la web); vacio = fondo_corporativo -->
+        <field id="backgroundImage" type="string" value="" onChange="OnBackgroundImageSet" />
+    </interface>
+
+    <children>
+        <Rectangle id="rBackground" width="1920" height="1080" />
+        <Poster id="pBackground" width="1920" height="1080" loadWidth="1920" loadHeight="1080" loadDisplayMode="scaleToZoom" />
+        <Poster id="pFadeLeft" uri="pkg:/images/overlay/hero_fade_left.png" width="1056" height="1080" loadDisplayMode="stretchToFit" translation="[0,0]" />
+        <Poster id="pFadeBottom" uri="pkg:/images/overlay/hero_fade_bottom.png" width="1920" height="659" loadDisplayMode="stretchToFit" translation="[0,421]" />
+
+        <!-- .titular: logo + titulo-1 -->
+        <Poster id="logo" width="154" height="154" loadWidth="154" loadHeight="154" loadDisplayMode="scaleToFit" translation="[170,497]" />
+        <!-- h1.titulo-1 medido en la web: x=362 y=487, ancho 474, 46px, 3 lineas (line-height 57.6px) -->
+        <MultiStyleLabel id="lTitle" width="474" lineSpacing="4" translation="[362,487]" />
+
+        <!-- .acciones: AccountButton "Volver". En la web: padding 20 + icono play de 15px + gap 10 + texto (143 de ancho);
+             aca un poco mas ancho porque el texto del Roku mide algo mas y el bloque se centra. -->
+        <CustomButton id="bBack" backGroundImage="pkg:/images/focus/btn_pill_58.9.png" focusBorderImage="pkg:/images/focus/btn_pill_58.9.png" posterImage="pkg:/images/focus/btnplay.png" posterImageSize="15" padding="20" buttonWidth="165" buttonHeight="58" buttonText="Volver" isFilledBgOnFocus="false" translation="[170,756]" visible="true" />
+
+        <!-- .qr -->
+        <Group id="gQr" translation="[1462,506]">
+            <Poster id="pQrCard" uri="pkg:/images/other/qr_card_bg.png" width="288" height="328" loadWidth="288" loadHeight="328" loadDisplayMode="scaleToFit" />
+            <Label id="lQrTitle" width="288" height="30" horizAlign="center" translation="[0,10]" text="Escanéa el código QR" />
+            <Poster id="pQrCode" uri="pkg:/images/other/qr_registro.png" width="269" height="269" loadWidth="269" loadHeight="269" loadDisplayMode="scaleToFit" translation="[10,50]" />
+            <MultiStyleLabel id="lQrFooter" width="288" horizAlign="center" translation="[0,351]" />
+        </Group>
+    </children>
+
+</component>

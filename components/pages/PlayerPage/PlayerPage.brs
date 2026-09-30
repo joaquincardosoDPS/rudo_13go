@@ -137,8 +137,8 @@ sub OnChaptersResponse(event as dynamic)
             return
         end if
         if ValidateRestriction(restriction, getValueFromProps(m.chapter, "packs", []))
-            ' navigate("/suscribe"): SuscribeView todavia no esta portada.
-            ShowError("Este contenido requiere una suscripción")
+            ' navigate("/suscribe", { replace: true })
+            OpenSuscribe(getValueFromProps(m.chapter, "image", ""))
             return
         end if
     end if
@@ -163,8 +163,8 @@ sub StartLiveDirect(live as object)
             return
         end if
         if restriction = "1" AND ValidateRestriction(restriction, packs)
-            ' navigate("/suscribe"): SuscribeView todavia no esta portada.
-            ShowError("Este contenido requiere una suscripción")
+            ' navigate("/suscribe", { state: { bgImage: item.image } })
+            OpenSuscribe(getValueFromProps(live, "image", ""))
             return
         end if
     end if
@@ -227,7 +227,7 @@ sub OnAuthContentResponse(event as dynamic)
         print "PlayerPage : error autenticando VOD : " FormatJson(event.getData())
         ' Una senal de pago sin token no se reproduce.
         if m.isLiveDirect = true AND (IsPaidRestriction(m.mediaRestriction) OR IsPaidRestriction(getValueFromProps(m.chapter, "restriction", "0")))
-            ShowError("Este contenido requiere una suscripción")
+            OpenSuscribe(getValueFromProps(m.chapter, "image", ""))
             return
         end if
     end if
@@ -774,6 +774,13 @@ end function
 
 sub ShowLoading(flag as boolean)
     m.scene.callFunc("ShowHideLoader", flag)
+end sub
+
+' /suscribe en lugar del reproductor (replace: back vuelve a la pagina de abajo).
+sub OpenSuscribe(image as string)
+    ShowLoading(false)
+    m.video.control = "stop"
+    m.scene.callFunc("ShowSuscribePage", { bgImage: image, replacePlayer: true })
 end sub
 
 sub ShowError(message as string)

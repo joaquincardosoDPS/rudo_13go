@@ -598,8 +598,8 @@ sub ChapterClick(chapter as object, initialSeconds as integer)
         return
     end if
     if restriction = "1" AND IsRestricted(chapter)
-        ' /suscribe (SuscribeView) todavia no esta portada.
-        print "ProgramPage : ChapterClick : capitulo bloqueado (requiere suscripcion) : " getValueFromProps(chapter, "link", "")
+        ' navigate("/suscribe", { state: { bgImage: chapter.image } })
+        m.scene.callFunc("ShowSuscribePage", { bgImage: getValueFromProps(chapter, "image", "") })
         return
     end if
     ' navigate(chapter.link, { state: { initialSeconds } })
