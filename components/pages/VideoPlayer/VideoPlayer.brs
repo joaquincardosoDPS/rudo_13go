@@ -61,31 +61,6 @@ sub onKnobPositionChanged(event as dynamic)
     '     m.videoPlayer.seek = position
 end sub
 
-sub SendAnalyticsToServer()
-    if not isValid(m.videoContent) OR m.videoContent.isLive = true OR not isNonEmptyString(getValueFromProps(m.videoContent, "slug", ""))
-        return
-    end if
-    analyticsObj = {}
-    selectedProfileID = GlobalGet("selectedProfileID")
-    if isNonEmptyString(selectedProfileID) then analyticsObj["profile"] = selectedProfileID
-    if isNonEmptyString(m.videoContent.slug) then analyticsObj["vod"] = m.videoContent.slug
-    if m.position > 0 then analyticsObj["end"] = m.position
-    if m.watchDuration > 0 then analyticsObj["time"] = m.watchDuration
-    ' print "Video Player : SendAnalyticsToServer : analyticsObj : " analyticsObj
-    if analyticsObj.count() > 0
-        sendAnalyticsDataTask = CreateObject("roSGNode", "ContentAPIAction")
-        sendAnalyticsDataTask.functionName = "AddWatchHistory"
-        sendAnalyticsDataTask.params = analyticsObj
-        sendAnalyticsDataTask.ObserveField("result", "OnCallLogAnalyticsVideosResponse")
-        sendAnalyticsDataTask.control = "RUN"
-    end if
-end sub
-
-sub OnCallLogAnalyticsVideosResponse(event as dynamic)
-    response = event.GetData()
-    print "Video Player : OnCallLogAnalyticsVideosResponse : response : " FormatJson(response)
-end sub
-
 sub setupPageLoaderDetails()
     m.loadingStatus.poster.uri = "pkg:/images/loader/loader.png"
     m.loadingStatus.poster.width = "100"
@@ -150,28 +125,12 @@ sub onGetNextEpisodeResponse(event as dynamic)
     end if
 end sub
 
+' El historial de reproduccion de MiCHV (GetWatchHistory) no existe en 13go: se
+' reproduce desde el inicio (el avance de 13go va por contentTracking, en PlayerPage).
 sub getResumePostion()
-    params = {}
-    params["vod_slugs[0]"] = m.videoContent.slug
-    m.getResumePostionTask = CreateObject("roSGNode", "ContentAPIAction")
-    m.getResumePostionTask.functionName = "GetWatchHistory"
-    m.getResumePostionTask.params = params
-    m.getResumePostionTask.ObserveField("result", "OnGetResumePostionAPIResponse")
-    m.getResumePostionTask.control = "RUN"
-end sub
-
-sub OnGetResumePostionAPIResponse(event as dynamic)
-    response = event.getData()
-    print "VideoPlayer : OnGetResumePostionAPIResponse : response : " 'FormatJson(response)
-    isResume = false
-    resumePos = 0
-    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND isValid(response.data.data[0]) AND isValid(response.data.data[0].time)
-        resumePos = response.data.data[0].time
-        isResume = true
-    end if
     if isValid(m.videoContent)
-        m.videoContent.time = resumePos
-        playVideo(m.videoContent, m.adUrl, isResume)
+        m.videoContent.time = 0
+        playVideo(m.videoContent, m.adUrl, false)
     end if
 end sub
 
@@ -295,7 +254,6 @@ sub onVideoPlayerStatusChange(event as dynamic)
         else
             showLoading(false)
             showOverlay(false)
-            SendAnalyticsToServer()
             closePlayer()
         end if
     else if m.videoStatus = "paused"
@@ -312,9 +270,6 @@ sub onVideoPositionChanged()
             m.nextEpisodePopup.leftPosition = m.videoPlayer.duration - videoPos
         end if
         m.watchDuration = videoPos
-        if (m.videoPlayer.duration <> 0 AND videoPos mod 30 = 0)
-            SendAnalyticsToServer()
-        end if
         m.videoPosition = videoPos
         m.PlayerOverlay.videoPosition = videoPos
     end if

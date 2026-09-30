@@ -164,26 +164,3 @@ function AddRemoveFavourite() as void
     end if
 end function
 
-function GetWatchHistory() as void
-    print "ContentAPIAction : GetWatchHistory"
-    response = ContentAPI().GetWatchHistory(m.top.params)
-    if(isValid(response))
-        m.top.result = response
-    end if
-end function
-
-function GetAllWatchHistory() as void
-    print "ContentAPIAction : GetAllWatchHistory"
-    response = ContentAPI().GetAllWatchHistory(m.top.params)
-    if(isValid(response))
-        m.top.result = response
-    end if
-end function
-
-function AddWatchHistory() as void
-    print "ContentAPIAction : AddWatchHistory"
-    response = ContentAPI().AddWatchHistory(m.top.params)
-    if(isValid(response))
-        m.top.result = response
-    end if
-end function

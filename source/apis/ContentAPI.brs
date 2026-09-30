@@ -57,9 +57,6 @@ function ContentAPI__New()
     this.AddRemoveFavourite = ContentAPI__AddRemoveFavourite
     this.GetAllPrograms = ContentAPI__GetAllPrograms
 
-    this.GetWatchHistory = ContentAPI__GetWatchHistory
-    this.GetAllWatchHistory = ContentAPI__GetAllWatchHistory
-    this.AddWatchHistory = ContentAPI__AddWatchHistory
 
     return this
 end function
@@ -439,44 +436,6 @@ function ContentAPI__AddRemoveFavourite(params as object)
     headers = { "Content-Type": "application/json" }
     params["token"] = GlobalGet("token")
     data = params
-    response = postRequest(path, data, headers, true)
-    return handleApiResponse(response)
-end function
-
-' Favoritos/historial (Paso 4d.5) todavia no esta implementado para 13go - no
-' hay endpoint equivalente cargado en apiEndPoints (ver Global.brs). Estas tres
-' funciones son heredadas de MiCHV; se dejan sin borrar porque HomePage.brs/
-' DetailPage.brs/VideoPlayer.brs ya las llaman, pero devuelven error en vez de
-' crashear (path quedaba Invalid -> Type Mismatch en postRequest, crash real
-' visto en un Roku con telnet conectado apenas el login funciono por primera vez).
-function ContentAPI__GetWatchHistory(params as object)
-    path = GlobalGet("apiEndPoints").GetWatchHistory
-    if not isNonEmptyString(path) then return error("GetWatchHistory: endpoint no implementado (pendiente 4d.5)")
-    headers = GetHeaders()
-    data = params
-    data["token"] = GlobalGet("token")
-    data["client"] = GlobalGet("appConfig").client
-    data["profile"] = GlobalGet("selectedProfileID")
-    response = postRequest(path, data, headers)
-    return handleApiResponse(response)
-end function
-
-function ContentAPI__GetAllWatchHistory(params as object)
-    path = GlobalGet("apiEndPoints").GetAllWatchHistory
-    if not isNonEmptyString(path) then return error("GetAllWatchHistory: endpoint no implementado (pendiente 4d.5)")
-    headers = GetHeaders()
-    data = params
-    response = postRequest(path, data, headers)
-    return handleApiResponse(response)
-end function
-
-function ContentAPI__AddWatchHistory(params as object)
-    path = GlobalGet("apiEndPoints").AddWatchHistory
-    if not isNonEmptyString(path) then return error("AddWatchHistory: endpoint no implementado (pendiente 4d.5)")
-    headers = { "Content-Type": "application/json" }
-    data = params
-    data["token"] = GlobalGet("token")
-    data["client"] = GlobalGet("appConfig").client
     response = postRequest(path, data, headers, true)
     return handleApiResponse(response)
 end function

@@ -153,54 +153,13 @@ sub onContentInfoChanged()
         else
             m.programKey = contentNode.itemData.key
         end if
-        fetchAndStoreWatchHistory()
+        ' Sin historial de MiCHV (GetAllWatchHistory no existe en 13go): el
+        ' avance de 13go va por contentTracking (ProgramPage/PlayerPage).
         ValidateFavouriteStatus()
         if (m.scene.isWatchHistoryFetched = false OR m.programData = invalid)
             getProgramDetails()
         end if
     end if
-end sub
-
-sub fetchAndStoreWatchHistory()
-    if m.scene.isUserLoggedIn
-        m.apiInProgress++
-        showHidePageLoader(true)
-        if isValid(m.watchHistoryTask)
-            m.watchHistoryTask.control = "STOP"
-            m.watchHistoryTask = invalid
-            m.apiInProgress--
-        end if
-        params = {}
-        params["client"] = GlobalGet("appConfig").client
-        params["token"] = GlobalGet("token")
-        params["profile"] = GlobalGet("selectedProfileID")
-        params["program"] = m.programKey
-        params["end"] = 0
-        params["limit"] = 1
-        m.watchHistoryTask = CreateObject("roSGNode", "ContentAPIAction")
-        m.watchHistoryTask.functionName = "GetAllWatchHistory"
-        m.watchHistoryTask.params = params
-        m.watchHistoryTask.observeField("result", "onGetAllWatchHistoryResponse")
-        m.watchHistoryTask.control = "RUN"
-    end if
-end sub
-
-sub onGetAllWatchHistoryResponse(event as dynamic)
-    response = event.getData()
-    print "onGetAllWatchHistoryResponse >>>> response : " 'formatjson(response)
-    if isValid(response) AND isValid(response.data) AND isValid(response.data.data) AND isValid(response.data.data[0]) AND response.data.data[0].count() > 0
-        contentData = response.data.data[0]
-        programItem = CreateObject("roSGNode", "EpisodeItemNode")
-        programItem.setFields(contentData)
-        m.lastPlayedEpisode = programItem
-        if isValid(contentData) AND isValid(contentData.time)
-            m.programProgress = contentData.time
-            m.programDuration = contentData.duration_seg
-        end if
-    end if
-    m.apiInProgress--
-    callProgramAPI()
-    m.watchHistoryTask = invalid
 end sub
 
 sub ValidateFavouriteStatus()
