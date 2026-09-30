@@ -17,6 +17,8 @@ sub SetLocals()
     m.appLaunchCompleteBeaconSent = false
     m.appDialogInitiateBeaconSent = false
     m.appDialogCompleteBeaconSent = false
+    m.launchFromDeepLink = false
+    m.authenticatedEventSent = false
     m.ViewStackManager = CreateViewStackManager()
     m.registryManager = CreateRegistryManager()
     m.defaultProfileName = "Mi perfil"
@@ -163,6 +165,7 @@ sub OpenPendingDeepLink()
     link = m.pendingDeepLink
     m.pendingDeepLink = invalid
     print "MainScene : abriendo deep link : " FormatJson(link)
+    if not m.appLaunchCompleteBeaconSent then m.launchFromDeepLink = true
     if link.type = "series"
         ShowProgramPage(link.slug)
     else if link.type = "episode"
@@ -190,7 +193,39 @@ sub DeletePages()
 end sub
 ' End Deep Linking
 
-' Beacon Events'
+' Requisito 4.3 de certificacion: los canales con cuenta avisan a Roku, con el
+' Roku Event Dispatcher (RED, libreria roku_analytics del manifest), que el
+' usuario abrio el canal con la sesion iniciada. Roku pide mandarlo en cada
+' apertura con sesion (usa una ventana de 30 dias). Una vez por apertura; si la
+' libreria no esta (simulador) no hace nada.
+sub SendAuthenticatedEvent()
+    if m.authenticatedEventSent = true then return
+    m.authenticatedEventSent = true
+    red = CreateObject("roSGNode", "Roku_Analytics:AnalyticsNode")
+    if not isValid(red)
+        print "MainScene : RED no disponible, sin Roku_Authenticated"
+        return
+    end if
+    red.init = { RED: {} }
+    m.global.addFields({ roku_event_dispatcher: red })
+    red.trackEvent = { RED: { eventName: "Roku_Authenticated" } }
+    print "MainScene : RED Roku_Authenticated"
+end sub
+
+' Beacons de arranque (Roku mide el tiempo de arranque con ellos, requisito 3.2):
+' AppLaunchComplete cuando la primera pantalla esta armada y se puede usar (la
+' Portada) o, con un deep link, cuando el contenido pedido esta listo (el video
+' empieza o la vista del programa cargo). El login y "Quien anda ahi?" son
+' dialogos con interaccion: AppDialogInitiate al mostrarlos y AppDialogComplete
+' al elegir perfil; ese tiempo no cuenta para el arranque. El splash en video y
+' los "cargando" no son dialogos.
+sub SignalLaunchReady(source as string)
+    if m.appLaunchCompleteBeaconSent then return
+    if m.launchFromDeepLink = true AND source = "home" then return
+    sendAppDialogCompleteBeacon()
+    sendAppLaunchCompleteBeacon()
+end sub
+
 sub sendAppLaunchCompleteBeacon()
     if (m.appLaunchCompleteBeaconSent = false)
         print "MainScene : Sending AppLaunchComplete..."
@@ -280,24 +315,19 @@ sub RestoreSession()
     accessToken = getValueFromProps(authData, "accessToken", "")
     if not isNonEmptyString(accessToken)
         StartAsGuest()
-        sendAppLaunchCompleteBeacon()
         return
     end if
     m.authData = authData
     if IsJwtValid(accessToken)
         ApplySession(m.authData)
-        ' Relanzamiento de la app con una sesion ya existente: si ya habia un
-        ' perfil elegido, se respeta y se salta "¿Quién anda ahí?" (igual que
-        ' currentProfile en el localStorage de la web). Distinto del flujo de
-        ' vinculacion recien completada (OnDeviceLinked), que en c13_reloaded
-        ' SIEMPRE muestra WhosThere (ConnectView.tsx navega ahi sin condicion).
+        ' Relanzamiento con sesion: con un deep link se usa el perfil guardado
+        ' (ver OnGetUserInfoAPIResponse); sin deep link pregunta igual.
         m.skipProfilePickerIfSaved = true
         LoadUserData()
     else
         print "MainScene : access token vencido, renovando con el refresh token"
         RefreshSessionToken()
     end if
-    sendAppLaunchCompleteBeacon()
 end sub
 
 sub StartAsGuest()
@@ -404,6 +434,7 @@ sub OnGetUserInfoAPIResponse(event as dynamic)
     print "MainScene : OnGetUserInfoAPIResponse : ocultando loader, isUserLoggedIn=true"
     ShowHideLoader(false)
     m.top.isUserLoggedIn = true
+    SendAuthenticatedEvent()
     ' "¿Quién anda ahí?" se muestra siempre al abrir el canal (pedido del
     ' usuario; la web recuerda el "currentProfile" del localStorage y no
     ' pregunta). Excepcion: un deep link al relanzar (RestoreSession) usa el
@@ -516,6 +547,7 @@ sub StartAfterSplash(target as string)
         return
     end if
     ShowHideLoader(false)
+    if target = "login" OR target = "picker" then sendAppDialogInitiateBeacon()
     if target = "login"
         ShowOnboardingPage(true)
         return
@@ -525,8 +557,34 @@ sub StartAfterSplash(target as string)
     if target = "picker" then ShowEditorProfilesPage(false)
 end sub
 
+' Perfil elegido en "Quien anda ahi?". Si la Portada ya se armo debajo (StartApp
+' con el picker encima), se reusa: se saca el picker y listo, sin volver a pedir
+' las secciones (antes se rehacia entera y sumaba ~3 s al arranque). Lo que
+' depende del perfil ("Seguir viendo") se vuelve a pedir al mostrarse la
+' Portada; el sidebar ya observa ProfileData.
+sub OnProfileChosen()
+    top = m.ViewStackManager.GetTop()
+    below = invalid
+    if m.ViewStackManager.ViewStack.count() >= 2 then below = m.ViewStackManager.ViewStack[m.ViewStackManager.ViewStack.count() - 2]
+    if not isValid(top) OR top.id <> "EditorProfilesPage" OR not isValid(below) OR below.id <> "HomePage" OR not isValid(m.TopMenu)
+        StartApp()
+        return
+    end if
+    print "MainScene : OnProfileChosen : se reusa la Portada ya armada"
+    sendAppDialogCompleteBeacon()
+    m.ViewStackManager.HideTop()
+    m.gPageContainer.removeChild(top)
+    m.EditorProfilesPage = invalid
+    ShowHideMenu(true)
+    m.HomePage.visible = true
+    setFocus(m.HomePage)
+    OpenPendingDeepLink()
+end sub
+
 sub StartApp(openDeepLink = true as boolean)
     print "Mainscene : StartApp "
+    ' openDeepLink = false solo cuando el picker va a quedar encima.
+    if openDeepLink then sendAppDialogCompleteBeacon()
     if m.top.isUserLoggedIn
         m.top.updatedContinueWatchData = {}
     end if

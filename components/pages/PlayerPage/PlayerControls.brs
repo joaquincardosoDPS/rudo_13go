@@ -156,6 +156,19 @@ function HandleKey(key as string) as boolean
     if key = "back" then return false
     ' Repeticion del control remoto con la tecla ya mantenida: la maneja holdTimer.
     if key = m.heldKey then return true
+    ' Repeticion instantanea del control: 20s atras al toque (requisito 4.9 de
+    ' certificacion, entre 10 y 25s). La web no tiene este boton.
+    if key = "replay"
+        if not m.top.isLive AND m.top.duration > 0
+            m.seekTimer.control = "stop"
+            target = m.displayPosition - 20
+            if target < 0 then target = 0
+            m.displayPosition = target
+            ApplySeek(target)
+        end if
+        ShowControls()
+        return true
+    end if
     if not m.top.shown
         ' Con la tarjeta "A continuacion" enfocada, OK pasa al siguiente capitulo.
         if key = "OK" AND m.top.nextVisible

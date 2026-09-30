@@ -41,6 +41,8 @@
         <function name="HandleBackKey" />
         <function name="OnLogout" />
         <function name="StartApp" />
+        <function name="SignalLaunchReady" />
+        <function name="OnProfileChosen" />
         <function name="showDetailPage" />
         <function name="showEventDetailPage" />
         <function name="showCategoryDetailPage" />

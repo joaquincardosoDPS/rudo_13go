@@ -201,7 +201,7 @@ sub onProfilesSelected(event as dynamic)
     m.registryManager.SaveSelectedProfile(profileData)
     GlobalSet("selectedProfileID", selectedItem.id)
     m.scene.ProfileData = profileData
-    m.scene.callFunc("StartApp")
+    m.scene.callFunc("OnProfileChosen")
 end sub
 
 Function onKeyEvent(key as String, press as Boolean) as Boolean

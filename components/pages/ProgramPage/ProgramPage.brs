@@ -253,6 +253,8 @@ end sub
 
 sub FinishLoading()
     ShowLoading(false)
+    ' Deep link a un programa: listo para usar (con el reproductor encima no cuenta).
+    if m.top.visible then m.scene.callFunc("SignalLaunchReady", "content")
     m.gPage.visible = true
     if not m.isLoaded
         m.isLoaded = true

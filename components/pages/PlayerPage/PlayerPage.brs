@@ -510,6 +510,7 @@ sub OnVideoStateChange()
     print "PlayerPage : state : " state
     if state = "playing"
         ShowLoading(false)
+        m.scene.callFunc("SignalLaunchReady", "content")
         m.controls.playing = true
         ' resetUIVisibility en cada evento "playing" del video.
         m.controls.callFunc("ShowControls")

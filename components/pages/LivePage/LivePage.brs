@@ -691,6 +691,7 @@ sub updatePauseIcon()
 end sub
 
 sub onVideoState(event as dynamic)
+    if event.getData() = "playing" then m.scene.callFunc("SignalLaunchReady", "content")
 end sub
 
 '===> Overlay / focus

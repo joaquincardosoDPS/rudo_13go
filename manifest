@@ -14,4 +14,5 @@ ui_resolutions=fhd
 uri_resolution_autosub=$$RES$$,sd,hd,fhd
 supports_input_launch=1
 bs_libs_required=googleima3, roku_ads_lib
+sg_component_libs_required=roku_analytics
 rsg_version=1.3

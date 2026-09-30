@@ -48,6 +48,8 @@ sub Init()
     m.lTitle.text = "<Normal>Suscríbete para</Normal>" + chr(10) + "<Normal>disfrutar de este y de</Normal>" + chr(10) + "<Normal>otros contenidos.</Normal>"
 
     OnBackgroundImageSet()
+    ' Deep link a un contenido que el plan no incluye: esta es la pantalla lista.
+    m.scene.callFunc("SignalLaunchReady", "content")
     m.top.observeField("focusedChild", "OnFocusedChild")
     SetFocus(m.bBack)
 end sub

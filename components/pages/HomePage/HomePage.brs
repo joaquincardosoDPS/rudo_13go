@@ -57,6 +57,8 @@ sub onVisibleChange()
     if m.top.visible AND m.homeLoaded AND isValid(m.trackingSlider)
         GetHomeTracking(m.trackingTitle, true)
     end if
+    ' Armada detras de "Quien anda ahi?" y recien mostrada: ya esta lista para usar.
+    if m.top.visible AND m.homeLoaded then m.scene.callFunc("SignalLaunchReady", "home")
 end sub
 
 sub OnFocusedChild()
@@ -109,8 +111,15 @@ end sub
 sub GetHomeTracking(rowTitle as string, isRefresh = false as boolean)
     m.trackingTitle = rowTitle
     profile = getValueFromProps(m.scene.ProfileData, "profileId", "")
-    if m.scene.isUserLoggedIn <> true OR not isNonEmptyString(profile)
+    if m.scene.isUserLoggedIn <> true
         if not isRefresh then ProcessNextHomeSection()
+        return
+    end if
+    ' Con sesion pero sin perfil todavia (la Portada se arma detras de "Quien anda
+    ' ahi?"): la fila queda en su lugar vacia y se llena al elegir el perfil
+    ' (onVisibleChange la vuelve a pedir, como al volver del reproductor).
+    if not isNonEmptyString(profile)
+        if not isRefresh then AddTrackingRow(invalid, invalid)
         return
     end if
     if isValid(m.trackingTask) then m.trackingTask.control = "stop"
@@ -169,8 +178,12 @@ sub OnGetHomeTrackingResponse(event as dynamic)
         ApplyTrackingRefresh(catData, catNode)
         return
     end if
-    ' Primera carga: la fila queda en su lugar del CMS aunque venga vacia, para
-    ' poder llenarla al volver al Home despues de ver algo.
+    AddTrackingRow(catData, catNode)
+end sub
+
+' Primera carga: la fila queda en su lugar del CMS aunque venga vacia, para
+' poder llenarla al volver al Home despues de ver algo.
+sub AddTrackingRow(catData as dynamic, catNode as dynamic)
     sliderView = createObject("roSGNode", "SliderView")
     sliderView.ObserveField("itemSelected", "onRowItemSelected")
     sliderView.ObserveField("itemFocused", "onRowItemFocused")
@@ -653,6 +666,7 @@ sub manageFocus()
     ' pantalla encima (bug real: ViewStackManager pone m.top.visible=false al
     ' pasar a otra pantalla, hay que respetarlo).
     if not m.top.visible then return
+    m.scene.callFunc("SignalLaunchReady", "home")
     m.noData.visible = false
     if (m.focusableGroup.callFunc("getContainerChildCount") > 0)
         setFocus(m.focusableGroup)
