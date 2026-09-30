@@ -493,21 +493,6 @@ sub OnGetSeasonEpisodeDetailsAPIResponse(event as dynamic)
         end for
         m.mgEpisode.content = gridItem
         m.mgEpisode.visible = true
-        if isNonEmptyString(m.scene.deepLinkingContentId) AND isNonEmptyString(m.scene.deepLinkingMediaType) 
-            if isValid(m.scene.deeplinkingData) AND isNonEmptyString(m.scene.deeplinkingData.episodeId)
-                episodeId = m.scene.deeplinkingData.episodeId
-                for i = 0 to m.mgEpisode.content.getChildCount() - 1
-                    episodeNode = m.mgEpisode.content.getChild(i)
-                    if isValid(episodeNode) AND (episodeNode.slug = episodeId OR episodeNode.id = episodeId)
-                        m.mgEpisode.ItemSelected = i
-                        exit for
-                    end if
-                end for
-            else
-                m.mgEpisode.ItemSelected = 0
-            end if
-            m.scene.callFunc("CloseDeeplinkDialog")
-        end if
     end if
     showHidePageLoader(false)
 end sub

@@ -7,6 +7,8 @@
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <interface>
         <field id="isDestroy" type="boolean" value="false" alwaysNotify="true" onChange="onPageDestroy" />
+        <!-- key_live de la señal con que arranca (deep link /en-vivo?sid=...); vacío = la primera -->
+        <field id="initialChannelKey" type="string" value="" />
     </interface>
     <children>
         <Rectangle id="rBg" width="1920" height="1080" color="#000000" />

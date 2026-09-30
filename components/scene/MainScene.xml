@@ -17,12 +17,8 @@
 
         <field id="deepLinkingContentId" type="string" />
         <field id="deepLinkingMediaType" type="string" />
-        <field id="deeplinkMsg" type="string" alwaysNotify="true" onChange="ChangeDeeplinkDialogMessage" />
         <field id="deepLinkingLand" type="boolean" alwaysNotify="true" onChange="onDeepLinkingLand" />
-        <field id="isDeeplinking" type="boolean" value="false" alwaysNotify="true" />
-        <field id="deeplinkingData" type="assocArray" alwaysNotify="true" />
         <function name="HandleInputEvent" />
-        <function name="CloseDeeplinkDialog" />
 
         <field id="isUserLoggedIn" type="boolean" value="false" alwaysNotify="true" onChange="OnUserLoggedIn" />
         <field id="hasTopMenuBackground" type="boolean" value="false" alwaysNotify="true" alias="pTopMenuBackground.visible" />
@@ -49,7 +45,6 @@
         <function name="showEventDetailPage" />
         <function name="showCategoryDetailPage" />
         <function name="ShowHideMenu" />
-        <function name="StartVideo" />
         <function name="UpdateSelectedTopMenu" />
         <function name="ShowLivePage" />
         <function name="ShowRadioPage" />
@@ -70,7 +65,6 @@
         <Group id="ToastMsgBox" visible="false">
             <Label id="ToastMsgText" />
         </Group>
-        <Timer id="toastMessageTimer" repeat="true" duration="5" />
         <!-- GA4: mira que pagina esta arriba del stack para mandar el page_view -->
         <Timer id="ga4Timer" repeat="true" duration="0.5" />
     </children>

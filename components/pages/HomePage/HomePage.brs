@@ -616,25 +616,6 @@ sub createDynamicRowList()
     end for
     m.homeLoaded = true
     manageFocus()
-    if (isNonEmptyString(m.scene.deepLinkingContentId) AND isValid(m.scene.deeplinkingData) AND isValid(m.scene.deeplinkingData.programid) AND isNonEmptyString(m.scene.DeeplinkingMediaType))
-        m.scene.isDeeplinking = true
-        item = {}
-        item.key = m.scene.deeplinkingData.programid
-        item.category_key = m.scene.deeplinkingData.programid
-        item.format = "default"
-        item.image_orientation = "landscape"
-        itemContent = CreateObject("roSGNode", "ProgramItemNode")
-        itemContent.setFields(item)
-        itemSelected = {
-            "itemData": itemContent
-            "sliderId": "deeplinking"
-        }
-        print "itemSelected : " itemSelected
-        m.scene.callFunc("showDetailPage", itemSelected, false)
-    else
-        m.scene.DeeplinkMsg = "No result found"
-        m.scene.deepLinkingContentId = ""
-    end if
     showHidePageLoader(false)
 end sub
 

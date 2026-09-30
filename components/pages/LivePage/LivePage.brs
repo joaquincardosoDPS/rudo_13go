@@ -176,8 +176,22 @@ sub tryBuildChannels()
     buildRows()
     m.loaded = true
     showLoading(false)
-    selectChannel(0)
+    selectChannel(InitialChannelIndex())
 end sub
+
+' Deep link /en-vivo?sid={key_live} (como el initialChannelKey de LiveView.tsx):
+' arranca en esa senal si existe y el usuario tiene acceso; si no, en la primera.
+function InitialChannelIndex() as integer
+    key = LCase(m.top.initialChannelKey)
+    if key = "" then return 0
+    for i = 0 to m.channels.count() - 1
+        if LCase(m.channels[i].key_live) = key
+            if m.channels[i].blocked then return 0
+            return i
+        end if
+    end for
+    return 0
+end function
 
 function nowEpoch() as integer
     nd = CreateObject("roDateTime")

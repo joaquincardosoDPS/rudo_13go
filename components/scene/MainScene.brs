@@ -60,154 +60,133 @@ end sub
 sub CreateToastMessageControls()
     m.toastMsgBox = m.top.findNode("ToastMsgBox")
     m.toastMsgText = m.top.findNode("ToastMsgText")
-    m.toastMessageTimer = m.top.FindNode("toastMessageTimer")
-    m.toastMessageTimer.observeField("fire", "toastMessageTimerExpired")
 end sub
 
-function IsValidDeepLink() as boolean
-    contentID = m.top.deepLinkingContentId
-    mediaType = LCase(m.top.deepLinkingMediaType)
-    print "MainScene : IsValidDeepLink : contentID : " contentID
-    print "MainScene : IsValidDeepLink : mediaType : " mediaType
-    validData = false
-    if (isEmptyString(contentID) AND not IsSupportedDeepLinkMediaType(mediaType))
-        m.top.DeeplinkMsg = "Wrong arguments provided for deeplinking."
-    else if isEmptyString(contentID)
-        m.top.DeeplinkMsg = "Required contentId not provided."
-    else if not IsSupportedDeepLinkMediaType(mediaType)
-        m.top.DeeplinkMsg = "Required mediaType not provided."
-    else
-        m.top.deeplinkingData = splitDeeplinkingData(contentID)
-        if m.top.deeplinkingData.count() > 0
-            m.top.DeeplinkMsg = "Fetching details for provided id..."
-            validData = true
-            m.top.isDeeplinking = true
-        else
-            m.top.DeeplinkMsg = "No data found..."
-            validData = false
-        end if
+' ===================================================================
+' Deep linking (Roku: busqueda del sistema, pantalla principal, publicidad)
+' -------------------------------------------------------------------
+' El contentId usa las mismas rutas que el sitio 13go.cl (con o sin dominio):
+'   series  -> /programas/{slug}                          vista del programa
+'   episode -> /programas/{slug}/capitulos/{capitulo}      reproductor (con el programa debajo)
+'   live    -> /en-vivo?sid={key_live}  (o solo la key)    En vivo en esa senal
+' La ruta decide el destino; mediaType solo se usa si viene un slug/key suelto.
+' Al abrir el canal el link queda pendiente y se abre donde normalmente se ve
+' la Portada (StartApp): sin sesion, despues del login y "¿Quién anda ahí?".
+' Con el canal abierto (roInputEvent) se reinicia el flujo con el link nuevo.
+' Un link que no se entiende se ignora y el canal arranca normal.
+' ===================================================================
+function ParseDeepLink(contentId as dynamic, mediaType as dynamic) as dynamic
+    if not isNonEmptyString(contentId) then return invalid
+    id = contentId.Trim()
+    kind = ""
+    if isNonEmptyString(mediaType) then kind = LCase(mediaType)
+    ' URL completa del sitio: se queda solo la ruta (y la query).
+    domainPos = Instr(1, LCase(id), "13go.cl")
+    if domainPos > 0
+        id = Mid(id, domainPos + 7)
+        if id = "" then id = "/"
     end if
-    if (not IsNullOrEmpty(m.top.DeeplinkMsg))
-        ShowDeeplinkDialog(m.top.DeeplinkMsg)
-        m.toastMessageTimer.control = "start"
-    end if
-    if (not validData)
-        DeeplinkingDialogClosed()
-    end if
-    return validData
-end function
+    if Left(id, 1) <> "/" AND (Left(id, 9) = "programas" OR Left(id, 7) = "en-vivo") then id = "/" + id
 
-function splitDeeplinkingData(deepLinkingContentId as string) as object
-    deeplinkingCollection = deepLinkingContentId.Split("|")
-    data = {}
-    if deeplinkingCollection <> invalid AND deeplinkingCollection.count() > 0 AND deeplinkingCollection[0] <> invalid
-        for i = 0 to deeplinkingCollection.count() - 1
-            key = deeplinkingCollection[i].Split("=")[0]
-            value = deeplinkingCollection[i].Split("=")[1].toStr()
-            if LCase(key) = "programid"
-                data.programId = value
-            else if LCase(key) = "segmentid"
-                data.segmentId = value
-            else if LCase(key) = "seasonid"
-                data.seasonId = value
-            else if LCase(key) = "episodeid"
-                data.episodeId = value
-            end if
+    ' En vivo: /en-vivo?sid={key_live}
+    if Left(id, 8) = "/en-vivo"
+        sid = GetQueryParam(id, "sid")
+        if isNonEmptyString(sid) then return { type: "live", sid: sid }
+        return { type: "live", sid: "" }
+    end if
+
+    ' Programas y capitulos: /programas/{slug}[/{seccion}/{capitulo}]
+    if Left(id, 11) = "/programas/"
+        path = id
+        queryPos = Instr(1, path, "?")
+        if queryPos > 0 then path = Left(path, queryPos - 1)
+        parts = []
+        for each part in path.Split("/")
+            if part <> "" then parts.push(part)
         end for
+        if parts.count() < 2 then return invalid
+        slug = parts[1]
+        if parts.count() >= 4 then return { type: "episode", slug: slug, link: path }
+        return { type: "series", slug: slug }
     end if
-    return data
+
+    ' Slug o key suelto: el mediaType dice que es.
+    if Instr(1, id, "/") = 0
+        if kind = "live" then return { type: "live", sid: id }
+        if kind = "series" OR kind = "season" OR kind = "movie" then return { type: "series", slug: id }
+    end if
+    return invalid
 end function
 
-function IsSupportedDeepLinkMediaType(mediaType as dynamic) as boolean
-    return isValid(mediaType) AND mediaType = "movie" OR mediaType = "season" OR mediaType = "episode" OR mediaType = "series" OR mediaType = "live"
+function GetQueryParam(url as string, key as string) as string
+    queryPos = Instr(1, url, "?")
+    if queryPos = 0 then return ""
+    for each pair in Mid(url, queryPos + 1).Split("&")
+        eqPos = Instr(1, pair, "=")
+        if eqPos > 0 AND LCase(Left(pair, eqPos - 1)) = LCase(key) then return Mid(pair, eqPos + 1)
+    end for
+    return ""
 end function
 
-function IsValidDeepLinkingParams() as boolean
-    return isValid(m.top.deepLinkingContentId) AND isNonEmptyString(m.top.deepLinkingContentId) AND isValid(m.top.deepLinkingMediaType) AND isNonEmptyString(m.top.deepLinkingMediaType)
+' Al abrir el canal (args de Main): el link queda pendiente hasta StartApp.
+sub onDeepLinkingLand()
+    if not m.top.deepLinkingLand then return
+    m.top.deepLinkingLand = false
+    m.pendingDeepLink = ParseDeepLink(m.top.deepLinkingContentId, m.top.deepLinkingMediaType)
+    print "MainScene : deep link al abrir : " m.top.deepLinkingContentId " (" m.top.deepLinkingMediaType ") -> " FormatJson(m.pendingDeepLink)
+    ClearDeepLinkParams()
+end sub
+
+' Con el canal abierto (roInputEvent): se reinicia el flujo con el link nuevo,
+' como al abrir el canal (sesion, perfil y despues el contenido).
+sub HandleInputEvent(deeplinkData)
+    link = ParseDeepLink(getValueFromProps(deeplinkData, "contentId", ""), getValueFromProps(deeplinkData, "mediaType", ""))
+    print "MainScene : deep link con el canal abierto : " FormatJson(deeplinkData) " -> " FormatJson(link)
+    if not isValid(link) then return
+    m.pendingDeepLink = link
+    DeletePages()
+    Initialize()
+end sub
+
+function HasPendingDeepLink() as boolean
+    return isValid(m.pendingDeepLink)
 end function
 
-sub DeeplinkingDialogClosed()
+sub ClearDeepLinkParams()
     m.top.deepLinkingContentId = ""
     m.top.deepLinkingMediaType = ""
 end sub
+
+' Se llama al final de StartApp (Portada ya armada y perfil elegido).
+sub OpenPendingDeepLink()
+    if not isValid(m.pendingDeepLink) then return
+    link = m.pendingDeepLink
+    m.pendingDeepLink = invalid
+    print "MainScene : abriendo deep link : " FormatJson(link)
+    if link.type = "series"
+        ShowProgramPage(link.slug)
+    else if link.type = "episode"
+        ' Como OpenChapterLink del Home: el programa queda debajo del reproductor
+        ' (back vuelve al programa, como en la web).
+        ShowProgramPage(link.slug)
+        ShowPlayerPage({ link: link.link, slug: link.slug, initialSeconds: 0 })
+    else if link.type = "live"
+        ' Igual que elegir "En vivo" en el sidebar, con la senal pedida.
+        if isValid(m.HomePage) then m.HomePage.isDestroy = true
+        ShowLivePage(true)
+        if isValid(m.LivePage) AND isNonEmptyString(link.sid) then m.LivePage.initialChannelKey = link.sid
+        if isValid(m.TopMenu) then m.TopMenu.callFunc("UpdateSelectedTopMenu", LIVE_MENU_INDEX(), true)
+    end if
+end sub
+
+function LIVE_MENU_INDEX() as integer
+    ' Orden de LocalMenu.json: Mi cuenta, Portada, Programas, En vivo, Radios, Búsqueda.
+    return 3
+end function
 
 sub DeletePages()
-    if isValid(m.videoPlayerControl)
-        m.videoPlayerControl.callFunc("closePlayer")
-        m.top.removeChild(m.videoPlayerControl)
-        m.videoPlayerControl = invalid
-    end if
     m.top.isWatchHistoryFetched = false
     m.ViewStackManager.HideScreen(invalid, true)
-end sub
-
-sub HandleInputEvent(deeplinkData)
-    print "MainScene : HandleDeepLinkingInputEvent : DeepLinking Data : " deeplinkData
-    m.top.deepLinkingContentId = ""
-    m.top.deepLinkingMediaType = ""
-
-    m.top.deepLinkingContentId = deeplinkData.contentid
-    m.top.deepLinkingMediaType = deeplinkData.mediaType
-
-    if IsValidDeepLinkingParams() AND IsValidDeepLink()
-        DeletePages()
-        Initialize()
-    else
-        DeeplinkingDialogClosed()
-    end if
-end sub
-
-sub onDeepLinkingLand()
-    print "MainScene : OnDeepLinkingLand"
-    if m.top.deepLinkingLand
-        m.top.deepLinkingLand = false
-        if IsValidDeepLinkingParams()
-            if IsValidDeepLink() = false
-                DeeplinkingDialogClosed()
-            end if
-        else
-            DeeplinkingDialogClosed()
-        end if
-    end if
-end sub
-
-sub ShowDeeplinkDialog(message as string)
-    sendAppDialogInitiateBeacon()
-    if IsValidDeepLinkingParams()
-        m.top.dialog = invalid
-        dialog = createObject("roSGNode", "ProgressDialog")
-        dialog.title = "Deeplinking..."
-        dialog.message = message
-        print "Dialog Message "
-        dialog.optionsDialog = false
-        m.top.dialog = dialog
-        m.top.dialog = dialog
-    end if
-end sub
-
-sub CloseDeeplinkDialog()
-    if isValid(m.top.dialog)
-        print "MainScene : CloseDeeplinkDialog : dialog closed"
-        m.top.dialog.close = true
-        m.top.dialog = invalid
-    end if
-    sendAppDialogCompleteBeacon()
-    sendAppLaunchCompleteBeacon()
-end sub
-
-sub ChangeDeeplinkDialogMessage()
-    if isValid(m.top.dialog)
-        m.top.dialog.message = m.top.DeeplinkMsg
-    end if
-end sub
-
-sub toastMessageTimerExpired()
-    print "MainScene : toastMessageTimerExpired"
-    if m.top.deepLinkingContentId = ""
-        m.top.DeeplinkMsg = ""
-        m.toastMessageTimer.control = "stop"
-        CloseDeeplinkDialog()
-    end if
 end sub
 ' End Deep Linking
 
@@ -498,7 +477,7 @@ end sub
 ' se sigue restaurando por detras mientras se ve el video.
 ' ===================================================================
 sub StartSplash(url as string)
-    if m.splashShown = true OR not isNonEmptyString(url) OR IsValidDeepLinkingParams() then return
+    if m.splashShown = true OR not isNonEmptyString(url) OR HasPendingDeepLink() then return
     m.splashShown = true
     m.splashPlaying = true
     m.splash = CreateObject("roSGNode", "SplashScreen")
@@ -540,11 +519,12 @@ sub StartAfterSplash(target as string)
         ShowOnboardingPage(true)
         return
     end if
-    StartApp()
+    ' En el picker el deep link espera a que se elija el perfil (el picker llama StartApp).
+    StartApp(target <> "picker")
     if target = "picker" then ShowEditorProfilesPage(false)
 end sub
 
-sub StartApp()
+sub StartApp(openDeepLink = true as boolean)
     print "Mainscene : StartApp "
     if m.top.isUserLoggedIn
         m.top.updatedContinueWatchData = {}
@@ -553,6 +533,7 @@ sub StartApp()
     ShowHideMenu(true)
     SetFocus(m.TopMenu)
     showHomePage(true)
+    if openDeepLink then OpenPendingDeepLink()
 end sub
 
 '===> Start Top Menu Objects
@@ -883,22 +864,9 @@ sub showDetailPage(data as dynamic, isReplace = false as boolean)
         ShowProgramPage(Mid(url, 12))
         return
     end if
-    ' El DetailPage heredado de MiCHV habla el API de MiCHV y se quedaba colgado:
-    ' salvo el deep link (sigue en ese flujo), el resto (capitulos de
-    ' "Destacados", que en la web van al reproductor) espera el PlayerView.
-    if getValueFromProps(data, "sliderId", "") <> "deeplinking"
-        print "MainScene : showDetailPage : sin vista para este item (pendiente reproductor) : " url
-        return
-    end if
-    m.DetailPage = GetDetailPageObject(true)
-    m.DetailPage.contentNode = data
-    if (isReplace = true)
-        m.ViewStackManager.ReplaceScreen(m.DetailPage)
-    else
-        m.ViewStackManager.ShowScreen(m.DetailPage)
-    end if
-    ShowHideMenu(false)
-    setFocus(m.DetailPage)
+    ' Sin ruta de programa no hay vista (el DetailPage de MiCHV ya no existe; el
+    ' deep link va por OpenPendingDeepLink).
+    print "MainScene : showDetailPage : sin vista para este item : " url
 end sub
 
 ' /programas/:slug (ProgramView). Se apila sobre la seccion actual con el
@@ -1075,18 +1043,6 @@ sub ClosePlayerPage()
     end if
 end sub
 
-function GetDetailPageObject(isReplace as boolean) as object
-    if isValid(m.DetailPage) OR isReplace
-        m.gPageContainer.removeChild(m.DetailPage)
-        m.DetailPage = invalid
-    end if
-    m.DetailPage = createObject("roSGNode", "DetailPage")
-    m.DetailPage.visible = true
-    m.DetailPage.id = "DetailPage"
-    m.gPageContainer.appendChild(m.DetailPage)
-    return m.DetailPage
-end function
-
 sub showEventDetailPage(data as dynamic, isReplace = false as boolean)
     m.EventDetailPage = GetEventDetailPageObject(true)
     m.EventDetailPage.contentNode = data
@@ -1254,40 +1210,6 @@ function GetMyListPageObject(isReplace as boolean) as object
     return m.MyListPage
 end function
 
-sub StartVideo(videoData as dynamic)
-    print "Main : StartVideo : videoID : " videoData
-    if isValid(videoData) AND isNonEmptyString(getValueFromProps(videoData, "m3u8", ""))
-        m.videoPlayerControl = GetVideoPlayer()
-        m.top.appendChild(m.videoPlayerControl)
-        m.videoPlayerControl.visible = true
-        SetFocus(m.videoPlayerControl)
-        m.videoPlayerControl.content = videoData
-    else
-        print "MainScene : StartVideo : Missing playable m3u8 URL."
-        m.ViewStackManager.FocusTop()
-    end if
-end sub
-
-sub GetVideoPlayer() as object
-    if isValid(m.videoPlayerControl)
-        m.top.removeChild(m.videoPlayerControl)
-        m.videoPlayerControl = invalid
-    end if
-    m.videoPlayerControl = createObject("roSGNode", "VideoPlayer")
-    m.videoPlayerControl.observeField("isVideoPlayerStopped", "StopVideoPlayback")
-    m.videoPlayerControl.id = "videoPlayer"
-    return m.videoPlayerControl
-end sub
-
-sub StopVideoPlayback()
-    if m.videoPlayerControl <> invalid
-        m.videoPlayerControl.visible = false
-        m.top.removeChild(m.videoPlayerControl)
-        m.videoPlayerControl = invalid
-        m.ViewStackManager.FocusTop()
-    end if
-end sub
-
 '===> Exit Confirmation
 sub ShowHideExitConfirmation()
     print "MainScene : ShowHideExitConfirmation : "
@@ -1377,45 +1299,39 @@ end function
 
 function HandleBackKey() as boolean
     result = false
-    if (isValid(m.videoPlayerControl) AND m.videoPlayerControl.visible = true)
-        print "MainScene : onKeyEvent : StopVideoPlayback"
-        StopVideoPlayback()
-        result = true
-    else
-        if (m.ViewStackManager.GetViewCount() > 1)
+    if (m.ViewStackManager.GetViewCount() > 1)
+        topNode = m.viewStackManager.GetTop()
+        m.ViewStackManager.HideTop()
+        m.gPageContainer.removeChild(topNode)
+        topNode = invalid
+        if (m.ViewStackManager.GetViewCount() = 1 AND isValid(m.TopMenu) AND m.TopMenu.visible)
             topNode = m.viewStackManager.GetTop()
-            m.ViewStackManager.HideTop()
-            m.gPageContainer.removeChild(topNode)
-            topNode = invalid
-            if (m.ViewStackManager.GetViewCount() = 1 AND isValid(m.TopMenu) AND m.TopMenu.visible)
-                topNode = m.viewStackManager.GetTop()
-                if isValid(topNode) AND (LCase(topNode.id) <> "homepage") then m.top.isWatchHistoryFetched = false
-                if isValid(topNode) AND (topNode.id = "OnboardingPage" OR topNode.id = "DeviceLinkPage" OR topNode.id = "EditorProfilesPage")
-                else
-                    ShowHideMenu(true)
-                end if
-            else if m.ViewStackManager.GetTopId() = "ProgramPage"
-                ' Vuelta desde el reproductor (o el login) a la vista de programa,
-                ' que se ve con el sidebar.
+            if isValid(topNode) AND (LCase(topNode.id) <> "homepage") then m.top.isWatchHistoryFetched = false
+            if isValid(topNode) AND (topNode.id = "OnboardingPage" OR topNode.id = "DeviceLinkPage" OR topNode.id = "EditorProfilesPage")
+            else
                 ShowHideMenu(true)
             end if
-            result = true
-        else if m.exitCalled = false
-            If(m.viewStackManager.GetViewCount() = 1) then
-                if (m.TopMenu = invalid OR not m.gTopMenu.visible OR (isValid(m.TopMenu) AND (m.TopMenu.hasFocus() OR m.TopMenu.IsInFocusChain())))
-                    If(m.exitPopUpOpened = false OR m.exitCalled = false)
-                        ShowHideExitConfirmation()
-                        result = true
-                    End If
-                else
-                    if isValid(m.TopMenu) AND m.TopMenu.visible
-                        SetFocus(m.TopMenu)
-                        result = true
-                    end if
-                end if
+        else if m.ViewStackManager.GetTopId() = "ProgramPage"
+            ' Vuelta desde el reproductor (o el login) a la vista de programa,
+            ' que se ve con el sidebar.
+            ShowHideMenu(true)
+        end if
+        result = true
+    else if m.exitCalled = false
+        If(m.viewStackManager.GetViewCount() = 1) then
+            if (m.TopMenu = invalid OR not m.gTopMenu.visible OR (isValid(m.TopMenu) AND (m.TopMenu.hasFocus() OR m.TopMenu.IsInFocusChain())))
+                If(m.exitPopUpOpened = false OR m.exitCalled = false)
+                    ShowHideExitConfirmation()
+                    result = true
+                End If
             else
-                m.ViewStackManager.FocusTop()
+                if isValid(m.TopMenu) AND m.TopMenu.visible
+                    SetFocus(m.TopMenu)
+                    result = true
+                end if
             end if
+        else
+            m.ViewStackManager.FocusTop()
         end if
     end if
     return result
