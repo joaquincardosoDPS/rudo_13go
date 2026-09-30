@@ -338,7 +338,7 @@ function ContentAPI__GetMyListPrograms(requestParams = invalid as dynamic)
     return handleApiResponse(response)
 end function
 
-function ContentAPI__GetPrograms(params as object)
+function ContentAPI__GetPrograms()
     path = GlobalGet("apiEndPoints").GetPrograms
     headers = { "Content-Type": "application/json" }
     data = { }

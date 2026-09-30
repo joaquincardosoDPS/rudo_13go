@@ -211,7 +211,7 @@ sub MgItems_ItemSelected(event as dynamic)
             "sliderId": m.top.id
             "lastSelectedNodeIndex": index
         }
-        m.scene.callFunc("showDetailPage", itemSelected, false)
+        m.scene.callFunc("showDetailPage", itemSelected)
     end if
 end sub
 

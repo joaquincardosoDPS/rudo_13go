@@ -706,7 +706,7 @@ sub onRowItemSelected(event as dynamic)
         else if selectedItem.sliderId = "destacados"
             OpenFeaturedItem(selectedItem.itemData)
         else
-            m.scene.callFunc("showDetailPage", selectedItem, false)
+            m.scene.callFunc("showDetailPage", selectedItem)
         end if
     end if
 end sub
@@ -720,7 +720,7 @@ sub OpenChapterLink(link as dynamic, initialSeconds = 0 as integer)
     parts = link.Split("/")
     if parts.count() < 4 OR parts[1] <> "programas" then return
     slug = parts[2]
-    m.scene.callFunc("showDetailPage", { itemData: { url: "/programas/" + slug } }, false)
+    m.scene.callFunc("showDetailPage", { itemData: { url: "/programas/" + slug } })
     m.scene.callFunc("ShowPlayerPage", { link: link, slug: slug, initialSeconds: initialSeconds })
 end sub
 

@@ -135,7 +135,7 @@ function focusToIndex(targetIndex as integer) as boolean
         if targetIndex < currentIndex
             direction = "up"
         end if
-        slidePanel(direction, targetNode, targetIndex <= getFirstContentIndex())
+        slidePanel(targetNode, targetIndex <= getFirstContentIndex())
     end if
 
     m.focusComponentIndex = targetIndex
@@ -203,7 +203,7 @@ function onKeyPressDown() as boolean
     currentFocusNode = m.gContainer.getChild(m.focusComponentIndex)
     if isValid(nextCompNode)
         m.focusComponentIndex += 1
-        slidePanel("down", nextCompNode, m.focusComponentIndex <= getFirstContentIndex())
+        slidePanel(nextCompNode, m.focusComponentIndex <= getFirstContentIndex())
         setFocus(nextCompNode)
         setNodeFocusState(currentFocusNode, false)
         setNodeFocusState(nextCompNode, true)
@@ -220,7 +220,7 @@ function onKeyPressUp() as boolean
     currentFocusNode = m.gContainer.getChild(m.focusComponentIndex)
     if isValid(prevCompNode) AND isValid(currentFocusNode)
         m.focusComponentIndex -= 1
-        slidePanel("up", prevCompNode, m.focusComponentIndex <= getFirstContentIndex())
+        slidePanel(prevCompNode, m.focusComponentIndex <= getFirstContentIndex())
         setFocus(prevCompNode)
         setNodeFocusState(currentFocusNode, false)
         setNodeFocusState(prevCompNode, true)
@@ -285,7 +285,7 @@ function getHeroSliderIndex(visibleOnly = false as boolean) as integer
     return -1
 end function
 
-function slidePanel(key, nextFocusNode, isTopContent = false as boolean)
+function slidePanel(nextFocusNode, isTopContent = false as boolean)
     if isValid(m.slideAnimation) AND m.slideAnimation.state = "running" then m.slideAnimation.control = "finish"
     currentX = m.gContainer.translation[0]
     if (isValid(nextFocusNode))

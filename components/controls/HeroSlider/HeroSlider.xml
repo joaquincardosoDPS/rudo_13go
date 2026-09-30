@@ -20,7 +20,8 @@
             <MaskGroup id="mgImageMask" maskUri="pkg:/images/card/card_mask_320_180.png">
                 <Poster id="pImage" loadDisplayMode="scaleToZoom" opacity="1.0" />
             </MaskGroup>
-            <Poster id="overlayImage" uri="pkg:/images/overlay/detailpage_overlay.png" />
+            <!-- la imagen se asigna solo en la variante "full" (setupPosters): cargarla siempre gastaba una textura de 1920x1080 -->
+            <Poster id="overlayImage" />
             <Poster id="pFadeBottom" uri="pkg:/images/overlay/hero_fade_bottom.png" loadDisplayMode="stretchToFit" visible="false" />
             <Poster id="pFadeLeft" uri="pkg:/images/overlay/hero_fade_left.png" loadDisplayMode="stretchToFit" visible="false" />
         </Group>

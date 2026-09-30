@@ -166,6 +166,7 @@ sub setupPosters()
         setMaskBox(w, h, 0, 0)
         setPosterSize(m.pImage, w, h)
         m.pImage.translation = [0, 0]
+        m.overlayImage.uri = "pkg:/images/overlay/detailpage_overlay.png"
         setPosterSize(m.overlayImage, w, h)
         m.lgDetails.translation = [100, 163]
         m.title.width = 900
@@ -286,7 +287,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
                     "itemData": itemContent
                     "sliderId": "heroSlider"
                 }
-                m.scene.callFunc("showDetailPage", itemSelected, false)
+                m.scene.callFunc("showDetailPage", itemSelected)
             end if
         end if
     else if key = "right"

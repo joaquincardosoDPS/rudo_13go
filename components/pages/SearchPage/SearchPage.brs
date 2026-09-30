@@ -247,7 +247,7 @@ sub onResultSelected(event as dynamic)
     if isValid(m.searchGrid.content) AND index >= 0 AND index < m.searchGrid.content.getChildCount()
         childNode = m.searchGrid.content.getChild(index)
         data = { "itemData": childNode }
-        m.scene.callFunc("showDetailPage", data, false)
+        m.scene.callFunc("showDetailPage", data)
     end if
 end sub
 

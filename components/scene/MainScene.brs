@@ -914,7 +914,7 @@ function GetHomePageObject(isReplace as boolean) as object
     return m.HomePage
 end function
 
-sub showDetailPage(data as dynamic, isReplace = false as boolean)
+sub showDetailPage(data as dynamic)
     ' Tarjetas de programa (url "/programas/<slug>", como ProgramItem/TopItem/
     ' MonumentalCarouselItem/ResultItem de la web) -> vista de programa.
     itemData = getValueFromProps(data, "itemData", invalid)

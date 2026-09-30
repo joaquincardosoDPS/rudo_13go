@@ -148,7 +148,6 @@ sub PushCategoryRow(title as string, items as object)
 
         sliderView = createObject("roSGNode", "SliderView")
         sliderView.ObserveField("itemSelected", "onRowItemSelected")
-        sliderView.ObserveField("itemFocused", "onRowItemFocused")
         sliderView.id = title
         sliderView.componentHeight = 361
         catNode = buildCategoryContent(title, items)
@@ -200,9 +199,6 @@ sub onRowItemSelected(event as dynamic)
     end if
 end sub
 
-sub onRowItemFocused(event as dynamic)
-    ' La vista web (VODView) no muestra detalle al enfocar; solo el carrusel.
-end sub
 
 Function onKeyEvent(key as String, press as Boolean) as Boolean
     handled = false

@@ -57,7 +57,7 @@ end function
 
 function GetPrograms() as void
     print "ContentAPIAction : GetPrograms"
-    response = ContentAPI().GetPrograms(m.top.params)
+    response = ContentAPI().GetPrograms()
     if(isValid(response))
         m.top.result = response
     end if

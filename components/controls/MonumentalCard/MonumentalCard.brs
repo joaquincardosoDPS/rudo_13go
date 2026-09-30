@@ -279,7 +279,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
                     "itemData": itemContent
                     "sliderId": "monumental"
                 }
-                m.scene.callFunc("showDetailPage", itemSelected, false)
+                m.scene.callFunc("showDetailPage", itemSelected)
             end if
         end if
     else if key = "right"
