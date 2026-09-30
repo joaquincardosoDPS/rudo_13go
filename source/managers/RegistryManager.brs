@@ -20,7 +20,6 @@ Function CreateRegistryManager() as Object
             reg = CreateObject("roRegistrySection", m.SECTION)
             if not reg.Exists("authData") then return invalid
             data = ParseJSON(reg.Read("authData"), "i")
-            print "RegistryManager : GetAuthData : sesion guardada, accessToken=" isValid(data) AND isValid(data.accessToken) AND data.accessToken <> ""
             return data
         End Function,
 
