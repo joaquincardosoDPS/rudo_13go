@@ -1,39 +1,15 @@
-params:   
-    rasp_version: 1
-    default_keypress_wait: 2
-    channels:   
-        MiCHV: dev
-steps:  
-    - launch: MiCHV
-    - pause: 13
-    - press: up
-    - press: up
-    - press: right
-    - press: right
-    - press: right
-    - press: right
-    - press: right
-    - press: right
-    - press: ok
-    - press: ok
-    - press: ok
-    - pause: 5
-    - press: back
-    - press: ok
-    - text: script-login
-    - press: down
-    - press: down
-    - press: down
-    - press: down
-    - press: ok
-    - press: ok
-    - press: ok
-    - text: script-password
-    - press: down
-    - press: down
-    - press: down
-    - press: down
-    - press: ok
-    - press: ok
-    - pause: 8
-    - press: ok
+params:
+    rasp_version: 1
+    default_keypress_wait: 2
+    channels:
+        13GO: dev
+steps:
+    - launch: 13GO
+    - pause: 15
+    - press: ok
+    - pause: 30
+    - pause: 30
+    - pause: 30
+    - pause: 30
+    - press: ok
+    - pause: 8
