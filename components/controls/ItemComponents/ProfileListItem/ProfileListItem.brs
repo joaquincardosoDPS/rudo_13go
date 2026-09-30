@@ -14,7 +14,6 @@ end sub
 
 sub setControls()
     m.title = m.top.findNode("title")
-    m.borderMask = m.top.FindNode("borderMask")
     m.poster = m.top.findNode("poster")
     m.email = m.top.findNode("email")
     m.roundedTransparent_Poster = m.top.findNode("roundedTransparent_Poster")
@@ -41,11 +40,6 @@ sub itemContentChanged(event as dynamic)
             profileUri = m.itemContent.profileUri
         end if
         m.poster.uri = profileUri
-        maskSize = [m.poster.width, m.poster.height]
-        if m.global.designresolution = "720p"
-            maskSize = [maskSize[0] / 1.5, maskSize[1] / 1.5]
-        end if
-        m.borderMask.maskSize = maskSize
         showEditBadge = false
         if m.itemContent.hasField("showEditBadge")
             showEditBadge = m.itemContent.showEditBadge

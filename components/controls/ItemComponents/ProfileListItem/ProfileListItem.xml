@@ -12,9 +12,10 @@
         <field id="gridHasFocus" type="bool" onChange="gridHasFocusChanged" />
     </interface>
     <children>
-        <MaskGroup id="borderMask" maskUri="pkg:/images/other/profile_mask.png" translation="[6.5, 51.5]">
-            <Poster id="poster" opacity="0.6" visible="true" uri="pkg:/images/Group 872.png" loadWidth="188" loadHeight="188" loadDisplayMode="scaleToFit => Fill  => or Zoom" width="188" height="188" />
-        </MaskGroup>
+        <!-- Sin MaskGroup (recorta mal en este Roku, ver CLAUDE.md): foto cuadrada + marco #08090C
+             con agujero circular encima; el anillo va por arriba del marco. -->
+        <Poster id="poster" opacity="0.6" uri="pkg:/images/Group 872.png" loadWidth="188" loadHeight="188" loadDisplayMode="scaleToZoom" width="188" height="188" translation="[6.5,51.5]" />
+        <Poster id="pAvatarFrame" uri="pkg:/images/account/avatar_frame_188.png" width="188" height="188" loadWidth="188" loadHeight="188" translation="[6.5,51.5]" />
         <Poster id="roundedTransparent_Poster" uri="pkg:/images/other/borderImage.png" translation="[6.5,51.5]" height="188" width="188" visible="true" />
         <Group id="editBadge" translation="[141.5,187]" visible="false">
             <Poster id="editBadgeIcon" uri="pkg:/images/focus/edit_icon.png" width="44" height="44" />
