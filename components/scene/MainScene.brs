@@ -404,14 +404,15 @@ sub OnGetUserInfoAPIResponse(event as dynamic)
     print "MainScene : OnGetUserInfoAPIResponse : ocultando loader, isUserLoggedIn=true"
     ShowHideLoader(false)
     m.top.isUserLoggedIn = true
-    ' Si esto es un relanzamiento de la app (RestoreSession) y ya habia un
-    ' perfil elegido, se respeta y se salta el picker (como el "currentProfile"
-    ' del localStorage de la web). Recien vinculado (OnDeviceLinked) siempre
-    ' muestra "¿Quién anda ahí?" - ver notas en RestoreSession()/OnDeviceLinked().
+    ' "¿Quién anda ahí?" se muestra siempre al abrir el canal (pedido del
+    ' usuario; la web recuerda el "currentProfile" del localStorage y no
+    ' pregunta). Excepcion: un deep link al relanzar (RestoreSession) usa el
+    ' perfil guardado, porque Roku exige que el deep link lleve directo al
+    ' contenido. Recien vinculado (OnDeviceLinked) pregunta siempre.
     savedProfile = m.registryManager.GetSelectedProfile()
     hasSavedProfile = isValid(savedProfile) AND isNonEmptyString(getValueFromProps(savedProfile, "profileId", ""))
-    if m.skipProfilePickerIfSaved AND hasSavedProfile
-        print "MainScene : OnGetUserInfoAPIResponse : relanzamiento con perfil guardado, StartApp directo"
+    if m.skipProfilePickerIfSaved AND hasSavedProfile AND HasPendingDeepLink()
+        print "MainScene : OnGetUserInfoAPIResponse : deep link con perfil guardado, StartApp directo"
         GlobalSet("selectedProfileID", savedProfile.profileId)
         m.top.ProfileData = savedProfile
         StartAfterSplash("home")
