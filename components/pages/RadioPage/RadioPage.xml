@@ -6,6 +6,8 @@
     <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
     <interface>
         <field id="isDestroy" type="boolean" value="false" alwaysNotify="true" onChange="onPageDestroy" />
+        <!-- { name, liveUrl } de la radio elegida en el Home (initialRadio de RadioView.tsx) -->
+        <field id="initialRadio" type="assocarray" onChange="OnInitialRadioSet" />
     </interface>
     <children>
         <Rectangle id="rBg" width="1920" height="1080" color="#060608" />
@@ -18,7 +20,7 @@
             <Label id="lLive" text="EN VIVO" translation="[230,55]" />
             <Label id="lRadioName" text="" translation="[230,88]" />
             <Poster id="pPlayPause" width="57" height="57" translation="[548,68]" loadDisplayMode="scaleToFit" />
-            <BusySpinner id="bsLoading" translation="[552,72]" visible="false" clockwise="true" spinInterval="0.8" />
+            <DotsSpinner id="bsLoading" size="36" translation="[559,78]" visible="false" />
             <Poster id="pPlayerFocusBorder" width="672" height="192" uri="pkg:/images/radio/radio_player_border.png" loadDisplayMode="scaleToZoom" visible="false" />
         </Group>
         <Label id="lTitle" text="Radios" width="1920" height="50" horizAlign="center" translation="[0,690]" />

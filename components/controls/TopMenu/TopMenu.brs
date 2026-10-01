@@ -12,10 +12,17 @@ sub SetLocals()
     m.fonts = m.global.Fonts
     m.scene = m.top.getScene()
     m.isMenuExpanded = false
+    ' Seleccion "fantasma" ("Bug real #4"): la grilla dispara itemSelected del
+    ' item enfocado al entrar al riel, sin que el usuario apriete OK. Se ignora
+    ' toda seleccion que llegue antes o hasta 500 ms despues de que la grilla
+    ' gane el foco; un OK real siempre llega despues.
+    m.clock = CreateObject("roTimespan")
+    m.gridFocused = false
+    m.gridFocusMs = 0
     m.defaultAvatarUri = "pkg:/images/other/default_user.png"
     m.lastSelectedMenu = invalid
     m.accountMenuNode = invalid
-    ' "Portada" es el item que queda seleccionado al arrancar (indice 1, porque
+    ' "Inicio" es el item que queda seleccionado al arrancar (indice 1, porque
     ' el 0 es "Mi cuenta").
     m.defaultMenuIndex = 1
 end sub
@@ -60,11 +67,11 @@ sub Initlization()
     menuList = m.global.menuList.items
 
     menuIcons = {
-        "Portada": "pkg:/images/icons/sidebar/icon_home.png"
-        "Programas": "pkg:/images/icons/sidebar/icon_vod.png"
+        "Inicio": "pkg:/images/icons/sidebar/icon_home.png"
+        "On Demand": "pkg:/images/icons/sidebar/icon_vod.png"
         "En vivo": "pkg:/images/icons/sidebar/icon_live.png"
         "Radios": "pkg:/images/icons/sidebar/icon_radios.png"
-        "Búsqueda": "pkg:/images/icons/sidebar/icon_search.png"
+        "Buscador": "pkg:/images/icons/sidebar/icon_search.png"
     }
 
     m.content = createObject("roSGNode", "ContentNode")
@@ -109,6 +116,8 @@ sub OnFocusChild()
         end if
     end if
     isGridFocused = isValid(m.topMenuGrid) AND (m.topMenuGrid.hasFocus() OR m.topMenuGrid.isInFocusChain())
+    if isGridFocused AND not m.gridFocused then m.gridFocusMs = m.clock.TotalMilliseconds()
+    m.gridFocused = isGridFocused
     SetMenuExpanded(isGridFocused)
 end sub
 
@@ -125,7 +134,7 @@ end sub
 
 sub SetupContent()
     m.topMenuGrid.content = m.content
-    ' Se marca "Portada" como seleccionada SIN tocar itemSelected: asignar ese
+    ' Se marca "Inicio" como seleccionada SIN tocar itemSelected: asignar ese
     ' campo dispara el observer y haria navegar sola a la app al arrancar
     ' (ahora el indice 0 es "Mi cuenta", que ademas abriria el login).
     m.topMenuGrid.jumpToItem = m.defaultMenuIndex
@@ -135,8 +144,32 @@ sub SetupContent()
     end if
 end sub
 
+' MainScene la llama justo antes de darle el foco al riel: la grilla salta a la
+' seccion marcada (preferredChildFocusKey de la web) y desde ahora corre la
+' ventana de 500 ms en la que se ignora la seleccion "fantasma" de entrada. No
+' depende del observer de focusedChild, que en el Roku no siempre llega a tiempo.
+sub PrepareEnter()
+    m.gridFocusMs = m.clock.TotalMilliseconds()
+    if isValid(m.lastSelectedMenu) AND isValid(m.content)
+        for i = 0 to m.content.getChildCount() - 1
+            if m.content.getChild(i).isSameNode(m.lastSelectedMenu)
+                m.topMenuGrid.jumpToItem = i
+                exit for
+            end if
+        end for
+    end if
+end sub
+
 sub OnItemSelected(event as dynamic)
     index = event.getData()
+    ' La grilla tiene que tener el foco ahora (no la marca guardada).
+    gridFocused = m.topMenuGrid.hasFocus() OR m.topMenuGrid.isInFocusChain()
+    elapsed = m.clock.TotalMilliseconds() - m.gridFocusMs
+    print "TopMenu : itemSelected "; index; " gridFocused="; gridFocused; " ms desde que entro="; elapsed
+    if not gridFocused OR elapsed < 500
+        print "TopMenu : seleccion ignorada al entrar al riel : " index
+        return
+    end if
     UpdateSelectedTopMenu(index)
 end sub
 
@@ -152,7 +185,7 @@ sub UpdateSelectedTopMenu(selectedIndex as integer, isFromMainScene = false as b
     ' completa, no queda activa); con sesion MainScene abre la cuenta y recien
     ' ahi la marca como activa llamando con isFromMainScene = true.
     if selectedNode.title = "Mi cuenta" AND not isFromMainScene
-        m.top.selectedItem = selectedNode
+        m.top.selectedItem = { title: selectedNode.title }
         return
     end if
 
@@ -161,5 +194,11 @@ sub UpdateSelectedTopMenu(selectedIndex as integer, isFromMainScene = false as b
     m.lastSelectedMenu = selectedNode
     ' isFromMainScene = la navegacion ya ocurrio y solo hay que reflejarla en el
     ' riel; emitir selectedItem aca volveria a disparar la navegacion.
-    if not isFromMainScene then m.top.selectedItem = selectedNode
+    if not isFromMainScene
+        print "TopMenu : emite seleccion " selectedNode.title
+        m.top.selectedItem = { title: selectedNode.title }
+    end if
+    ' Al entrar al riel el foco tiene que caer en la seccion actual (el
+    ' preferredChildFocusKey de la web), no en el ultimo item enfocado.
+    if isFromMainScene AND not (m.topMenuGrid.hasFocus() OR m.topMenuGrid.isInFocusChain()) then m.topMenuGrid.jumpToItem = selectedIndex
 end sub

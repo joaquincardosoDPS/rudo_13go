@@ -6,8 +6,13 @@
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
     <interface>
-        <field id="selectedItem" type="node" alwaysNotify="true" />
+        <!-- { title } de la seccion elegida. Antes era type="node" con el item de la grilla:
+             en el Roku un campo node con alwaysNotify vuelve a notificar cuando cambia algo
+             DENTRO del nodo (isExpanded/isSelected al abrir el riel), y MainScene lo tomaba
+             como una seleccion nueva ("Bug real #4" y el salto a Buscador al volver). -->
+        <field id="selectedItem" type="assocarray" alwaysNotify="true" />
         <function name="UpdateSelectedTopMenu" />
+        <function name="PrepareEnter" />
     </interface>
     <children>
         <Poster id="pExpandGradient" width="1728" height="1080" uri="pkg:/images/overlay/hero_fade_left.png" loadDisplayMode="stretchToFit" translation="[0,0]" visible="false" />

@@ -434,7 +434,7 @@ sub OnGetHomeTop10APIResponse(event as dynamic)
             image_port: { small: imageUrl, medium: imageUrl, normal: imageUrl, big: imageUrl, default: imageUrl }
         })
     end for
-    PushHomeRow(m.pendingRowTitle, items, "ranking")
+    PushHomeRow(m.pendingRowTitle, items, "ranking", 360)
     m.getHomeTop10Task = invalid
     ProcessNextHomeSection()
 end sub
@@ -459,6 +459,9 @@ sub OnGetHomeSenalesAPIResponse(event as dynamic)
         items.push({
             title: stripEmojis(decodeHtmlEntities(raw.titulo))
             key: raw.nid
+            ' El id del feed es el key_live de la senal (13cl, t13...): va en el campo
+            ' url nativo de ContentNode para abrir En vivo en esa senal.
+            url: raw.id
             image: logoUrl
             ringColor: raw.color_principal
             format: "circle"
@@ -490,6 +493,9 @@ sub OnGetHomeRadiosAPIResponse(event as dynamic)
             title: stripEmojis(decodeHtmlEntities(raw.name))
             key: raw.name
             image: raw.image
+            ' liveUrl va en el campo url nativo de ContentNode (ProgramItemNode no
+            ' declara liveUrl y setFields lo descartaria).
+            url: raw.liveUrl
             ringColor: m.theme.focPrimary
             format: "circle"
             type: "radio"
@@ -529,6 +535,9 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
                 rudoKey: getValueFromProps(raw, "key", "")
                 restriction: getValueFromProps(raw, "restriction", "0")
                 packs: getValueFromProps(raw, "packs", [])
+                ' FeaturedItem.tsx: clase "bloqueado" (velo + candado) si validateRestriction
+                ' dice que el plan no alcanza (capitulos y senales en vivo).
+                blocked: ValidateRestriction(getValueFromProps(raw, "restriction", "0"), getValueFromProps(raw, "packs", []))
                 vastUrl: getValueFromProps(raw, "vast_app", "")
                 daiAssetKey: getValueFromProps(raw, "DPSDAIAssetKey", "")
                 image: imageUrl
@@ -552,9 +561,17 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
             heroSlider = m.heroSlider
             heroSlider.variant = "compact"
             heroSlider.items = [items[0]]
-            heroSlider.componentHeight = 660
+            ' Alto que ocupa el banner antes de la fila de Destacados. Con 660 la fila
+            ' quedaba en y=794 y los titulos de las tarjetas salian de pantalla al abrir
+            ' el Home; con 540 la fila sube 120px (pisa el degradado inferior del banner).
+            heroSlider.componentHeight = 540
             heroSlider.visible = true
             m.gDetails.translation = [106,0]
+            ' Mientras cargan las secciones el banner es hijo directo de la pagina; al
+            ' terminar, FocusableGroup lo mueve dentro de gDetails (corrido 106, el margen
+            ' del sidebar) con translation [0,0]. Se lo ubica ya en esa posicion para que
+            ' no salte 106px a la derecha cuando desaparece el spinner.
+            heroSlider.translation = [106, 0]
             m.categoriesNode.push(heroSlider)
         end if
         if items.count() > 0
@@ -575,7 +592,8 @@ sub OnGetFeaturedSliderProgramsAPIResponse(event as dynamic)
             sliderView.ObserveField("itemFocused", "onRowItemFocused")
             sliderView.id = "destacados"
             sliderView.keepHeroVisible = true
-            sliderView.componentHeight = 180 + 50
+            ' Tarjeta de 180 + programa y capitulo (hasta 2 lineas cada uno, ~120).
+            sliderView.componentHeight = 180 + 110
             catNode = rowListDataParser(catData)
             if isValid(catNode)
                 sliderView.category = catData
@@ -699,8 +717,12 @@ sub onRowItemSelected(event as dynamic)
             if selectedItem.itemData.blocked = true
                 m.scene.callFunc("ShowSuscribePage", {})
             else
-                m.scene.callFunc("ShowLivePage", false)
+                ' PlaylistListCarousel.tsx: navigate("/en-vivo", { state: { initialChannelKey: key_live } }).
+                m.scene.callFunc("OpenLive", selectedItem.itemData.url)
             end if
+        else if isValid(selectedItem.itemData.type) AND selectedItem.itemData.type = "radio"
+            ' RadioListCarousel.tsx: navigate('/radio', { state: { initialRadio: item } }).
+            m.scene.callFunc("OpenRadio", { name: selectedItem.itemData.key, liveUrl: selectedItem.itemData.url })
         else if isValid(selectedItem.itemData.format) AND selectedItem.itemData.format = "tracking"
             OpenChapterLink(selectedItem.itemData.path, Int(convertToNumber(selectedItem.itemData.seconds)))
         else if selectedItem.sliderId = "destacados"
@@ -760,17 +782,8 @@ Function onKeyEvent(key as String, press as Boolean) as Boolean
     handled = false
     if press
         print " Page : HomePage : onKeyEvent : key = " key " press = " press
-        if key = "back"
-            if hasFocusOnFocusableGroup() AND validFocusableGroup()
-                focusIndex = m.focusableGroup.callFunc("getFocusComponentIndex")
-                firstContentIndex = m.focusableGroup.callFunc("getFirstContentIndex")
-                if focusIndex > firstContentIndex
-                    handled = m.focusableGroup.callFunc("focusToFirstRow")
-                else if focusIndex = firstContentIndex AND firstContentIndex > 0
-                    handled = m.focusableGroup.callFunc("focusToHeroSlider")
-                end if
-            end if
-        end if
+        ' back: lo maneja MainScene (dialogo de salida, como la web). Antes subia
+        ' primero a la primera fila (comportamiento de MiCHV que la web no tiene).
     end if
     return handled
 End Function

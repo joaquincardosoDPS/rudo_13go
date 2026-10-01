@@ -203,15 +203,7 @@ end sub
 Function onKeyEvent(key as String, press as Boolean) as Boolean
     handled = false
     if press
-        if key = "back"
-            if isValid(m.focusableGroup) AND (m.focusableGroup.hasFocus() OR m.focusableGroup.isInFocusChain())
-                focusIndex = m.focusableGroup.callFunc("getFocusComponentIndex")
-                firstContentIndex = m.focusableGroup.callFunc("getFirstContentIndex")
-                if focusIndex > firstContentIndex
-                    handled = m.focusableGroup.callFunc("focusToFirstRow")
-                end if
-            end if
-        end if
+        ' back: lo maneja MainScene (vuelve a la Portada, como la web).
     end if
     return handled
 End Function

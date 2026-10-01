@@ -102,9 +102,30 @@ sub OnGetRadiosAPIResponse(event as dynamic)
     m.getRadiosTask = invalid
     if m.radios.count() > 0
         buildCards()
-        setCurrentRadio(0, true)
+        setCurrentRadio(InitialRadioIndex(), true)
         m.radiosLoaded = true
         setFocusToPlayer()
+    end if
+end sub
+
+' RadioView.tsx: la radio que viene del Home se busca por liveUrl o por nombre; si no
+' esta, la primera.
+function InitialRadioIndex() as integer
+    initial = m.top.initialRadio
+    if not isValid(initial) then return 0
+    liveUrl = getValueFromProps(initial, "liveUrl", "")
+    name = getValueFromProps(initial, "name", "")
+    for i = 0 to m.radios.count() - 1
+        if (liveUrl <> "" AND m.radios[i].liveUrl = liveUrl) OR (name <> "" AND m.radios[i].name = name) then return i
+    end for
+    return 0
+end function
+
+' Si la lista ya cargo cuando llega la radio elegida, se cambia a esa.
+sub OnInitialRadioSet()
+    if m.radiosLoaded = true
+        index = InitialRadioIndex()
+        if index <> m.currentIndex then setCurrentRadio(index, true)
     end if
 end sub
 

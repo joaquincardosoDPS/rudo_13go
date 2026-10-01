@@ -221,8 +221,15 @@ function AddSizeFields(childNode as dynamic)
                 m.rowHeights.push(706)
                 m.rowItemSize.push([324, 576])
             else if isValid(childNode.format) AND childNode.format = "ranking"
-                m.rowHeights.push(596)
-                m.rowItemSize.push([324, 576])
+                ' Top 10 (TopItem.tsx): tarjetas de 16vw (307) pegadas; 360 de alto
+                ' para la imagen de 310 que crece x1.13 con foco.
+                m.rowHeights.push(360)
+                m.rowItemSize.push([307, 360])
+                m.rowSpacings.push(70)
+                ' En la web van pegadas, pero en el Roku el numero (mas ancho con la
+                ' fuente del equipo) pisaba la imagen anterior: 40px de separacion.
+                m.rowItemSpacing.push([40, 100])
+                return invalid
             else
                 ' Tarjetas de categoria_carrusel: 11.6vw x 139% (web) = 224x311
                 m.rowHeights.push(361)
@@ -231,7 +238,8 @@ function AddSizeFields(childNode as dynamic)
             m.rowSpacings.push(70)
             m.rowItemSpacing.push([25, 100])
         else if (childNode.image_orientation = "landscape")
-            m.rowHeights.push(230)
+            ' Destacados: tarjeta de 180 + programa y capitulo de hasta 2 lineas cada uno.
+            m.rowHeights.push(330)
             m.rowItemSize.push([320, 180])
             m.rowSpacings.push(70)
             m.rowItemSpacing.push([40, 100])
@@ -309,6 +317,11 @@ sub createDynamicCardsRowList()
     isTrackingRow = isValid(m.top.category) AND isValid(m.top.category.format) AND m.top.category.format = "tracking"
     if isTrackingRow
         m.rowList.itemComponentName = "TrackingCardItem"
+        m.rowList.drawFocusFeedback = false
+    end if
+    ' Top 10: tarjeta propia (numero detras de la imagen) con su anillo de foco.
+    if isValid(m.top.category) AND isValid(m.top.category.format) AND m.top.category.format = "ranking"
+        m.rowList.itemComponentName = "TopCardItem"
         m.rowList.drawFocusFeedback = false
     end if
 

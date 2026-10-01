@@ -22,8 +22,15 @@
                 <Rectangle id="pUnfillProgressRect" width="320" height="10" opacity="0.8" visible="false" />
                 <Rectangle id="pFillProgressRect" width="320" height="10" visible="false" />
             </MaskGroup>
-            <Label id="lHEpigrafe" width="320" height="20" horizAlign="left" vertAlign="center" wrap="false" translation="[0,188]" />
-            <Label id="lHTitle" width="320" height="24" horizAlign="left" vertAlign="center" wrap="false" translation="[0,208]" />
+            <!-- .card.bloqueado .imagen::after: velo #00000075 + candado de 2vw centrado. -->
+            <Rectangle id="rHLocked" width="320" height="180" color="#000000" opacity="0.46" visible="false" />
+            <Poster id="pHLock" uri="pkg:/images/live/lock.png" width="38" height="38" loadDisplayMode="scaleToFit" translation="[141,71]" visible="false" />
+            <!-- Programa y capitulo bajo la tarjeta: hasta 2 lineas cada uno dentro de los 320
+                 de la tarjeta; el LayoutGroup baja el titulo si el programa ocupa dos lineas. -->
+            <LayoutGroup id="lgHText" layoutDirection="vert" itemSpacings="[4]" translation="[0,190]">
+                <Label id="lHEpigrafe" width="320" horizAlign="left" wrap="true" maxLines="2" lineSpacing="-2" />
+                <Label id="lHTitle" width="320" horizAlign="left" wrap="true" maxLines="2" lineSpacing="-2" />
+            </LayoutGroup>
         </Group>
         <Group id="gViewMoreCard" translation="[0, 0]" visible="false">
             <MaskGroup id="mgViewMoreBorderMask" maskUri="pkg:/images/card/card_mask_320_180.png" translation="[0,0]">

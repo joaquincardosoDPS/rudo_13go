@@ -51,6 +51,8 @@
         <function name="UpdateSelectedTopMenu" />
         <function name="ShowLivePage" />
         <function name="ShowRadioPage" />
+        <function name="OpenRadio" />
+        <function name="OpenLive" />
         <function name="ShowPlayerPage" />
         <function name="ClosePlayerPage" />
         <function name="ShowSuscribePage" />
@@ -66,7 +68,7 @@
         <Group id="gPageContainer" />
         <Poster id="pTopMenuBackground" width="1920" height="200" loadwidth="1920" loadheight="200" uri="pkg:/images/overlay/preference_gradient.png" loadDisplayMode="scaleToZoom" />
         <Group id="gTopMenu" visible="true" />
-        <PageLoader id="pageLoader" isCenter="true" loaderWidth="100" pageSpinnerTextTranslation="[-50,130]" showSpinnerText="Please wait..." />
+        <PageLoader id="pageLoader" isCenter="true" />
         <Group id="ToastMsgBox" visible="false">
             <Label id="ToastMsgText" />
         </Group>

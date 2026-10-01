@@ -18,6 +18,8 @@ sub SetControls()
     m.lHRightTop = m.top.findNode("lHRightTop")
     m.lHEpigrafe = m.top.findNode("lHEpigrafe")
     m.lHTitle = m.top.findNode("lHTitle")
+    m.rHLocked = m.top.findNode("rHLocked")
+    m.pHLock = m.top.findNode("pHLock")
     m.pHCard = m.top.findNode("pHCard")
     m.pUnfillProgressRect = m.top.findNode("pUnfillProgressRect")
     m.pFillProgressRect = m.top.findNode("pFillProgressRect")
@@ -58,8 +60,8 @@ sub SetupFonts()
     m.lNumberRightTop.font = m.fonts.dmSansBold23
     m.lVRightTop.font = m.fonts.dmSansMedium18
     m.lHRightTop.font = m.fonts.dmSansMedium12
-    m.lHEpigrafe.font = m.fonts.dmSansBold18
-    m.lHTitle.font = m.fonts.dmSansMedium18
+    m.lHEpigrafe.font = m.fonts.dmSansBold23
+    m.lHTitle.font = m.fonts.dmSansMedium24
     m.lViewMoreTitle.font = m.fonts.dmSansMedium24
     m.lETime.font = m.fonts.dmSansBold23
     m.lEDescription.font = m.fonts.dmSansMedium20
@@ -194,6 +196,9 @@ sub itemContent_Changed()
             m.lHRightTop.text = itemContent.duration
             m.rHRightTop.visible = true
         end if
+        isLocked = itemContent.hasField("blocked") AND itemContent.blocked = true
+        m.rHLocked.visible = isLocked
+        m.pHLock.visible = isLocked
         m.gHorizCard.visible = true
     end if
 end sub

@@ -19,6 +19,8 @@ sub SetLocals()
     m.appDialogCompleteBeaconSent = false
     m.launchFromDeepLink = false
     m.authenticatedEventSent = false
+    m.syncedMenuIndex = -1
+    m.dialogFromMenu = false
     m.ViewStackManager = CreateViewStackManager()
     m.registryManager = CreateRegistryManager()
     m.defaultProfileName = "Mi perfil"
@@ -180,6 +182,18 @@ sub OpenPendingDeepLink()
         if isValid(m.LivePage) AND isNonEmptyString(link.sid) then m.LivePage.initialChannelKey = link.sid
         if isValid(m.TopMenu) then m.TopMenu.callFunc("UpdateSelectedTopMenu", LIVE_MENU_INDEX(), true)
     end if
+end sub
+
+' Una senal elegida en el Home: En vivo (como la seccion del sidebar, reemplaza a la
+' actual) arranca en esa senal, igual que el deep link (initialChannelKey de LiveView.tsx).
+sub OpenLive(channelKey as string)
+    if isValid(m.HomePage) then m.HomePage.isDestroy = true
+    if isValid(m.LivePage) then m.LivePage.isDestroy = true
+    if isValid(m.MyListPage) then m.MyListPage.isDestroy = true
+    if isValid(m.RadioPage) then m.RadioPage.isDestroy = true
+    if isValid(m.SearchPage) then m.SearchPage.isDestroy = true
+    ShowLivePage(true)
+    if isValid(m.LivePage) AND isNonEmptyString(channelKey) then m.LivePage.initialChannelKey = channelKey
 end sub
 
 function LIVE_MENU_INDEX() as integer
@@ -600,8 +614,55 @@ sub createTopMenu()
     end if
     m.TopMenu = m.gTopMenu.createChild("TopMenu")
     m.TopMenu.observeField("selectedItem", "onTopMenuItemSelected")
+    ' El TopMenu nuevo arranca marcando "Inicio" (indice 1).
+    m.syncedMenuIndex = 1
     ' SetFocus(m.TopMenu)
     ShowHideMenu(true)
+end sub
+
+' Cierra todo lo apilado sobre la seccion base (programa, reproductor...) y
+' vuelve a ella con el sidebar.
+sub PopToBasePage()
+    while m.ViewStackManager.GetViewCount() > 1
+        topNode = m.ViewStackManager.GetTop()
+        m.ViewStackManager.HideTop()
+        m.gPageContainer.removeChild(topNode)
+    end while
+    baseNode = m.ViewStackManager.GetTop()
+    if isValid(baseNode) then baseNode.visible = true
+    ShowHideMenu(true)
+    m.ViewStackManager.FocusTop()
+end sub
+
+' Marca en el sidebar la seccion de la pantalla actual, como el
+' location.pathname.includes(item.path) de la web: con un programa apilado
+' (/programas/{slug}, tambien con su reproductor encima) se marca "On Demand";
+' si no, la seccion base. Se llama cuando cambia la pagina de arriba.
+sub SyncTopMenuSelection()
+    if not isValid(m.TopMenu) then return
+    index = -1
+    for each page in m.ViewStackManager.ViewStack
+        if isValid(page) AND page.id = "ProgramPage" then index = 2
+    end for
+    if index = -1 AND m.ViewStackManager.GetViewCount() > 0
+        baseId = m.ViewStackManager.ViewStack[0].id
+        if baseId = "HomePage"
+            index = 1
+        else if baseId = "ShowProgramsPage"
+            index = 2
+        else if baseId = "LivePage"
+            index = 3
+        else if baseId = "RadioPage"
+            index = 4
+        else if baseId = "SearchPage"
+            index = 5
+        else if baseId = "AccountPage"
+            index = 0
+        end if
+    end if
+    if index = -1 OR index = m.syncedMenuIndex then return
+    m.syncedMenuIndex = index
+    m.TopMenu.callFunc("UpdateSelectedTopMenu", index, true)
 end sub
 
 sub UpdateSelectedTopMenu(index as integer)
@@ -627,10 +688,17 @@ end sub
 
 sub onTopMenuItemSelected(event as dynamic)
     menuItem = event.getData()
-    if menuItem = invalid then return
+    if menuItem = invalid OR not isNonEmptyString(getValueFromProps(menuItem, "title", "")) then return
 
     pageName = menuItem.title
     print "MainScene : onTopMenuItemSelected : pageName = " pageName
+    ' Resguardo: un OK real en el sidebar llega con el sidebar enfocado. La causa
+    ' de las selecciones "fantasma" era selectedItem de tipo node (ver TopMenu.xml);
+    ' ahora es un assocarray, pero este filtro y el de 500 ms del TopMenu quedan.
+    if not isValid(m.TopMenu) OR not (m.TopMenu.hasFocus() OR m.TopMenu.isInFocusChain())
+        print "MainScene : onTopMenuItemSelected : ignorada, el sidebar no tiene el foco"
+        return
+    end if
     ' "Editar perfil" esta apilada sobre "Mi Cuenta": al ir a otra seccion se
     ' cierra primero, para que el reemplazo de pagina actue sobre la seccion
     ' real. Con "Mi cuenta" se queda: la grilla puede disparar itemSelected del
@@ -646,11 +714,11 @@ sub onTopMenuItemSelected(event as dynamic)
     end if
     if isValid(pageName)
         targetPageId = ""
-        if pageName = "Portada"
+        if pageName = "Inicio"
             targetPageId = "homepage"
-        else if pageName = "Búsqueda"
+        else if pageName = "Buscador"
             targetPageId = "searchpage"
-        else if pageName = "Programas"
+        else if pageName = "On Demand"
             targetPageId = "showprogramspage"
         else if pageName = "En vivo"
             targetPageId = "livepage"
@@ -662,12 +730,16 @@ sub onTopMenuItemSelected(event as dynamic)
         if isValid(topNode) AND isNonEmptyString(targetPageId) AND LCase(topNode.id) = targetPageId
             return
         end if
-        ' Un programa apilado sobre esta misma seccion: la grilla del riel puede
-        ' disparar itemSelected del item activo con solo entrar al sidebar
-        ' ("Bug real #4"), no hay que sacar al usuario del programa por eso.
-        if isValid(topNode) AND topNode.id = "ProgramPage" AND m.ViewStackManager.GetViewCount() > 1
+        ' La seccion elegida ya esta debajo (ej. Portada con un programa y/o el
+        ' reproductor apilados encima): se vuelve a ella sin recargarla, como el
+        ' navigate('/home') de la web. La seleccion "fantasma" al entrar al riel
+        ' la filtra el TopMenu.
+        if m.ViewStackManager.GetViewCount() > 1 AND isNonEmptyString(targetPageId)
             baseNode = m.ViewStackManager.ViewStack[0]
-            if isValid(baseNode) AND LCase(baseNode.id) = targetPageId then return
+            if isValid(baseNode) AND LCase(baseNode.id) = targetPageId
+                PopToBasePage()
+                return
+            end if
         end if
 
         if isValid(m.HomePage) then m.HomePage.isDestroy = true
@@ -675,11 +747,11 @@ sub onTopMenuItemSelected(event as dynamic)
         if isValid(m.MyListPage) then m.MyListPage.isDestroy = true
         if isValid(m.RadioPage) then m.RadioPage.isDestroy = true
         if isValid(m.SearchPage) then m.SearchPage.isDestroy = true
-        if pageName = "Portada"
+        if pageName = "Inicio"
             ShowHomePage(true)
-        else if pageName = "Búsqueda"
+        else if pageName = "Buscador"
             ShowSearchPage(true)
-        else if pageName = "Programas"
+        else if pageName = "On Demand"
             ShowProgramsPage(true)
         else if pageName = "En vivo"
             ShowLivePage(true)
@@ -1048,6 +1120,7 @@ sub OnAnalyticsTick()
     if isValid(top) then topId = top.id
     if topId = m.ga4LastTopId then return
     m.ga4LastTopId = topId
+    SyncTopMenuSelection()
     path = AnalyticsPathForPage(top)
     if isNonEmptyString(path) then TrackPage({ path: path })
 end sub
@@ -1260,6 +1333,37 @@ function GetLivePageObject(isReplace as boolean) as object
     return m.LivePage
 end function
 
+' Entrar al sidebar: el TopMenu prepara la grilla (seccion actual + ventana para
+' ignorar la seleccion "fantasma") y recien despues recibe el foco.
+sub FocusTopMenu()
+    if not isValid(m.TopMenu) then return
+    m.TopMenu.callFunc("PrepareEnter")
+    SetFocus(m.TopMenu)
+end sub
+
+' Vuelve a la Portada desde una seccion principal (back), como elegir "Inicio"
+' en el sidebar: reemplaza la seccion y rearma la Portada.
+sub GoHomeSection()
+    if isValid(m.HomePage) then m.HomePage.isDestroy = true
+    if isValid(m.LivePage) then m.LivePage.isDestroy = true
+    if isValid(m.MyListPage) then m.MyListPage.isDestroy = true
+    if isValid(m.RadioPage) then m.RadioPage.isDestroy = true
+    if isValid(m.SearchPage) then m.SearchPage.isDestroy = true
+    ShowHomePage(true)
+end sub
+
+' Una radio elegida en el Home: la vista de Radios (como la seccion del sidebar,
+' reemplaza a la actual) arranca en esa radio (initialRadio de RadioView.tsx).
+sub OpenRadio(radio as object)
+    if isValid(m.HomePage) then m.HomePage.isDestroy = true
+    if isValid(m.LivePage) then m.LivePage.isDestroy = true
+    if isValid(m.MyListPage) then m.MyListPage.isDestroy = true
+    if isValid(m.RadioPage) then m.RadioPage.isDestroy = true
+    if isValid(m.SearchPage) then m.SearchPage.isDestroy = true
+    ShowRadioPage(true)
+    m.RadioPage.initialRadio = radio
+end sub
+
 sub ShowRadioPage(isReplace = false as boolean)
     m.RadioPage = GetRadioPageObject(true)
     if (isReplace = true)
@@ -1312,7 +1416,8 @@ end function
 sub ShowHideExitConfirmation()
     print "MainScene : ShowHideExitConfirmation : "
     if(m.exitPopUpOpened = false)
-        ShowConfirmationDialog("Are you sure you want to exit ?", "Exit", 200, "exit")
+        ' Textos de ExitDialog.tsx
+        ShowConfirmationDialog("¿Desea salir de la aplicación?", "Sí", 0, "exit", "Si selecciona " + Chr(34) + "Sí" + Chr(34) + ", la aplicación se cerrará.")
     else
         CloseExitConfirmation()
     end if
@@ -1326,14 +1431,17 @@ sub ShowLogoutConfirmation()
     end if
 end sub
 
-sub ShowConfirmationDialog(message as String, positiveButtonText as String, positiveButtonWidth as Integer, mode as String)
+sub ShowConfirmationDialog(message as String, positiveButtonText as String, positiveButtonWidth as Integer, mode as String, detail = "" as String)
     m.exitDialogMode = mode
     m.dlgExit = CreateObject("roSGNode", "ExitDialog")
     m.dlgExit.id = "ExitDialog"
     m.dlgExit.positiveButtonText = positiveButtonText
     m.dlgExit.positiveButtonWidth = positiveButtonWidth
+    m.dlgExit.detail = detail
     m.dlgExit.message = message
     m.dlgExit.observeField("selectedButton", "OnExitDialogButtonSelected")
+    ' Al cerrar, el foco vuelve a donde estaba (handleExitCancel + lastFocusKey).
+    m.dialogFromMenu = isValid(m.TopMenu) AND (m.TopMenu.hasFocus() OR m.TopMenu.isInFocusChain())
     m.top.appendChild(m.dlgExit)
     m.dlgExit.setFocus(true)
     m.exitPopUpOpened = true
@@ -1350,8 +1458,8 @@ sub CloseExitConfirmation()
     topNode = m.ViewStackManager.GetTop()
     if isValid(topNode) AND topNode.id = "AccountPage"
         SetFocus(topNode)
-    else if isValid(m.TopMenu)
-        SetFocus(m.TopMenu)
+    else if isValid(m.TopMenu) AND m.dialogFromMenu = true
+        FocusTopMenu()
     else
         m.ViewStackManager.FocusTop()
     end if
@@ -1387,7 +1495,7 @@ function OnkeyEvent(key as string, press as boolean) as boolean
         else if key = "left"
             ' Con el sidebar oculto (reproductor, onboarding) no se le da el foco.
             if isValid(m.TopMenu) AND m.TopMenu.visible AND m.gTopMenu.visible
-                SetFocus(m.TopMenu)
+                FocusTopMenu()
                 result = true
             end if
         end if
@@ -1421,6 +1529,18 @@ function HandleBackKey() as boolean
         end if
         result = true
     else if m.exitCalled = false
+        ' Como handleBack de MainLayout.tsx: en la Portada back abre el dialogo de
+        ' salida (este el foco en el contenido o en el sidebar); en las demas
+        ' secciones principales vuelve a la Portada.
+        rootId = m.ViewStackManager.GetTopId()
+        if rootId = "HomePage" AND m.exitPopUpOpened = false
+            ShowHideExitConfirmation()
+            return true
+        end if
+        if rootId = "ShowProgramsPage" OR rootId = "LivePage" OR rootId = "RadioPage" OR rootId = "SearchPage" OR rootId = "AccountPage"
+            GoHomeSection()
+            return true
+        end if
         If(m.viewStackManager.GetViewCount() = 1) then
             if (m.TopMenu = invalid OR not m.gTopMenu.visible OR (isValid(m.TopMenu) AND (m.TopMenu.hasFocus() OR m.TopMenu.IsInFocusChain())))
                 If(m.exitPopUpOpened = false OR m.exitCalled = false)
@@ -1429,7 +1549,7 @@ function HandleBackKey() as boolean
                 End If
             else
                 if isValid(m.TopMenu) AND m.TopMenu.visible
-                    SetFocus(m.TopMenu)
+                    FocusTopMenu()
                     result = true
                 end if
             end if
