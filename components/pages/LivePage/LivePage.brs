@@ -1,4 +1,4 @@
-﻿sub init()
+sub init()
     setLocals()
     setControls()
     setupFonts()

@@ -7,7 +7,9 @@ end sub
 
 sub PlayLiveDai()
     ' Sin el SDK (ej: el simulador brs-node no trae IMA ni RAF) la pagina sigue
-    ' con el stream normal.
+    ' con el stream normal. New_IMASDK viene de Library "IMA3.brs", que el Roku
+    ' carga al ejecutar: el analisis de BrighterScript no la ve (error 1001).
+    ' bs:disable-next-line: 1001
     if type(New_IMASDK) <> "Function" AND type(New_IMASDK) <> "roFunction"
         Fail("SDK IMA no disponible")
         return
@@ -16,6 +18,7 @@ sub PlayLiveDai()
     ' Cualquier falla del SDK termina en errors (la pagina sigue sin DAI) en
     ' vez de colgar la task.
     try
+        ' bs:disable-next-line: 1001 1140
         m.sdk = New_IMASDK()
         m.sdk.initSdk()
         SetupPlayer()
