@@ -34,6 +34,13 @@
             <Label id="lSectionTitle" text="" translation="[40, 40]" />
         </Poster>
         <Poster id="pFocusBorder" uri="pkg:/images/focus/R5T3_35px_outborder_nopadding.9.png" visible="false" />
+        <!-- Flechas laterales (CarouselArrow.tsx: circulo de 4vw negro al 50% + chevron de
+             1.2vw, a 10px de cada borde, centradas en el alto). Aca solo indican si hay
+             mas programas hacia ese lado: chevron naranjo si hay, blanco en el extremo. -->
+        <Poster id="pArrowLeftBg" uri="pkg:/images/home/arrow_circle.png" width="77" height="77" blendColor="#000000" opacity="0.5" visible="false" />
+        <Poster id="pArrowLeft" uri="pkg:/images/home/arrow_chevron_left.png" width="77" height="77" visible="false" />
+        <Poster id="pArrowRightBg" uri="pkg:/images/home/arrow_circle.png" width="77" height="77" blendColor="#000000" opacity="0.5" visible="false" />
+        <Poster id="pArrowRight" uri="pkg:/images/home/arrow_chevron_right.png" width="77" height="77" visible="false" />
         <Animation id="slideAnim" duration="0.3" easeFunction="inOutQuad" repeat="false">
             <Vector2DFieldInterpolator id="slideInterp" key="[0.0, 1.0]" fieldToInterp="gSlide.translation" />
         </Animation>

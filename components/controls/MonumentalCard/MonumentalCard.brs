@@ -43,6 +43,10 @@ sub setControls()
     m.gSlide = m.top.findNode("gSlide")
     m.slideAnim = m.top.findNode("slideAnim")
     m.slideInterp = m.top.findNode("slideInterp")
+    m.pArrowLeftBg = m.top.findNode("pArrowLeftBg")
+    m.pArrowLeft = m.top.findNode("pArrowLeft")
+    m.pArrowRightBg = m.top.findNode("pArrowRightBg")
+    m.pArrowRight = m.top.findNode("pArrowRight")
 end sub
 
 sub setUpFonts()
@@ -160,6 +164,31 @@ sub finalizeLayout()
     m.pFadeLeft.translation = [m.leftInset + imgX, m.topInset]
     setPosterSize(m.pFocusBorder, cw, cardHeight)
     m.top.componentHeight = m.topInset + cardHeight + 50
+    LayoutArrows()
+    UpdateArrows(m.activeIndex)
+end sub
+
+' A 10px de cada borde de la tarjeta y centradas en el alto (fuera del slide: no se mueven).
+sub LayoutArrows()
+    y = m.topInset + (m.cardHeight - 77) / 2
+    m.pArrowLeftBg.translation = [m.leftInset + 10, y]
+    m.pArrowLeft.translation = [m.leftInset + 10, y]
+    m.pArrowRightBg.translation = [m.leftInset + m.cw - 10 - 77, y]
+    m.pArrowRight.translation = [m.leftInset + m.cw - 10 - 77, y]
+end sub
+
+' Naranjo si hay mas programas hacia ese lado, blanco en el extremo. Con un solo
+' programa no hay a donde moverse: sin flechas.
+sub UpdateArrows(index as integer)
+    count = 0
+    if isValid(m.items) then count = m.items.count()
+    show = count > 1
+    for each node in [m.pArrowLeftBg, m.pArrowLeft, m.pArrowRightBg, m.pArrowRight]
+        node.visible = show
+    end for
+    if not show then return
+    if index > 0 then m.pArrowLeft.blendColor = m.theme.focPrimary else m.pArrowLeft.blendColor = "#FFFFFF"
+    if index < count - 1 then m.pArrowRight.blendColor = m.theme.focPrimary else m.pArrowRight.blendColor = "#FFFFFF"
 end sub
 
 ' Recorte tipo "object-fit: cover; object-position: top right":
@@ -304,6 +333,7 @@ end function
 
 sub navigateTo(newIndex as integer, direction as integer)
     m.pendingIndex = newIndex
+    UpdateArrows(newIndex)
     m.slideDirection = direction
     m.slidePhase = 1
     if direction > 0
