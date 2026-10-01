@@ -40,5 +40,15 @@
             <Label id="descLabel" width="900" wrap="true" lineSpacing="-3" maxLines="3" />
             <CustomButton id="bWatchNow" visible="false" />
         </LayoutGroup>
+        <!-- Cambio de destacado (variante compact): fundido de imagen y texto en vez de
+             cambiar de golpe. Los keyValue se ajustan en codigo (salen de la opacidad actual). -->
+        <Animation id="fadeOutAnim" duration="0.15" easeFunction="linear" repeat="false">
+            <FloatFieldInterpolator id="fadeOutImg" key="[0.0, 1.0]" keyValue="[1.0, 0.0]" fieldToInterp="pImageGroup.opacity" />
+            <FloatFieldInterpolator id="fadeOutText" key="[0.0, 1.0]" keyValue="[1.0, 0.0]" fieldToInterp="lgDetails.opacity" />
+        </Animation>
+        <Animation id="fadeInAnim" duration="0.25" easeFunction="outQuad" repeat="false">
+            <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, 1.0]" fieldToInterp="pImageGroup.opacity" />
+            <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, 1.0]" fieldToInterp="lgDetails.opacity" />
+        </Animation>
     </children>
 </component>

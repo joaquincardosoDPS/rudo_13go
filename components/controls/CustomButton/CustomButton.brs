@@ -138,7 +138,9 @@ Sub SetTranslations()
         m.slButtonText.wrap = true
     end if
     m.btnImage.translation = [x, (m.top.buttonHeight - iconH) / 2]
-    m.slButtonText.translation = [x + iconW + gap, 0]
+    ' vertAlign center centra la linea entera (con el espacio de las letras con cola):
+    ' las letras visibles quedaban ~3px mas arriba que el icono (visto en el Roku).
+    m.slButtonText.translation = [x + iconW + gap, 3]
     if textW > 0 then m.slButtonText.width = textW
     m.rButtonBackround.width = m.top.buttonWidth
     m.rButtonBackround.loadwidth = m.rButtonBackround.width

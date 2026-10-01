@@ -66,7 +66,7 @@ end function
 ' ===================================================================
 ' Gateway de 13go: auth y perfiles
 ' -------------------------------------------------------------------
-' A diferencia de MiCHV (un endpoint REST por accion), 13go expone un
+' 13go expone un
 ' unico POST (https://rudo.video/gateway/13go/) donde la operacion se
 ' elige con el campo "action". Con action=firebase, ademas, el campo
 ' "path" apunta al documento de Firestore a leer/escribir.

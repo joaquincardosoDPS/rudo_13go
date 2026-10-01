@@ -24,8 +24,7 @@ sub setColors()
 end sub
 
 sub Initialize(width = "100" as string)
-    ' Spinner de la web (DotsSpinner, 56px como el FullScreenSpinner); loaderWidth ya no
-    ' cambia el tamano (antes era la imagen de MiCHV tenida de rosado).
+    ' Spinner de la web (DotsSpinner, 56px como el FullScreenSpinner); 
     setColors()
     if m.top.isCenter
         xPos = (1920 - m.bsLoader.size) / 2

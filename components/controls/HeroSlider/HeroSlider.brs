@@ -33,6 +33,12 @@ sub setControls()
     m.desc = m.top.findNode("descLabel")
     m.bWatchNow = m.top.findNode("bWatchNow")
     m.pImageGroup = m.top.findNode("pImageGroup")
+    m.fadeOutAnim = m.top.findNode("fadeOutAnim")
+    m.fadeOutImg = m.top.findNode("fadeOutImg")
+    m.fadeOutText = m.top.findNode("fadeOutText")
+    m.fadeInAnim = m.top.findNode("fadeInAnim")
+    m.fadeOutAnim.observeField("state", "OnFadeOutState")
+    m.pendingItem = invalid
 end sub
 
 sub setScrollStateImageVisibility(hidden as boolean)
@@ -126,6 +132,43 @@ end sub
 sub onFocusedItemSet()
     item = m.top.focusedItem
     if item = invalid then return
+    ' Sin contenido previo o fuera del banner compacto: se aplica directo.
+    if m.top.variant <> "compact" OR not isValid(m.currentItem)
+        ApplyFocusedItem(item)
+        return
+    end if
+    ' El mismo destacado (ej. el primero, que el banner ya muestra al cargar): nada.
+    if m.fadeOutAnim.state <> "running" AND ItemTitle(m.currentItem) = ItemTitle(item) then return
+    ' Fundido: se apaga, se cambia el contenido y se vuelve a encender. Si llega otro
+    ' destacado mientras se apaga, se muestra directo el ultimo.
+    m.pendingItem = item
+    if m.fadeOutAnim.state = "running" then return
+    m.fadeInAnim.control = "stop"
+    m.fadeOutImg.keyValue = [m.pImageGroup.opacity, 0.0]
+    m.fadeOutText.keyValue = [m.lgDetails.opacity, 0.0]
+    m.fadeOutAnim.control = "start"
+end sub
+
+sub OnFadeOutState()
+    if m.fadeOutAnim.state <> "stopped" OR not isValid(m.pendingItem) then return
+    item = m.pendingItem
+    m.pendingItem = invalid
+    ApplyFocusedItem(item)
+    m.fadeInAnim.control = "start"
+end sub
+
+' El banner guarda items de dos tipos: assocarray (items) o nodo (focusedItem).
+function ItemTitle(item as dynamic) as string
+    if not isValid(item) then return ""
+    if type(item) = "roSGNode"
+        if item.hasField("title") AND isValid(item.title) then return item.title
+        return ""
+    end if
+    if type(item) = "roAssociativeArray" AND isValid(item.title) then return item.title
+    return ""
+end function
+
+sub ApplyFocusedItem(item as object)
     m.currentItem = item
     setupPosters()
     updateMeta()

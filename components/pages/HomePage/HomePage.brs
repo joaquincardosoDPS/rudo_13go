@@ -782,8 +782,7 @@ Function onKeyEvent(key as String, press as Boolean) as Boolean
     handled = false
     if press
         print " Page : HomePage : onKeyEvent : key = " key " press = " press
-        ' back: lo maneja MainScene (dialogo de salida, como la web). Antes subia
-        ' primero a la primera fila (comportamiento de MiCHV que la web no tiene).
+        ' back: lo maneja MainScene (dialogo de salida, como la web)
     end if
     return handled
 End Function
