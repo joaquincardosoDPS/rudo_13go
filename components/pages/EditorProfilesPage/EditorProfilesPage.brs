@@ -131,6 +131,8 @@ sub OnRequestFinished()
     m.scene.callFunc("ShowHideLoader", false)
     BuildProfileItems()
     RefreshProfilesMarkup()
+    ' Al abrir el canal con sesion esta es la primera pantalla usable.
+    m.scene.callFunc("SignalLaunchReady", "picker")
 end sub
 
 ' Cada perfil llega como documento de Firestore:

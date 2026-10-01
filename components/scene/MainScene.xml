@@ -30,6 +30,7 @@
         <function name="ShowHideLoader" />
         <function name="ShowOnboardingPage" />
         <function name="ShowDeviceLinkPage" />
+        <function name="ShowLoginPage" />
         <function name="ShowEditorProfilesPage" />
         <function name="ShowMyAccount" />
         <function name="OnDeviceLinked" />

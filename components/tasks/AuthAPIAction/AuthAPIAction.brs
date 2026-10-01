@@ -14,6 +14,10 @@ sub VerifyDevice()
     m.top.result = ContentAPI().VerifyDevice(m.top.params)
 end sub
 
+sub Login()
+    m.top.result = ContentAPI().Login(m.top.params)
+end sub
+
 sub RefreshToken()
     m.top.result = ContentAPI().RefreshToken(m.top.params)
 end sub

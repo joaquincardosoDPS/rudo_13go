@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Login con correo y contrasena en el propio Roku (PROVISORIA, hasta que llegue el
+     mockup de Canal 13). Roku exige que el ingreso se haga en el dispositivo; la
+     vinculacion con codigo/QR queda como alternativa ("Vincular con código QR").
+     Usa el mismo fondo que la bienvenida (fondo_corporativo + degrades). Los campos
+     se editan con el teclado de Roku (StandardKeyboardDialog, con dictado por voz). -->
+<component name="LoginPage" extends="Group">
+    <script type="text/brightscript" uri="LoginPage.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/RokuUtils.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
+    <script type="text/brightscript" uri="pkg:/source/managers/RegistryManager.brs" />
+
+    <interface>
+    </interface>
+
+    <children>
+        <Rectangle id="rBackground" width="1920" height="1080" />
+        <Poster id="pBackground" width="1920" height="1080" loadWidth="1920" loadHeight="1080" loadDisplayMode="scaleToZoom" />
+        <Poster id="pFadeLeft" uri="pkg:/images/overlay/hero_fade_left.png" width="1056" height="1080" loadDisplayMode="stretchToFit" translation="[0,0]" />
+        <Poster id="pFadeBottom" uri="pkg:/images/overlay/hero_fade_bottom.png" width="1920" height="659" loadDisplayMode="stretchToFit" translation="[0,421]" />
+
+        <Poster id="logo" width="120" height="120" loadWidth="120" loadHeight="120" loadDisplayMode="scaleToFit" translation="[170,170]" />
+        <Label id="lTitle" width="900" translation="[170,330]" text="Inicia sesión" />
+        <Label id="lSubtitle" width="900" wrap="true" translation="[170,400]" text="Ingresa con el correo y la contraseña de tu cuenta 13Go." />
+
+        <Label id="lEmailTitle" width="700" translation="[170,478]" text="Correo electrónico" />
+        <Poster id="pEmail" uri="pkg:/images/login/input_pill_72.9.png" width="700" height="72" translation="[170,514]" />
+        <Label id="lEmail" width="620" height="72" vertAlign="center" translation="[210,514]" />
+
+        <Label id="lPasswordTitle" width="700" translation="[170,610]" text="Contraseña" />
+        <Poster id="pPassword" uri="pkg:/images/login/input_pill_72.9.png" width="700" height="72" translation="[170,646]" />
+        <Label id="lPassword" width="620" height="72" vertAlign="center" translation="[210,646]" />
+
+        <Label id="lError" width="900" wrap="true" translation="[170,738]" visible="false" />
+
+        <CustomButton id="bLogin" backGroundImage="pkg:/images/focus/btn_pill_58.9.png" focusBorderImage="pkg:/images/focus/btn_pill_58.9.png" buttonWidth="220" buttonHeight="58" buttonText="Ingresar" isFilledBgOnFocus="false" translation="[170,800]" />
+        <CustomButton id="bLink" backGroundImage="pkg:/images/focus/btn_pill_58.9.png" focusBorderImage="pkg:/images/focus/btn_pill_58.9.png" buttonWidth="380" buttonHeight="58" buttonText="Vincular con código QR" isFilledBgOnFocus="false" translation="[414,800]" />
+
+        <!-- Registro: igual que en la bienvenida, en 13go.cl -->
+        <Group id="gQr" translation="[1462,533]">
+            <Poster id="pQrCard" uri="pkg:/images/other/qr_card_bg.png" width="288" height="328" loadWidth="288" loadHeight="328" loadDisplayMode="scaleToFit" />
+            <Label id="lQrTitle" width="288" height="30" horizAlign="center" translation="[0,18]" text="¿No tienes cuenta?" />
+            <Poster id="pQrCode" uri="pkg:/images/other/qr_registro.png" width="269" height="269" loadWidth="269" loadHeight="269" loadDisplayMode="scaleToFit" translation="[10,49]" />
+            <MultiStyleLabel id="lQrFooter" width="288" horizAlign="center" translation="[0,347]" />
+        </Group>
+    </children>
+
+</component>

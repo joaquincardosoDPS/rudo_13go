@@ -125,7 +125,9 @@ Function onKeyEvent(key as String, press as Boolean) as Boolean
     if press
         if key = "OK"
             if m.LoginButton.hasFocus()
-                m.scene.callFunc("ShowDeviceLinkPage", true)
+                ' Login en el Roku (certificacion); la vinculacion con codigo queda
+                ' como alternativa dentro de esa pantalla.
+                m.scene.callFunc("ShowLoginPage")
                 handled = true
             end if
         end if

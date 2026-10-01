@@ -166,14 +166,9 @@ sub UpdateIconColor()
             m.pAvatar.opacity = 0.7
         end if
     end if
-    ' Fondo de foco: marca el ítem enfocado sin depender del color. El avatar
-    ' usa su propio anillo circular (pAvatarFocusBg) en vez del rectangulo
-    ' redondeado genérico (pFocusBg), que se apaga siempre para este ítem.
-    if m.isAvatarItem
-        m.pAvatarFocusBg.visible = isFocused
-        if isValid(m.pFocusBg) then m.pFocusBg.visible = false
-    else
-        m.pAvatarFocusBg.visible = false
-        if isValid(m.pFocusBg) then m.pFocusBg.visible = isFocused
-    end if
+    ' Fondo de foco: mismo rectangulo redondeado genérico (pFocusBg) para
+    ' TODOS los ítems, incluido "Mi cuenta". Antes el avatar usaba un anillo
+    ' circular propio (pAvatarFocusBg) y se veía distinto al resto del riel.
+    m.pAvatarFocusBg.visible = false
+    if isValid(m.pFocusBg) then m.pFocusBg.visible = isFocused
 end sub

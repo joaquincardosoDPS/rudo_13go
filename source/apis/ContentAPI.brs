@@ -11,6 +11,7 @@ function ContentAPI__New()
     ' Auth y perfiles: todo va por el gateway único (ver bloque más abajo)
     this.GetDeviceCode = ContentAPI__GetDeviceCode
     this.VerifyDevice = ContentAPI__VerifyDevice
+    this.Login = ContentAPI__Login
     this.RefreshToken = ContentAPI__RefreshToken
     this.GetUserProfile = ContentAPI__GetUserProfile
     this.GetUserInfo = ContentAPI__GetUserInfo
@@ -109,6 +110,18 @@ function ContentAPI__VerifyDevice(params as dynamic)
     return ContentAPI__GatewayPost({
         "action": "deviceToken"
         "device_code": getValueFromProps(params, "deviceCode", "")
+    })
+end function
+
+' Login con correo y contrasena en el propio Roku (certificacion: Roku exige
+' que el ingreso se haga en el dispositivo). Accion "login" del gateway de Rudo
+' (no figura en c13_reloaded: la web entra por idp.13.cl). Errores vistos:
+' code 1 "Field Email/Password undefined or empty", code 2 "Incorrect credentials".
+function ContentAPI__Login(params as dynamic)
+    return ContentAPI__GatewayPost({
+        "action": "login"
+        "email": getValueFromProps(params, "email", "")
+        "password": getValueFromProps(params, "password", "")
     })
 end function
 

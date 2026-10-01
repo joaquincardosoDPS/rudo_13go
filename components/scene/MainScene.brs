@@ -212,17 +212,16 @@ sub SendAuthenticatedEvent()
     print "MainScene : RED Roku_Authenticated"
 end sub
 
-' Beacons de arranque (Roku mide el tiempo de arranque con ellos, requisito 3.2):
-' AppLaunchComplete cuando la primera pantalla esta armada y se puede usar (la
-' Portada) o, con un deep link, cuando el contenido pedido esta listo (el video
-' empieza o la vista del programa cargo). El login y "Quien anda ahi?" son
-' dialogos con interaccion: AppDialogInitiate al mostrarlos y AppDialogComplete
-' al elegir perfil; ese tiempo no cuenta para el arranque. El splash en video y
-' los "cargando" no son dialogos.
+' Beacon de arranque (Roku mide el tiempo de arranque con el, requisito 3.2):
+' AppLaunchComplete cuando la primera pantalla usable esta armada: la bienvenida
+' (sin sesion), "Quien anda ahi?" con los perfiles cargados, la Portada o, con un
+' deep link, el contenido pedido (el video empieza o la vista del programa
+' cargo). La bienvenida y el selector no se marcan como dialogos (AppDialog*).
+' El splash en video y los "cargando" cuentan para los 15 s.
 sub SignalLaunchReady(source as string)
     if m.appLaunchCompleteBeaconSent then return
     if m.launchFromDeepLink = true AND source = "home" then return
-    sendAppDialogCompleteBeacon()
+    print "MainScene : primera pantalla lista : " source
     sendAppLaunchCompleteBeacon()
 end sub
 
@@ -479,7 +478,7 @@ sub RefreshVisiblePageForProfile()
     topNode = m.ViewStackManager.GetTop()
     if not isValid(topNode) then return
     pageId = topNode.id
-    if pageId = "EditorProfilesPage" OR pageId = "OnboardingPage" OR pageId = "DeviceLinkPage"
+    if pageId = "EditorProfilesPage" OR pageId = "OnboardingPage" OR pageId = "DeviceLinkPage" OR pageId = "LoginPage"
         return
     end if
     if pageId = "HomePage"
@@ -547,9 +546,9 @@ sub StartAfterSplash(target as string)
         return
     end if
     ShowHideLoader(false)
-    if target = "login" OR target = "picker" then sendAppDialogInitiateBeacon()
     if target = "login"
         ShowOnboardingPage(true)
+        SignalLaunchReady("login")
         return
     end if
     ' En el picker el deep link espera a que se elija el perfil (el picker llama StartApp).
@@ -571,7 +570,6 @@ sub OnProfileChosen()
         return
     end if
     print "MainScene : OnProfileChosen : se reusa la Portada ya armada"
-    sendAppDialogCompleteBeacon()
     m.ViewStackManager.HideTop()
     m.gPageContainer.removeChild(top)
     m.EditorProfilesPage = invalid
@@ -583,8 +581,6 @@ end sub
 
 sub StartApp(openDeepLink = true as boolean)
     print "Mainscene : StartApp "
-    ' openDeepLink = false solo cuando el picker va a quedar encima.
-    if openDeepLink then sendAppDialogCompleteBeacon()
     if m.top.isUserLoggedIn
         m.top.updatedContinueWatchData = {}
     end if
@@ -740,7 +736,8 @@ end sub
 sub OnDeviceLinked()
     print "MainScene : OnDeviceLinked"
     m.authData = m.registryManager.GetAuthData()
-    print "MainScene : OnDeviceLinked : authData leido del registry : " FormatJson(m.authData)
+    ' Sin tokens en el log: la consola del Roku la puede leer cualquiera en la red.
+    print "MainScene : OnDeviceLinked : sesion leida del registry, userId=" getValueFromProps(m.authData, "userId", "")
     ' Vinculacion recien completada: en c13_reloaded, ConnectView.tsx navega a
     ' /whosthere SIEMPRE al autenticarse, sin importar si ya habia un perfil
     ' elegido antes - a diferencia de un relanzamiento de la app (RestoreSession).
@@ -772,6 +769,18 @@ function GetOnboardingPageObject(isReplace as boolean) as object
     m.gPageContainer.appendChild(m.OnboardingPage)
     return m.OnboardingPage
 end function
+
+' Login con correo y contrasena (provisoria): apilada sobre la bienvenida, back
+' vuelve a ella. Desde ahi "Vincular con codigo QR" apila la vinculacion.
+sub ShowLoginPage()
+    page = createObject("roSGNode", "LoginPage")
+    page.id = "LoginPage"
+    page.visible = true
+    m.gPageContainer.appendChild(page)
+    m.ViewStackManager.ShowScreen(page)
+    ShowHideMenu(false)
+    setFocus(page)
+end sub
 
 sub ShowDeviceLinkPage(isReplace = false as boolean)
     m.DeviceLinkPage = GetDeviceLinkPageObject(true)
@@ -1027,6 +1036,7 @@ function AnalyticsPathForPage(page as object) as string
     if id = "EditProfilePage" then return "/edit-perfil/" + AnyToText(page.profileId)
     if id = "OnboardingPage" then return "/login"
     if id = "DeviceLinkPage" then return "/connect"
+    if id = "LoginPage" then return "/login/correo"
     if id = "EditorProfilesPage" then return "/whosthere"
     if id = "SuscribePage" then return "/suscribe"
     return ""
@@ -1116,7 +1126,7 @@ sub CloseSuscribePage()
     m.ViewStackManager.HideTop()
     m.gPageContainer.removeChild(top)
     topId = m.ViewStackManager.GetTopId()
-    if topId <> "OnboardingPage" AND topId <> "DeviceLinkPage" AND topId <> "EditorProfilesPage" AND topId <> "PlayerPage" then ShowHideMenu(true)
+    if topId <> "OnboardingPage" AND topId <> "LoginPage" AND topId <> "DeviceLinkPage" AND topId <> "EditorProfilesPage" AND topId <> "PlayerPage" then ShowHideMenu(true)
     m.ViewStackManager.FocusTop()
 end sub
 
@@ -1127,7 +1137,7 @@ sub ClosePlayerPage()
         m.gPageContainer.removeChild(top)
         ' La pagina de abajo (vista de programa o una seccion) se ve con sidebar.
         topId = m.ViewStackManager.GetTopId()
-        if topId <> "OnboardingPage" AND topId <> "DeviceLinkPage" AND topId <> "EditorProfilesPage" then ShowHideMenu(true)
+        if topId <> "OnboardingPage" AND topId <> "LoginPage" AND topId <> "DeviceLinkPage" AND topId <> "EditorProfilesPage" then ShowHideMenu(true)
     end if
 end sub
 
@@ -1400,7 +1410,7 @@ function HandleBackKey() as boolean
         if (m.ViewStackManager.GetViewCount() = 1 AND isValid(m.TopMenu) AND m.TopMenu.visible)
             topNode = m.viewStackManager.GetTop()
             if isValid(topNode) AND (LCase(topNode.id) <> "homepage") then m.top.isWatchHistoryFetched = false
-            if isValid(topNode) AND (topNode.id = "OnboardingPage" OR topNode.id = "DeviceLinkPage" OR topNode.id = "EditorProfilesPage")
+            if isValid(topNode) AND (topNode.id = "OnboardingPage" OR topNode.id = "LoginPage" OR topNode.id = "DeviceLinkPage" OR topNode.id = "EditorProfilesPage")
             else
                 ShowHideMenu(true)
             end if

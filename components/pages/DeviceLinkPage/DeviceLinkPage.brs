@@ -71,6 +71,25 @@ end sub
 sub SetObservers()
     m.devicePollTimer.ObserveField("fire", "CallDevicePairAPI")
     m.codeExpiryTimer.ObserveField("fire", "CallGetDeviceCodeAPI")
+    m.top.ObserveField("visible", "OnVisibleChange")
+end sub
+
+' Ahora se puede salir con back (se llega desde el login): al cerrarse deja de
+' consultar al gateway. Si no, seguia vinculando por detras con ese codigo.
+sub OnVisibleChange()
+    if m.top.visible then return
+    m.devicePollTimer.control = "stop"
+    m.codeExpiryTimer.control = "stop"
+    if isValid(m.DevicePairAPI)
+        m.DevicePairAPI.unobserveField("result")
+        m.DevicePairAPI.control = "stop"
+        m.DevicePairAPI = invalid
+    end if
+    if isValid(m.GetDeviceCodeAPI)
+        m.GetDeviceCodeAPI.unobserveField("result")
+        m.GetDeviceCodeAPI.control = "stop"
+        m.GetDeviceCodeAPI = invalid
+    end if
 end sub
 
 Sub SetBusySpinnerControls()
@@ -159,7 +178,8 @@ end sub
 
 sub OnDevicePairAPIResponse(event as dynamic)
     response = event.getData()
-    print "DeviceLinkPage : OnDevicePairAPIResponse : " FormatJson(response)
+    ' Solo el estado: con exito la respuesta trae los tokens.
+    print "DeviceLinkPage : OnDevicePairAPIResponse : status=" getValueFromProps(response, "data.status", "") " message=" getValueFromProps(response, "data.message", "")
     m.DevicePairAPI = invalid
     gateway = getValueFromProps(response, "data", invalid)
     ' Mientras el usuario no aprueba, el gateway responde status=error/message=pending.
