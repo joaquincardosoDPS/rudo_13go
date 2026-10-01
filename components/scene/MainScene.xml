@@ -74,5 +74,7 @@
         </Group>
         <!-- GA4: mira que pagina esta arriba del stack para mandar el page_view -->
         <Timer id="ga4Timer" repeat="true" duration="0.5" />
+        <!-- revisa cada minuto si el token de la sesion esta por vencer (KeepSessionAlive) -->
+        <Timer id="tokenTimer" repeat="true" duration="60" />
     </children>
 </component>

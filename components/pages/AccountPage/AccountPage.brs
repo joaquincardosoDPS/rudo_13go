@@ -107,6 +107,7 @@ sub LoadData()
     m.gContent.visible = false
     m.scene.callFunc("ShowHideLoader", true)
     m.pendingRequests = 3
+    print "AccountPage : LoadData : userId=" GlobalGet("userId") " " TokenDiag(GlobalGet("token"))
     m.avatarTask = RunAuthTask("GetAvatarBaseUrl", "OnGetAvatarBaseUrlAPIResponse")
     m.profilesTask = RunAuthTask("GetProfilesData", "OnGetProfilesAPIResponse")
     m.userInfoTask = RunAuthTask("GetUserInfo", "OnGetUserInfoAPIResponse")

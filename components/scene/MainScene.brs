@@ -114,6 +114,26 @@ function ParseDeepLink(contentId as dynamic, mediaType as dynamic) as dynamic
         return { type: "series", slug: slug }
     end if
 
+    ' Formato de la app anterior de 13go (la publicada hasta la version 11.4), por
+    ' si Roku tiene guardados links con ese formato (busqueda, "Seguir viendo"):
+    '   series  -> {idPrograma}                 (ej. 533 = Betty la fea)
+    '   episode -> {idPrograma}|{idCapitulo}
+    '   live    -> radio|{nombre de la radio}   (la key de una senal ya se acepta abajo)
+    ' Los ids son los numericos del feed (feed/programa/{id}); se resuelven a la ruta
+    ' en ResolveLegacyDeepLink.
+    if Instr(1, id, "/") = 0
+        parts = id.Split("|")
+        if kind = "live" AND parts.count() = 2 AND LCase(parts[0].Trim()) = "radio" AND parts[1].Trim() <> ""
+            return { type: "radio", name: parts[1].Trim() }
+        end if
+        if kind = "episode" AND parts.count() >= 2 AND IsDigits(parts[0].Trim()) AND parts[1].Trim() <> ""
+            return { type: "legacyEpisode", programId: parts[0].Trim(), chapterId: parts[1].Trim() }
+        end if
+        if (kind = "series" OR kind = "season" OR kind = "movie") AND IsDigits(parts[0].Trim())
+            return { type: "legacySeries", programId: parts[0].Trim() }
+        end if
+    end if
+
     ' Slug o key suelto: el mediaType dice que es.
     if Instr(1, id, "/") = 0
         if kind = "live" then return { type: "live", sid: id }
@@ -147,6 +167,10 @@ sub HandleInputEvent(deeplinkData)
     link = ParseDeepLink(getValueFromProps(deeplinkData, "contentId", ""), getValueFromProps(deeplinkData, "mediaType", ""))
     print "MainScene : deep link con el canal abierto : " FormatJson(deeplinkData) " -> " FormatJson(link)
     if not isValid(link) then return
+    ' Un deep link de la app anterior que se estaba resolviendo queda descartado.
+    if isValid(m.legacyTask) then m.legacyTask.control = "stop"
+    m.legacyTask = invalid
+    m.legacyLink = invalid
     m.pendingDeepLink = link
     DeletePages()
     Initialize()
@@ -181,7 +205,109 @@ sub OpenPendingDeepLink()
         ShowLivePage(true)
         if isValid(m.LivePage) AND isNonEmptyString(link.sid) then m.LivePage.initialChannelKey = link.sid
         if isValid(m.TopMenu) then m.TopMenu.callFunc("UpdateSelectedTopMenu", LIVE_MENU_INDEX(), true)
+    else if link.type = "radio"
+        OpenRadio({ name: link.name })
+    else if link.type = "legacySeries" OR link.type = "legacyEpisode"
+        ResolveLegacyDeepLink(link)
     end if
+end sub
+
+function IsDigits(text as string) as boolean
+    if text = "" then return false
+    return CreateObject("roRegex", "^[0-9]+$", "").IsMatch(text)
+end function
+
+' ===================================================================
+' Deep link con ids de la app anterior: feed/programa/{id} da el slug del
+' programa (y si se emite, on_air); para un capitulo se recorren las paginas de
+' feed/programa/{id}/capitulos (5 por pagina, como lo hacia la app anterior)
+' hasta encontrar el id y se usa su link. Mientras, la Portada queda debajo con el
+' spinner. Si el programa no existe, queda la Portada; si el capitulo no aparece,
+' se abre la vista del programa.
+' ===================================================================
+sub ResolveLegacyDeepLink(link as object)
+    m.legacyLink = link
+    m.legacyLink.page = 0
+    ShowHideLoader(true)
+    RunLegacyRequest("programa/" + link.programId, "OnLegacyProgramResponse")
+end sub
+
+sub RunLegacyRequest(path as string, callback as string)
+    if isValid(m.legacyTask) then m.legacyTask.control = "stop"
+    m.legacyTask = CreateObject("roSGNode", "ContentAPIAction")
+    m.legacyTask.functionName = "GetJsonByUrl"
+    m.legacyTask.params = { url: GetFeedBaseUrl() + path }
+    m.legacyTask.observeField("result", callback)
+    m.legacyTask.control = "RUN"
+end sub
+
+function GetFeedBaseUrl() as string
+    return getValueFromProps(GlobalGet("appConfig"), "feedBaseUrl", "https://www.13.cl/13go-premium/feed/")
+end function
+
+sub OnLegacyProgramResponse(event as dynamic)
+    response = event.getData()
+    m.legacyTask = invalid
+    link = m.legacyLink
+    if not isValid(link) then return
+    program = invalid
+    list = getValueFromProps(response, "data.data", invalid)
+    if type(list) = "roArray" AND list.count() > 0 then program = list[0]
+    slug = getValueFromProps(program, "slug", "")
+    print "MainScene : deep link anterior : programa " link.programId " -> " slug
+    if slug = ""
+        ' Programa inexistente: queda la Portada, que cuenta como primera pantalla.
+        m.legacyLink = invalid
+        ShowHideLoader(false)
+        SignalLaunchReady("deeplink-fallback")
+        return
+    end if
+    link.slug = slug
+    if link.type = "legacySeries"
+        m.legacyLink = invalid
+        ShowHideLoader(false)
+        ShowProgramPage(slug)
+        return
+    end if
+    RequestLegacyChapters()
+end sub
+
+sub RequestLegacyChapters()
+    link = m.legacyLink
+    RunLegacyRequest("programa/" + link.programId + "/capitulos?page=" + link.page.ToStr(), "OnLegacyChaptersResponse")
+end sub
+
+sub OnLegacyChaptersResponse(event as dynamic)
+    response = event.getData()
+    m.legacyTask = invalid
+    link = m.legacyLink
+    if not isValid(link) then return
+    chapters = getValueFromProps(response, "data.data", invalid)
+    if type(chapters) = "roArray"
+        for each chapter in chapters
+            if getValueFromProps(chapter, "id", "") = link.chapterId OR getValueFromProps(chapter, "nid", "") = link.chapterId
+                chapterLink = getValueFromProps(chapter, "link", "")
+                if isNonEmptyString(chapterLink)
+                    print "MainScene : deep link anterior : capitulo " link.chapterId " -> " chapterLink
+                    m.legacyLink = invalid
+                    ShowHideLoader(false)
+                    ShowProgramPage(link.slug)
+                    ShowPlayerPage({ link: chapterLink, slug: link.slug, initialSeconds: 0 })
+                    return
+                end if
+            end if
+        end for
+    end if
+    ' Pagina vacia o tope de 40 paginas (200 capitulos): se abre el programa.
+    link.page = link.page + 1
+    if type(chapters) <> "roArray" OR chapters.count() = 0 OR link.page >= 40
+        print "MainScene : deep link anterior : no aparecio el capitulo " link.chapterId ", se abre el programa"
+        m.legacyLink = invalid
+        ShowHideLoader(false)
+        ShowProgramPage(link.slug)
+        return
+    end if
+    RequestLegacyChapters()
 end sub
 
 ' Una senal elegida en el Home: En vivo (como la seccion del sidebar, reemplaza a la
@@ -378,9 +504,62 @@ sub OnRefreshTokenAPIResponse(event as dynamic)
     end if
 end sub
 
+' ===================================================================
+' Renovacion del token con el canal abierto (como la app anterior de 13go, que lo
+' revisaba en cada cambio de pantalla). El access token dura ~1 hora: sin esto,
+' con el canal abierto mas tiempo fallan la firma de senales/capitulos y el
+' guardado del avance. Cada minuto (tokenTimer) se mira si le quedan menos de
+' 5 minutos y se renueva en segundo plano, sin tocar la pantalla. Si falla se
+' reintenta en el minuto siguiente (no se cierra la sesion por un corte de red).
+' ===================================================================
+function KeysOfAA(aa as dynamic) as object
+    if type(aa) = "roAssociativeArray" then return aa.Keys()
+    return []
+end function
+
+sub StartTokenKeepAlive()
+    if isValid(m.tokenTimer) then return
+    m.tokenTimer = m.top.findNode("tokenTimer")
+    m.tokenTimer.observeField("fire", "KeepSessionAlive")
+    m.tokenTimer.control = "start"
+end sub
+
+sub KeepSessionAlive()
+    if not isValid(m.authData) then return
+    ' Ya hay una renovacion en curso (la del arranque o la anterior de este timer).
+    if isValid(m.refreshTokenTask) OR isValid(m.keepAliveTask) then return
+    if IsJwtValid(getValueFromProps(m.authData, "accessToken", ""), 300) then return
+    refreshToken = getValueFromProps(m.authData, "refreshToken", "")
+    if not isNonEmptyString(refreshToken) then return
+    print "MainScene : el token esta por vencer, renovando en segundo plano"
+    m.keepAliveTask = CreateObject("roSGNode", "AuthAPIAction")
+    m.keepAliveTask.functionName = "RefreshToken"
+    m.keepAliveTask.params = { "refreshToken": refreshToken }
+    m.keepAliveTask.ObserveField("result", "OnKeepAliveResponse")
+    m.keepAliveTask.control = "RUN"
+end sub
+
+sub OnKeepAliveResponse(event as dynamic)
+    response = event.getData()
+    m.keepAliveTask = invalid
+    ' Se cerro sesion mientras se renovaba: no se revive.
+    if not isValid(m.authData) then return
+    tokenData = getValueFromProps(response, "data.data", invalid)
+    if isValid(tokenData) AND isNonEmptyString(getValueFromProps(tokenData, "access_token", ""))
+        print "MainScene : token renovado, claves de la respuesta: " FormatJson(KeysOfAA(tokenData))
+        m.authData = BuildAuthDataFromGateway(tokenData, getValueFromProps(m.authData, "deviceId", ""))
+        m.registryManager.SaveAuthData(m.authData)
+        ApplySession(m.authData)
+    else
+        print "MainScene : no se pudo renovar el token, se reintenta en un minuto : status=" getValueFromProps(response, "data.status", "") " code=" getValueFromProps(response, "data.code", "")
+    end if
+end sub
+
 sub ApplySession(authData as object)
+    StartTokenKeepAlive()
     GlobalSet("token", getValueFromProps(authData, "accessToken", ""))
     GlobalSet("userId", getValueFromProps(authData, "userId", ""))
+    print "MainScene : sesion aplicada : userId=" getValueFromProps(authData, "userId", "") " " TokenDiag(getValueFromProps(authData, "accessToken", ""))
 end sub
 
 sub ClearSession()
@@ -814,6 +993,8 @@ sub OnDeviceLinked()
     ' /whosthere SIEMPRE al autenticarse, sin importar si ya habia un perfil
     ' elegido antes - a diferencia de un relanzamiento de la app (RestoreSession).
     m.skipProfilePickerIfSaved = false
+    print "MainScene : OnDeviceLinked : " TokenDiag(getValueFromProps(m.authData, "accessToken", ""))
+    StartTokenKeepAlive()
     LoadUserData()
 end sub
 
@@ -1005,8 +1186,7 @@ sub showDetailPage(data as dynamic)
         ShowProgramPage(Mid(url, 12))
         return
     end if
-    ' Sin ruta de programa no hay vista (el DetailPage de MiCHV ya no existe; el
-    ' deep link va por OpenPendingDeepLink).
+    ' Sin ruta de programa no hay vista
     print "MainScene : showDetailPage : sin vista para este item : " url
 end sub
 

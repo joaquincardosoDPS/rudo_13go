@@ -118,7 +118,28 @@ function InitialRadioIndex() as integer
     for i = 0 to m.radios.count() - 1
         if (liveUrl <> "" AND m.radios[i].liveUrl = liveUrl) OR (name <> "" AND m.radios[i].name = name) then return i
     end for
+    ' Nombre que no coincide exacto (deep link "radio|{nombre}" de la app anterior):
+    ' sin mayusculas ni espacios/signos ("sonar fm" = "SonarFM"), y si no, sin
+    ' "radio"/"fm" ("t13" = "T13Radio"), como lo comparaba esa app.
+    if name = "" then return 0
+    wanted = RadioNameKey(name, false)
+    wantedBase = RadioNameKey(name, true)
+    for i = 0 to m.radios.count() - 1
+        if RadioNameKey(m.radios[i].name, false) = wanted then return i
+    end for
+    if wantedBase <> ""
+        for i = 0 to m.radios.count() - 1
+            if RadioNameKey(m.radios[i].name, true) = wantedBase then return i
+        end for
+    end if
     return 0
+end function
+
+function RadioNameKey(name as dynamic, stripWords as boolean) as string
+    if not isNonEmptyString(name) then return ""
+    key = CreateObject("roRegex", "[^a-z0-9]", "").ReplaceAll(LCase(name), "")
+    if stripWords then key = key.Replace("radio", "").Replace("fm", "")
+    return key
 end function
 
 ' Si la lista ya cargo cuando llega la radio elegida, se cambia a esa.

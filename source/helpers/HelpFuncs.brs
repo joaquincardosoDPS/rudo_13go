@@ -524,10 +524,11 @@ function DecodeJwtPayload(token as dynamic) as dynamic
 end function
 
 ' true si el access token existe y todavia no expiro (campo "exp" del JWT).
-function IsJwtValid(token as dynamic) as boolean
+' marginSeconds: el token cuenta como vencido si le quedan menos de esos segundos.
+function IsJwtValid(token as dynamic, marginSeconds = 0 as integer) as boolean
     payload = DecodeJwtPayload(token)
     if not isValid(payload) OR not isValid(payload.exp) then return false
-    return convertToNumber(payload.exp) > CreateObject("roDateTime").AsSeconds()
+    return convertToNumber(payload.exp) > CreateObject("roDateTime").AsSeconds() + marginSeconds
 end function
 
 ' Convierte "2026-09-16T14:41:56.855Z" a epoch UTC sin usar
@@ -616,4 +617,14 @@ function ValidateRestriction(restriction as dynamic, packs as dynamic) as boolea
         return true
     end if
     return true
+end function
+
+
+' Para el log, sin el token: cuanto le queda y quien lo emitio.
+function TokenDiag(token as dynamic) as string
+    if not isNonEmptyString(token) then return "sin token"
+    payload = DecodeJwtPayload(token)
+    if not isValid(payload) then return "token no es JWT (largo " + Len(token).ToStr() + ")"
+    remaining = convertToNumber(getValueFromProps(payload, "exp", 0)) - CreateObject("roDateTime").AsSeconds()
+    return "token vence en " + remaining.ToStr() + " s, iss=" + getValueFromProps(payload, "iss", "").ToStr() + ", uid=" + getValueFromProps(payload, "user_id", "").ToStr()
 end function
