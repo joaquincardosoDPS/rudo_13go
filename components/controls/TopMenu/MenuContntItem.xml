@@ -17,13 +17,15 @@
          MaskGroup a proposito: con ui_resolutions=fhd en un Roku de UI 720p,
          la mascara no se reescala igual que el contenido y el avatar quedaba
          recortado como un cuarto de circulo. El recorte circular lo hace
-         pAvatarFrame: un marco #08090C (color de fondo) con un agujero
-         circular, solo para fotos reales (default_user.png ya es circular). -->
+         pAvatarFrame: un marco con un agujero circular, solo para fotos reales
+         (default_user.png ya es circular). El asset es blanco y se tine con el
+         color que hay detras (#08090C, o el gris del fondo de foco). -->
     <Poster id="pAvatar" width="40" height="40" loadWidth="40" loadHeight="40" loadDisplayMode="scaleToZoom" translation="[25,25]" visible="false" />
-    <Poster id="pAvatarFrame" uri="pkg:/images/masks/avatar_frame_sidebar.png" width="40" height="40" loadWidth="40" loadHeight="40" translation="[25,25]" visible="false" />
-    <!-- Foco del avatar: anillo (no disco) por encima del marco, para que las
-         esquinas del marco no lo tapen. -->
-    <Poster id="pAvatarFocusBg" uri="pkg:/images/masks/avatar_focus_ring.png" width="50" height="50" loadWidth="50" loadHeight="50" translation="[20,20]" opacity="0.22" visible="false" />
+    <Poster id="pAvatarFrame" uri="pkg:/images/masks/avatar_frame_sidebar_white.png" blendColor="#08090C" width="40" height="40" loadWidth="40" loadHeight="40" translation="[25,25]" visible="false" />
+    <!-- Foco del avatar: anillo naranjo (no disco) por encima del marco, para que
+         las esquinas del marco no lo tapen. Opaco: sobre el fondo de foco un
+         anillo al 22% no se ve. -->
+    <Poster id="pAvatarFocusBg" uri="pkg:/images/masks/avatar_focus_ring.png" width="50" height="50" loadWidth="50" loadHeight="50" translation="[20,20]" visible="false" />
     <!-- Anillo + placa "Premium" (.menu .avatar .premium / .premium::after).
          Anillo dedicado (no el circle_ring_thin.png de los circulos de
          senales/radios, pensado para 192px - a 46px se veia "entrecortado").

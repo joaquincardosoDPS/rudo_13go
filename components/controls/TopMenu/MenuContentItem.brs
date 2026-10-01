@@ -37,7 +37,8 @@ sub SetupColor()
         m.pFocusBg.blendColor = m.theme.white
         m.pFocusBg.opacity = 0.22
     end if
-    m.pAvatarFocusBg.blendColor = m.theme.white
+    ' Anillo de foco del avatar en naranjo (pedido del usuario).
+    m.pAvatarFocusBg.blendColor = m.theme.focPrimary
     ' El anillo y la placa "Premium" del sidebar son amarillos en la web
     ' (#ffcf04, .menu .premium / .premium::after), con texto negro en la placa.
     m.pPremiumRing.blendColor = m.theme.focTertiary
@@ -167,8 +168,13 @@ sub UpdateIconColor()
         end if
     end if
     ' Fondo de foco: mismo rectangulo redondeado genérico (pFocusBg) para
-    ' TODOS los ítems, incluido "Mi cuenta". Antes el avatar usaba un anillo
-    ' circular propio (pAvatarFocusBg) y se veía distinto al resto del riel.
-    m.pAvatarFocusBg.visible = false
+    ' TODOS los ítems, incluido "Mi cuenta". El avatar ademas mantiene su
+    ' anillo circular (pAvatarFocusBg) con foco (pedido del usuario).
+    m.pAvatarFocusBg.visible = m.isAvatarItem AND isFocused
+    ' El marco que redondea la foto tiene que tener el color de lo que hay
+    ' detras: con foco, el fondo de foco (blanco al 22% sobre #08090C =
+    ' #3E3F41); sin foco, el fondo del riel. Si no, sus esquinas se ven como
+    ' un cuadrado oscuro alrededor del avatar.
+    if isFocused then m.pAvatarFrame.blendColor = "#3E3F41" else m.pAvatarFrame.blendColor = "#08090C"
     if isValid(m.pFocusBg) then m.pFocusBg.visible = isFocused
 end sub
