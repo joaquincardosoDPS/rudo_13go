@@ -1,29 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Modal de confirmacion, calcado de c13_reloaded (layout/components/ExitDialog.tsx +
+     DialogButton.tsx), medido en localhost:3000 a 1920: velo negro al 80% sobre toda la
+     pantalla; caja de 400 centrada, fondo #1a1a1a, borde 1px #333, radio 8, padding 32;
+     titulo h2 (DM Sans Bold 34.5) y detalle (19.2) centrados; botones "No" (foco inicial)
+     y "Si" de 48 de alto, padding 30, radio 4, #333 sin foco y #FA6428 con foco (x1.1),
+     separados 40. Se usa para salir de la app y para confirmar el cierre de sesion. -->
 <component name="ExitDialog" extends="Group">
     <script type="text/brightscript" uri="ExitDialog.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/FocusHandler.brs" />
     <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
 
     <interface>
+        <!-- 0 = "No"/cancelar, 1 = accion positiva -->
         <field id="selectedButton" type="Integer" alwaysNotify="true" />
-        <field id="message" type="String" alwaysNotify="true" onChange="OnMessageChangedEvent" />
-        <field id="positiveButtonText" type="String" alwaysNotify="true" value="Exit" onChange="OnPositiveButtonTextChanged" />
-        <field id="positiveButtonWidth" type="Integer" alwaysNotify="true" value="200" onChange="OnPositiveButtonWidthChanged" />
-        <field id="showLogoutButton" type="boolean" alwaysNotify="true" value="false" />
+        <field id="message" type="String" alwaysNotify="true" onChange="Layout" />
+        <field id="detail" type="String" value="" onChange="Layout" />
+        <field id="positiveButtonText" type="String" value="Sí" onChange="Layout" />
+        <!-- sin uso con el diseño nuevo (el ancho sigue al texto); se deja por compatibilidad -->
+        <field id="positiveButtonWidth" type="Integer" value="0" />
     </interface>
 
     <children>
-        <Group id="gConfirmation">
-            <Rectangle id="rBackground" width="1920" height="1080" />
-            <Poster id="pBackgroundImage" width="1056" height="1080" loadWidth="1056" loadHeight="1080" uri="" loadDisplayMode="scaleToFit" translation="[864,0]" />
-            <Poster id="topGradient" width="1060" height="1080" uri="pkg:/images/overlay/topGradient.png" visible="false"/>
-            <Poster id="pLogo" height="150" loadHeight="150" loadDisplayMode="scaleToFit" translation="[80,300]" />
-            <Group id="exitGrp">
-                <Label id="message" width="1820" maxLines="1" lineSpacing="0" horizAlign="left" />
-                <LayoutGroup id="lgButtons" layoutDirection="horiz" itemSpacings="25">
-                    <CustomButton backGroundImage="pkg:/images/focus/filled_r6.9.png" id="bNo" buttonWidth="200" buttonHeight="80" buttonText="Cancel" />
-                    <CustomButton backGroundImage="pkg:/images/focus/filled_r6.9.png" id="bPositive" buttonWidth="200" buttonHeight="80" buttonText="Exit" />
-                </LayoutGroup>
+        <Rectangle id="rOverlay" width="1920" height="1080" color="#000000" opacity="0.8" />
+        <Group id="gBox">
+            <Poster id="pBox" uri="pkg:/images/dialog/dialog_box.9.png" width="400" height="335" />
+            <Label id="lTitle" width="336" horizAlign="center" wrap="true" translation="[32,62]" />
+            <Label id="lDetail" width="336" horizAlign="center" wrap="true" />
+            <Group id="gButtons">
+                <Group id="gNo">
+                    <Poster id="pNo" uri="pkg:/images/dialog/dialog_button.9.png" height="48" />
+                    <Label id="lNo" text="No" height="48" horizAlign="center" vertAlign="center" />
+                </Group>
+                <Group id="gYes">
+                    <Poster id="pYes" uri="pkg:/images/dialog/dialog_button.9.png" height="48" />
+                    <Label id="lYes" height="48" horizAlign="center" vertAlign="center" />
+                </Group>
             </Group>
         </Group>
     </children>
