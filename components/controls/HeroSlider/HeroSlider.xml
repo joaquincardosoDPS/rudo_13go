@@ -27,7 +27,14 @@
         </Group>
         <LayoutGroup id="lgDetails" addItemSpacingAfterChild="false" layoutDirection="vert" itemSpacings="[10,10,10,20,20,20]" translation="[100, 163]">
             <Poster id="pLogo" height="184" loadHeight="184" loadDisplayMode="scaleToZoom" />
-            <Label id="liveLabel" text="" visible="false" />
+            <!-- .label-envivo de DynamicBanner.tsx: el llamado del feed ("Transmision en Directo",
+                 "Capitulo estreno") en mayusculas y negrita, sobre una pildora roja con un punto
+                 blanco delante (::before de .5vw, gap .3vw). El ancho sigue al texto. -->
+            <Group id="gLiveBadge" visible="false">
+                <Poster id="pLiveBadge" uri="pkg:/images/home/live_badge_pill.9.png" width="200" height="36" blendColor="#FF0000" />
+                <Poster id="pLiveDot" uri="pkg:/images/home/live_badge_dot.png" width="10" height="10" translation="[14,13]" />
+                <Label id="liveLabel" text="" height="36" vertAlign="center" translation="[30,0]" />
+            </Group>
             <Label id="epigrafeLabel" text="" visible="false" />
             <Label id="titleLabel" width="900" wrap="true" lineSpacing="-3" maxLines="2" />
             <Label id="descLabel" width="900" wrap="true" lineSpacing="-3" maxLines="3" />

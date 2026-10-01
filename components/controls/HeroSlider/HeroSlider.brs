@@ -25,6 +25,8 @@ sub setControls()
     m.pFadeLeft = m.top.findNode("pFadeLeft")
     m.pLogo = m.top.findNode("pLogo")
     m.liveLabel = m.top.findNode("liveLabel")
+    m.gLiveBadge = m.top.findNode("gLiveBadge")
+    m.pLiveBadge = m.top.findNode("pLiveBadge")
     m.epigrafeLabel = m.top.findNode("epigrafeLabel")
     m.title = m.top.findNode("titleLabel")
     m.lgDetails = m.top.findNode("lgDetails")
@@ -229,12 +231,16 @@ sub updateMeta()
     m.title.text = ""
     m.desc.text = ""
     m.liveLabel.text = ""
-    m.liveLabel.visible = false
+    m.gLiveBadge.visible = false
     m.epigrafeLabel.text = ""
     m.epigrafeLabel.visible = false
     if isValid(item.llamado) AND isNonEmptyString(item.llamado)
-        m.liveLabel.text = UCase(item.llamado)
-        m.liveLabel.visible = true
+        m.liveLabel.text = UpperWithAccents(item.llamado)
+        ' Pildora: 30 (padding + punto + gap) + texto + 14 de padding derecho.
+        textW = m.liveLabel.boundingRect().width
+        if textW <= 0 then textW = Len(m.liveLabel.text) * 13
+        m.pLiveBadge.width = 30 + textW + 14
+        m.gLiveBadge.visible = true
     end if
     if isValid(item.epigrafe) AND isNonEmptyString(item.epigrafe)
         m.epigrafeLabel.text = item.epigrafe
@@ -311,4 +317,15 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return false
     end if
     return false
+end function
+
+' UCase no siempre pasa a mayuscula las vocales con tilde ("TRANSMISIoN"): el
+' text-transform: uppercase de la web si.
+function UpperWithAccents(text as string) as string
+    result = UCase(text)
+    pairs = [["á", "Á"], ["é", "É"], ["í", "Í"], ["ó", "Ó"], ["ú", "Ú"], ["ñ", "Ñ"], ["ü", "Ü"]]
+    for each pair in pairs
+        result = result.Replace(pair[0], pair[1])
+    end for
+    return result
 end function
