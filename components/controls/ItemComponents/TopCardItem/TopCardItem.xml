@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tarjeta del Top 10 (TopItem.tsx + .carrusel-masvistos de c13_reloaded), medida en
+     la web real a 1920: tarjeta de 16vw (307) sin separacion; imagen vertical de
+     223x310 (72.51%) corrida 6vw (115), esquinas de 10px, brightness .6 sin foco y
+     box-shadow 0 0 30px 10px negro; la posicion en DM Sans Black de 9vw (173px), negra
+     con contorno naranjo (text-shadow), DETRAS de la imagen con su borde derecho a
+     134px (123 en la primera) y apoyada 9px bajo la imagen. Con foco, imagen y numero
+     crecen x1.13 (el numero ademas se corre 0.5vw a la izquierda), borde naranjo de 4px
+     y brillo completo. La imagen arranca en y=25 para que el x1.13 no se corte. -->
+<component name="TopCardItem" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/controls/ItemComponents/TopCardItem/TopCardItem.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/HelpFuncs.brs" />
+    <script type="text/brightscript" uri="pkg:/source/helpers/ImageUtils.brs" />
+    <interface>
+        <field id="itemContent" type="node" onChange="OnContentChange" />
+        <field id="focusPercent" type="float" onChange="OnFocusChange" />
+        <field id="itemHasFocus" type="boolean" onChange="OnFocusChange" />
+        <field id="rowListHasFocus" type="boolean" onChange="OnFocusChange" />
+    </interface>
+    <children>
+        <!-- Numero: 8 copias naranjas corridas (el text-shadow de la web) + la negra encima -->
+        <Group id="gNumber" scaleRotateCenter="[89,257]">
+          <!-- Labels de 260 de ancho alineados a la derecha y corridos -126: el borde
+               derecho queda en 134 y entra el "10" (con 134 de ancho no se dibujaba). -->
+          <Group translation="[-126,0]">
+            <Label id="lN1" translation="[3,171]" />
+            <Label id="lN2" translation="[-2,171]" />
+            <Label id="lN3" translation="[0,174]" />
+            <Label id="lN4" translation="[0,168]" />
+            <Label id="lN5" translation="[2,173]" />
+            <Label id="lN6" translation="[-2,169]" />
+            <Label id="lN7" translation="[2,169]" />
+            <Label id="lN8" translation="[-2,173]" />
+            <Label id="lNumber" translation="[0,171]" />
+          </Group>
+        </Group>
+        <Group id="gImage" scaleRotateCenter="[226,180]">
+            <Poster id="pShadow" uri="pkg:/images/top10/top10_shadow.png" width="323" height="410" translation="[65,-25]" />
+            <Rectangle id="rImageBg" width="223" height="310" color="#1C1D28" translation="[115,25]" />
+            <Poster id="pImage" width="223" height="310" loadWidth="223" loadHeight="310" loadDisplayMode="scaleToZoom" blendColor="#999999" translation="[115,25]" />
+            <Poster id="pFrame" uri="pkg:/images/top10/top10_frame.png" width="223" height="310" blendColor="#08090C" translation="[115,25]" />
+            <Poster id="pFocus" uri="pkg:/images/top10/top10_focus_ring.png" width="223" height="310" translation="[115,25]" visible="false" />
+        </Group>
+    </children>
+</component>
