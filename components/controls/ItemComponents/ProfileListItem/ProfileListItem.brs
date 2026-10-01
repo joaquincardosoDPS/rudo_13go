@@ -81,9 +81,12 @@ sub ChangeFocus(focusPercent as float)
         m.poster.opacity = 1
         m.title.color = m.theme.focPrimary
         m.roundedTransparent_Poster.blendColor = m.theme.focPrimary
+        ' Con foco el anillo es mas grueso (8px en vez de 3px, pedido del usuario).
+        m.roundedTransparent_Poster.uri = "pkg:/images/other/borderImage_focus.png"
     else
         m.poster.opacity = 0.6
         m.title.color = m.theme.white
         m.roundedTransparent_Poster.blendColor = m.theme.white
+        m.roundedTransparent_Poster.uri = "pkg:/images/other/borderImage.png"
     end if
 end sub
