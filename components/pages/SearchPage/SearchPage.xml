@@ -18,6 +18,6 @@
         <Label id="lNoResults" width="1300" height="60" translation="[528,46]" horizAlign="left" vertAlign="center" text="No se encontraron resultados" visible="false" />
         <Label id="lNoResultsHint" width="1300" height="40" translation="[528,100]" horizAlign="left" vertAlign="center" text="Prueba con otras palabras clave." visible="false" />
         <SearchResultsGrid id="searchGrid" translation="[528,46]" numColumns="4" numRows="2" itemSize="[333,436]" itemSpacing="[0,0]" itemComponentName="SearchResultItem" drawFocusFeedback="false" horizFocusAnimationStyle="floatingFocus" vertFocusAnimationStyle="floatingFocus" visible="false" />
-        <BusySpinner id="bsLoading" translation="[935,490]" visible="false" clockwise="true" spinInterval="0.8" />
+        <DotsSpinner id="bsLoading" translation="[932,512]" visible="false" />
     </children>
 </component>

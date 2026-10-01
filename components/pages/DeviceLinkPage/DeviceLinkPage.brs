@@ -93,12 +93,10 @@ sub OnVisibleChange()
 end sub
 
 Sub SetBusySpinnerControls()
-    m.deviceLinkPreloader.poster.uri = "pkg:/images/loader/small-loader.png"
-    m.deviceLinkPreloader.poster.blendColor = m.theme.white
-    m.deviceLinkPreloader.poster.width = 50
-    m.deviceLinkPreloader.poster.height = 50
-    ' codeGroup mide 912x350 (mismo tamaño que el bloque real del código)
-    m.deviceLinkPreloader.translation = [(912 - m.deviceLinkPreloader.poster.width) / 2, (350 - m.deviceLinkPreloader.poster.height) / 2]
+    ' DotsSpinner de 36 (el <Spinner /> mediano de ConnectView.tsx), centrado en
+    ' codeGroup, que mide 912x350 (mismo tamaño que el bloque real del código).
+    size = m.deviceLinkPreloader.size
+    m.deviceLinkPreloader.translation = [(912 - size) / 2, (350 - size) / 2]
 End Sub
 
 sub Initialize()

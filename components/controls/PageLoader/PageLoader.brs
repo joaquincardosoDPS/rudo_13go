@@ -24,17 +24,12 @@ sub setColors()
 end sub
 
 sub Initialize(width = "100" as string)
-    m.bsLoader.poster.uri = "pkg:/images/loader/loader_image.png"
-    m.bsLoader.poster.width = width
-    m.bsLoader.poster.height = width
-    m.bsLoader.poster.loadwidth = width
-    m.bsLoader.poster.loadheight = width
-    m.bsLoader.poster.blendColor = "#FF1376"
-    m.bsLoader.poster.loadDisplayMode = "scaleToFit"
+    ' Spinner de la web (DotsSpinner, 56px como el FullScreenSpinner); loaderWidth ya no
+    ' cambia el tamano (antes era la imagen de MiCHV tenida de rosado).
     setColors()
     if m.top.isCenter
-        xPos = (1920 - m.bsLoader.poster.width) / 2
-        yPos = (1080 - m.bsLoader.poster.height) / 2
+        xPos = (1920 - m.bsLoader.size) / 2
+        yPos = (1080 - m.bsLoader.size) / 2
         m.gLoader.translation = [xPos, yPos]
     end if
 end sub

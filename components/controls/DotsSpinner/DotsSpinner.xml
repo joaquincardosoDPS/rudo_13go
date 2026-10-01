@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spinner de c13_reloaded (components/Spinner/Spinner.tsx): 4 puntos #FA6428 en cruz
+     que giran una vuelta por segundo. Como los puntos se repiten cada 90 grados, girar la
+     imagen se ve igual que el SVG de la web. 56px = el tamano "large" del FullScreenSpinner. -->
+<component name="DotsSpinner" extends="BusySpinner">
+    <script type="text/brightscript" uri="DotsSpinner.brs" />
+    <interface>
+        <field id="size" type="integer" value="56" onChange="OnSizeChange" />
+    </interface>
+</component>

@@ -37,7 +37,7 @@
         <Label id="CodeHintText" width="912" horizAlign="center" lineSpacing="6" wrap="true" translation="[960,453]" text="Ingresa el siguiente código de sincronización" />
         <Group id="codeGroup" translation="[960,536]">
             <Label id="codeValueText" width="912" height="350" horizAlign="center" vertAlign="center" />
-            <BusySpinner id="deviceLinkPreloader" control="start" clockwise="true" spinInterval="0.8" visible="false" />
+            <DotsSpinner id="deviceLinkPreloader" size="36" visible="false" />
         </Group>
 
         <Label id="ErrorText" width="1920" height="40" horizAlign="center" vertAlign="center" translation="[0,970]" visible="false" />

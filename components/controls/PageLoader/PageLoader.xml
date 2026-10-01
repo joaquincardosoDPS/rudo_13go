@@ -18,7 +18,7 @@
     <children>
         <Rectangle id="rLoaderBackground" width="1920" height="1080" color="#000000" translation="[0,0]" />
         <Group id="gLoader">
-            <BusySpinner id="bsLoader" translation="[0,0]" clockwise="true" spinInterval="0.8" />
+            <DotsSpinner id="bsLoader" translation="[0,0]" />
             <Label id="lSpinnerText" width="200" horizAlign="center" translation="[-50,250]" />
         </Group>
     </children>

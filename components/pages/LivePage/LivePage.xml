@@ -40,6 +40,6 @@
             </Group>
         </Group>
         <Timer id="tHide" duration="10" repeat="false" />
-        <BusySpinner id="bsLoading" translation="[935,490]" visible="false" clockwise="true" spinInterval="0.8" />
+        <DotsSpinner id="bsLoading" translation="[932,512]" visible="false" />
     </children>
 </component>
